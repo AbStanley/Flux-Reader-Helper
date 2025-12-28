@@ -8,28 +8,20 @@ import { LanguageSelect } from "../../components/LanguageSelect";
 import { SOURCE_LANGUAGES, TARGET_LANGUAGES } from "../../../core/constants/languages";
 import { LearningControls } from "./LearningControls";
 import { ArrowRightLeft } from "lucide-react";
+import { useReaderStore } from '../reader/store/useReaderStore';
 
-interface ControlPanelProps {
-    onTextChange: (text: string) => void;
-    sourceLang: string;
-    targetLang: string;
-    setSourceLang: (lang: string) => void;
-    setTargetLang: (lang: string) => void;
-    onStartReading: () => void;
-    initialText?: string;
-}
-
-export const ControlPanel: React.FC<ControlPanelProps> = ({
-    onTextChange,
-    sourceLang,
-    targetLang,
-    setSourceLang,
-    setTargetLang,
-    onStartReading,
-    initialText
-}) => {
+export const ControlPanel: React.FC = () => {
     const { aiService, setServiceType, currentServiceType } = useServices();
-    const [inputText, setInputText] = useState(initialText || '');
+
+    // Store State & Actions
+    const text = useReaderStore(state => state.text);
+    const setText = useReaderStore(state => state.setText);
+    const sourceLang = useReaderStore(state => state.sourceLang);
+    const setSourceLang = useReaderStore(state => state.setSourceLang);
+    const targetLang = useReaderStore(state => state.targetLang);
+    const setTargetLang = useReaderStore(state => state.setTargetLang);
+    const setIsReading = useReaderStore(state => state.setIsReading);
+
     const [isGenerating, setIsGenerating] = useState(false);
     const [availableModels, setAvailableModels] = useState<string[]>([]);
 
@@ -41,7 +33,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     React.useEffect(() => {
         if (currentServiceType === 'ollama') {
             aiService.getAvailableModels().then(models => {
-                if (models.length > 0) setAvailableModels(models);
+                if (models.length > 0) {
+                    setAvailableModels(models);
+                    // Default to first model
+                    setServiceType('ollama', { model: models[0] });
+                }
             });
         }
     }, [aiService, currentServiceType]);
@@ -59,8 +55,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             }
 
             const result = await aiService.generateText(prompt);
-            setInputText(result);
-            onTextChange(result);
+            setText(result);
         } catch (error) {
             console.error(error);
             alert("Failed to generate text");
@@ -76,21 +71,25 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         const reader = new FileReader();
         reader.onload = (event) => {
             const content = event.target?.result as string;
-            setInputText(content);
-            onTextChange(content);
+            setText(content);
         };
         reader.readAsText(file);
     };
 
     const handleManualChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setInputText(e.target.value);
-        onTextChange(e.target.value);
+        setText(e.target.value);
     };
 
     const handleSwapLanguages = () => {
         const temp = sourceLang;
         setSourceLang(targetLang);
         setTargetLang(temp);
+    };
+
+    const handleStartReading = () => {
+        if (text.trim()) {
+            setIsReading(true);
+        }
     };
 
     return (
@@ -181,7 +180,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 <Textarea
                     placeholder="Paste text here, or generate..."
                     className="min-h-[160px] font-mono text-lg shadow-sm resize-none focus-visible:ring-primary bg-secondary/30 border-border/50"
-                    value={inputText}
+                    value={text}
                     onChange={handleManualChange}
                 />
 
@@ -204,8 +203,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     </Button>
 
                     <Button
-                        onClick={onStartReading}
-                        disabled={!inputText.trim()}
+                        onClick={handleStartReading}
+                        disabled={!text.trim()}
                         className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg transition-all"
                     >
                         Start Reading

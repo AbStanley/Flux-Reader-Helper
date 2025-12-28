@@ -18,10 +18,15 @@ interface ReaderState {
     text: string;
     sourceLang: string;
     targetLang: string;
+    isReading: boolean;
     PAGE_SIZE: number;
 
     // Actions
     setConfig: (text: string, sourceLang: string, targetLang: string) => void;
+    setText: (text: string) => void;
+    setSourceLang: (lang: string) => void;
+    setTargetLang: (lang: string) => void;
+    setIsReading: (isReading: boolean) => void;
     setPage: (page: number) => void;
     // handleSelection combines toggle + translate
     handleSelection: (globalIndex: number, aiService: IAService) => Promise<void>;
@@ -103,8 +108,9 @@ export const useReaderStore = create<ReaderState>((set, get) => ({
     hoverTranslation: null,
     selectionTranslations: new Map(),
     text: "",
-    sourceLang: "",
-    targetLang: "",
+    sourceLang: "German",
+    targetLang: "English",
+    isReading: false,
     PAGE_SIZE: 500,
 
     // Actions
@@ -128,6 +134,23 @@ export const useReaderStore = create<ReaderState>((set, get) => ({
             hoverTranslation: null
         });
     },
+
+    setText: (text) => {
+        const tokens = text.split(/(\s+)/);
+        set({
+            text,
+            tokens,
+            currentPage: 1,
+            selectedIndices: new Set(),
+            selectionTranslations: new Map(),
+            hoveredIndex: null,
+            hoverTranslation: null
+        });
+    },
+
+    setSourceLang: (sourceLang) => set({ sourceLang }),
+    setTargetLang: (targetLang) => set({ targetLang }),
+    setIsReading: (isReading) => set({ isReading }),
 
     setPage: (page) => {
         const { tokens, PAGE_SIZE } = get();
