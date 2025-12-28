@@ -5,13 +5,7 @@ import { useReader } from './hooks/useReader';
 import { ReaderPagination } from './components/ReaderPagination';
 import { ReaderToken } from './components/ReaderToken';
 
-interface ReaderViewProps {
-    text: string;
-    sourceLang: string;
-    targetLang: string;
-}
-
-export const ReaderView: React.FC<ReaderViewProps> = ({ text, sourceLang, targetLang }) => {
+export const ReaderView: React.FC = () => {
     const {
         paginatedTokens,
         currentPage,
@@ -26,7 +20,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({ text, sourceLang, target
         handleMouseEnter,
         handleMouseLeave,
         getSelectionGroups
-    } = useReader({ text, sourceLang, targetLang });
+    } = useReader();
 
     // Calculate grouping for rendering
     const groups = getSelectionGroups(selectedIndices);

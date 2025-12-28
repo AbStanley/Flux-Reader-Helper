@@ -1,13 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ServiceProvider } from './contexts/ServiceContext';
 import { ControlPanel } from './features/controls/ControlPanel';
 import { ReaderView } from './features/reader/ReaderView';
+import { useReaderStore } from './features/reader/store/useReaderStore';
 
 
 function App() {
   const [text, setText] = useState('');
   const [sourceLang, setSourceLang] = useState<string>('Auto');
   const [targetLang, setTargetLang] = useState<string>('English');
+
+  // Sync state to global store (Senior Pattern: Store is Source of Truth)
+  useEffect(() => {
+    useReaderStore.getState().setConfig(text, sourceLang, targetLang);
+  }, [text, sourceLang, targetLang]);
 
   return (
     <ServiceProvider>
@@ -24,11 +30,7 @@ function App() {
             setSourceLang={setSourceLang}
             setTargetLang={setTargetLang}
           />
-          {text && <ReaderView
-            text={text}
-            sourceLang={sourceLang}
-            targetLang={targetLang}
-          />}
+          {text && <ReaderView />}
         </main>
       </div>
     </ServiceProvider>

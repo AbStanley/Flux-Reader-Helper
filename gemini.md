@@ -21,7 +21,7 @@ Use **Dependency Injection** (via React Context or Hook factories) to decouple t
 ## 3. Technology Stack
 - **Framework**: React (Vite) + TypeScript
 - **Styling**: **Tailwind CSS** + **shadcn/ui** (MCP Configured). *Focus on maintainability, scalability, and premium design tokens.*
-- **State Management**: React Context + Hooks (Clean and simple for MVP, scalable enough).
+- **State Management**: **Zustand** (Global Store) + Hooks (Connector pattern). *Single Source of Truth.*
 
 ## 4. Design & Aesthetics (The "Premium" Look)
 The UI must be **clean**, **minimalist**, and **animated**.
@@ -42,7 +42,10 @@ src/
   │   └── file-system/
   ├── presentation/     # UI Components and Pages
   │   ├── components/   # Shared UI components (Buttons, Modals)
-  │   └── features/     # Feature-specific components (Reader, Settings)
+  │   ├── features/     # Feature-specific components (Reader, Settings)
+  │   │   ├── components/ # Sub-components
+  │   │   ├── hooks/      # View Models / Connectors
+  │   │   └── store/      # Zustand Stores (Business Logic)
   ├── services/         # Application logic (Service classes/functions)
   └── styles/           # Global styles and themes
 ```
@@ -55,15 +58,22 @@ src/
 - **Immutability**: Prefer immutable data structures.
 - **Testing**: Code should be testable by design (thanks to DI).
 
-### 6.2 Best Practices (Senior Approach)
-- **Avoid Bad Practices**: Do not write spaghetti code, magic numbers, or tightly coupled components.
-- **Modern Syntax**: Use modern ES6+ features (arrow functions, destructuring, spread operator) and modern React patterns (Hooks, Functional Components).
-- **Secure**: Sanitize inputs where necessary (though React handles most XSS). Avoid storing sensitive keys in client-side code.
-- **Scalable**: Design components to be reusable. Isolate state where it belongs.
-- **Efficient**: Minimize re-renders. Use `useMemo` and `useCallback` appropriately (but pragmatically).
-- **Pragmatic**: Don't over-engineer. Solve the problem at hand with the simplest clean solution.
-- **DRY (Don't Repeat Yourself)**: Extract repeated logic into hooks or components. Use constants for repeated values (e.g. language options).
-- **Error Handling**: **NEVER** suppress errors with a simple `console.error` in a catch block. All errors must be exposed to the user at the UI level (e.g., via toast notifications, inline error messages, or alert dialogs). Failures must be visible.
+### 6.2 Senior Implementation Patterns (Strictly Enforced)
+
+#### State Management
+- **Single Source of Truth**: Data belongs in the Store. Hooks and Components are consumers.
+- **No Prop-Syncing**: Do not pass props to a hook just to sync them to the store via `useEffect`. Initialize the store at a higher level (e.g., `App.tsx`) and let components consume the store directly.
+- **Fat Store, Thin Components**: Move complex business logic (e.g., grouping algorithms, API orchestration) into Store Actions/Thunks. keep UI components purely presentational.
+- **Avoid Derived State**: Do not store state that can be calculated on-the-fly from other state variables. Calculate it in the selector or the hook.
+
+#### Code Quality & Comments
+- **Clean Comments**: Comments should explain **WHY**, not *WHAT*.
+- **No Stream of Consciousness**: Remove "TO DO" notes, self-corrections, or "maybe later" thoughts from production code. If it's not implemented, don't write about it in the comments.
+- **Self-Documenting Code**: Variable and function names should be descriptive enough to minimize the need for comments.
+
+#### Error Handling
+- **Visibility**: **NEVER** suppress errors with a simple `console.error` in a catch block. All errors must be exposed to the user at the UI level (e.g., via toast notifications, inline error messages, or alert dialogs). Failures must be visible.
+- **Graceful Failure**: When an action fails (e.g., translation), the UI should clearly reflect the failure state rather than failing silently or crashing.
 
 ## 7. Living Document Policy
 This file (`gemini.md`) is a **living document**.
