@@ -15,6 +15,8 @@ interface ControlPanelProps {
     targetLang: string;
     setSourceLang: (lang: string) => void;
     setTargetLang: (lang: string) => void;
+    onStartReading: () => void;
+    initialText?: string;
 }
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -22,10 +24,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     sourceLang,
     targetLang,
     setSourceLang,
-    setTargetLang
+    setTargetLang,
+    onStartReading,
+    initialText
 }) => {
     const { aiService, setServiceType, currentServiceType } = useServices();
-    const [inputText, setInputText] = useState('');
+    const [inputText, setInputText] = useState(initialText || '');
     const [isGenerating, setIsGenerating] = useState(false);
     const [availableModels, setAvailableModels] = useState<string[]>([]);
 
@@ -181,7 +185,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     onChange={handleManualChange}
                 />
 
-                <div className="flex gap-4">
+                <div className="flex gap-4 flex-wrap">
                     <Button
                         onClick={handleGenerate}
                         disabled={isGenerating}
@@ -197,6 +201,14 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                             onChange={handleFileUpload}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                         />
+                    </Button>
+
+                    <Button
+                        onClick={onStartReading}
+                        disabled={!inputText.trim()}
+                        className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg transition-all"
+                    >
+                        Start Reading
                     </Button>
                 </div>
             </CardContent>
