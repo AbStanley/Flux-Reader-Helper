@@ -5,6 +5,9 @@ import { useReader } from './hooks/useReader';
 import { ReaderPagination } from './components/ReaderPagination';
 import { ReaderToken } from './components/ReaderToken';
 
+import { useAudioStore } from './store/useAudioStore';
+import { PlayerControls } from './components/PlayerControls';
+
 export const ReaderView: React.FC = () => {
     const {
         paginatedTokens,
@@ -21,6 +24,9 @@ export const ReaderView: React.FC = () => {
         handleMouseLeave,
         getSelectionGroups
     } = useReader();
+
+    // Audio Store consumption
+    const { currentWordIndex, play } = useAudioStore();
 
     // Calculate grouping for rendering
     const groups = getSelectionGroups(selectedIndices);
@@ -56,9 +62,33 @@ export const ReaderView: React.FC = () => {
         }
     });
 
+    const handleTokenContextMenu = (index: number, e: React.MouseEvent) => {
+        e.preventDefault(); // Prevent default browser context menu
+
+        // Find the token text from paginatedTokens
+        // We need the global index logic here as well
+        // Wait, handleTokenClick uses globalIndex derived from page.
+        // pass local index to a handler that converts to global?
+        // ReaderToken gives back the index passed to it.
+        // In the map below, we pass current `index` (local to page).
+
+
+
+        // We need mapped tokens
+        // Actually, we can just grab the text content from the event target or use the store
+        // But let's use the store for correctness.
+        // We'll need to export a helper or just get the token from useReader store directly?
+        // useReader exposes `paginatedTokens`.
+        const token = paginatedTokens[index];
+        if (token) {
+            play(token);
+        }
+    };
+
     return (
         <Card className="h-full border-none shadow-sm glass max-w-4xl mx-auto my-8">
-            <CardContent className="p-8 md:p-12">
+            <CardContent className="p-8 md:p-12 relative">
+                <PlayerControls />
                 <div className={styles.textArea}>
                     {paginatedTokens.map((token, index) => {
                         const globalIndex = (currentPage - 1) * PAGE_SIZE + index;
@@ -67,6 +97,10 @@ export const ReaderView: React.FC = () => {
                         const isWhitespace = !token.trim();
                         const groupTranslation = groupStarts.get(globalIndex);
                         const position = tokenPositions.get(globalIndex);
+
+                        // Audio highlighting
+                        // Check if currentWordIndex matches globalIndex
+                        const isAudioHighlighted = currentWordIndex === globalIndex;
 
                         return (
                             <ReaderToken
@@ -79,9 +113,11 @@ export const ReaderView: React.FC = () => {
                                 groupTranslation={groupTranslation}
                                 position={position}
                                 hoverTranslation={hoverTranslation}
+                                isAudioHighlighted={isAudioHighlighted}
                                 onClick={handleTokenClick}
                                 onMouseEnter={handleMouseEnter}
                                 onMouseLeave={handleMouseLeave}
+                                onContextMenu={handleTokenContextMenu}
                             />
                         );
                     })}

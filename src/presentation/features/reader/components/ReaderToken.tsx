@@ -15,7 +15,10 @@ interface ReaderTokenProps {
     onMouseLeave: () => void;
 }
 
-export const ReaderToken: React.FC<ReaderTokenProps> = ({
+export const ReaderToken: React.FC<ReaderTokenProps & {
+    isAudioHighlighted?: boolean;
+    onContextMenu?: (index: number, e: React.MouseEvent) => void;
+}> = ({
     token,
     index,
     isSelected,
@@ -24,34 +27,42 @@ export const ReaderToken: React.FC<ReaderTokenProps> = ({
     groupTranslation,
     position,
     hoverTranslation,
+    isAudioHighlighted,
     onClick,
     onMouseEnter,
-    onMouseLeave
+    onMouseLeave,
+    onContextMenu
 }) => {
-    return (
-        <span
-            className={`
+        return (
+            <span
+                className={`
                 ${styles.token} 
                 ${isSelected ? styles.selected : ''} 
                 ${!isWhitespace ? styles.interactive : ''}
                 ${position ? styles[position] : ''}
+                ${isAudioHighlighted ? styles.audioHighlight : ''}
             `}
-            onClick={() => !isWhitespace && onClick(index)}
-            onMouseEnter={() => !isWhitespace && onMouseEnter(index)}
-            onMouseLeave={onMouseLeave}
-            style={{ position: 'relative' }}
-        >
-            {groupTranslation && (
-                <span className={styles.selectionPopupValid}>
-                    {groupTranslation}
-                </span>
-            )}
+                onClick={() => !isWhitespace && onClick(index)}
+                onMouseEnter={() => !isWhitespace && onMouseEnter(index)}
+                onMouseLeave={onMouseLeave}
+                onContextMenu={(e) => {
+                    if (!isWhitespace && onContextMenu) {
+                        onContextMenu(index, e);
+                    }
+                }}
+                style={{ position: 'relative' }}
+            >
+                {groupTranslation && (
+                    <span className={styles.selectionPopupValid}>
+                        {groupTranslation}
+                    </span>
+                )}
 
-            {token}
+                {token}
 
-            {isHovered && hoverTranslation && !isSelected && (
-                <span className={styles.hoverPopup}>{hoverTranslation}</span>
-            )}
-        </span>
-    );
-};
+                {isHovered && hoverTranslation && !isSelected && (
+                    <span className={styles.hoverPopup}>{hoverTranslation}</span>
+                )}
+            </span>
+        );
+    };
