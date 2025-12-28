@@ -57,7 +57,7 @@ export const ReaderView: React.FC = () => {
     });
 
     return (
-        <Card className="h-full border-none shadow-sm bg-card/50 backdrop-blur-sm max-w-4xl mx-auto my-8">
+        <Card className="h-full border-none shadow-sm glass max-w-4xl mx-auto my-8">
             <CardContent className="p-8 md:p-12">
                 <div className={styles.textArea}>
                     {paginatedTokens.map((token, index) => {

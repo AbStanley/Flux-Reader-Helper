@@ -5,6 +5,8 @@ import { ReaderView } from './features/reader/ReaderView';
 import { useReaderStore } from './features/reader/store/useReaderStore';
 
 
+import { ModeToggle } from './components/ui/mode-toggle';
+
 function App() {
   const [text, setText] = useState('');
   const [sourceLang, setSourceLang] = useState<string>('Auto');
@@ -18,8 +20,9 @@ function App() {
   return (
     <ServiceProvider>
       <div className="container max-w-4xl mx-auto py-8 px-4 min-h-screen">
-        <header className="text-center mb-8">
+        <header className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold tracking-tight text-primary">Reader Helper</h1>
+          <ModeToggle />
         </header>
 
         <main className="flex flex-col gap-8">
