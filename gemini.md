@@ -34,6 +34,7 @@ The UI must be **clean**, **minimalist**, and **animated**.
 ```
 src/
   ├── core/             # Core interfaces and shared logic
+  │   ├── constants/    # Shared constants (Languages, Configs)
   │   ├── interfaces/
   │   └── models/
   ├── infrastructure/   # Concrete implementations of core interfaces
@@ -61,6 +62,7 @@ src/
 - **Scalable**: Design components to be reusable. Isolate state where it belongs.
 - **Efficient**: Minimize re-renders. Use `useMemo` and `useCallback` appropriately (but pragmatically).
 - **Pragmatic**: Don't over-engineer. Solve the problem at hand with the simplest clean solution.
+- **DRY (Don't Repeat Yourself)**: Extract repeated logic into hooks or components. Use constants for repeated values (e.g. language options).
 
 ## 7. Living Document Policy
 This file (`gemini.md`) is a **living document**.

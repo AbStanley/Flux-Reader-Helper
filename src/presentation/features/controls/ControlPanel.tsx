@@ -5,6 +5,7 @@ import { Button } from "../../components/ui/button";
 import { Textarea } from "../../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { LanguageSelect } from "../../components/LanguageSelect";
+import { SOURCE_LANGUAGES, TARGET_LANGUAGES } from "../../../core/constants/languages";
 
 interface ControlPanelProps {
     onTextChange: (text: string) => void;
@@ -68,25 +69,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         onTextChange(e.target.value);
     };
 
-    const sourceOptions = [
-        { label: "Auto Detect", value: "Auto" },
-        { label: "Spanish", value: "Spanish" },
-        { label: "English", value: "English" },
-        { label: "French", value: "French" },
-        { label: "German", value: "German" },
-        { label: "Italian", value: "Italian" },
-        { label: "Japanese", value: "Japanese" }
-    ];
-
-    const targetOptions = [
-        { label: "English", value: "English" },
-        { label: "Spanish", value: "Spanish" },
-        { label: "French", value: "French" },
-        { label: "German", value: "German" },
-        { label: "Italian", value: "Italian" },
-        { label: "Japanese", value: "Japanese" }
-    ];
-
     return (
         <Card className="w-full mb-8 backdrop-blur-sm bg-white/5 border-white/10 text-card-foreground">
             <CardHeader className="space-y-4">
@@ -95,7 +77,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                         label="Source Language"
                         value={sourceLang}
                         onChange={setSourceLang}
-                        options={sourceOptions}
+                        options={SOURCE_LANGUAGES}
                         placeholder="Select Source"
                         className="w-1/2"
                     />
@@ -103,7 +85,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                         label="Target Language"
                         value={targetLang}
                         onChange={setTargetLang}
-                        options={targetOptions}
+                        options={TARGET_LANGUAGES}
                         placeholder="Select Target"
                         className="w-1/2"
                     />
