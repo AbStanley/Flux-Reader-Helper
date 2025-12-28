@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { useServices } from '../../contexts/ServiceContext';
-import styles from './ControlPanel.module.css';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Textarea } from "../../components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { LanguageSelect } from "../../components/LanguageSelect";
 
 interface ControlPanelProps {
     onTextChange: (text: string) => void;
@@ -20,7 +24,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     const { aiService, setServiceType, currentServiceType } = useServices();
     const [inputText, setInputText] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
-
     const [availableModels, setAvailableModels] = useState<string[]>([]);
 
     React.useEffect(() => {
@@ -65,89 +68,116 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         onTextChange(e.target.value);
     };
 
+    const sourceOptions = [
+        { label: "Auto Detect", value: "Auto" },
+        { label: "Spanish", value: "Spanish" },
+        { label: "English", value: "English" },
+        { label: "French", value: "French" },
+        { label: "German", value: "German" },
+        { label: "Italian", value: "Italian" },
+        { label: "Japanese", value: "Japanese" }
+    ];
+
+    const targetOptions = [
+        { label: "English", value: "English" },
+        { label: "Spanish", value: "Spanish" },
+        { label: "French", value: "French" },
+        { label: "German", value: "German" },
+        { label: "Italian", value: "Italian" },
+        { label: "Japanese", value: "Japanese" }
+    ];
+
     return (
-        <div className={`${styles.panel} glass-panel`}>
-            <div className={styles.header}>
-                <div className={styles.languageControls}>
-                    <div className={styles.selectGroup}>
-                        <label>Source</label>
-                        <select value={sourceLang} onChange={(e) => setSourceLang(e.target.value)}>
-                            <option value="Auto">Auto Detect</option>
-                            <option value="Spanish">Spanish</option>
-                            <option value="English">English</option>
-                            <option value="French">French</option>
-                            <option value="German">German</option>
-                            <option value="Italian">Italian</option>
-                            <option value="Japanese">Japanese</option>
-                        </select>
-                    </div>
-                    <div className={styles.selectGroup}>
-                        <label>Target</label>
-                        <select value={targetLang} onChange={(e) => setTargetLang(e.target.value)}>
-                            <option value="English">English</option>
-                            <option value="Spanish">Spanish</option>
-                            <option value="French">French</option>
-                            <option value="German">German</option>
-                            <option value="Italian">Italian</option>
-                            <option value="Japanese">Japanese</option>
-                        </select>
-                    </div>
+        <Card className="w-full mb-8 backdrop-blur-sm bg-white/5 border-white/10 text-card-foreground">
+            <CardHeader className="space-y-4">
+                <div className="flex gap-4 pb-4 border-b border-white/10">
+                    <LanguageSelect
+                        label="Source Language"
+                        value={sourceLang}
+                        onChange={setSourceLang}
+                        options={sourceOptions}
+                        placeholder="Select Source"
+                        className="w-1/2"
+                    />
+                    <LanguageSelect
+                        label="Target Language"
+                        value={targetLang}
+                        onChange={setTargetLang}
+                        options={targetOptions}
+                        placeholder="Select Target"
+                        className="w-1/2"
+                    />
                 </div>
 
-                <div className={styles.headerTop}>
-                    <h2 className={styles.title}>Reader Input</h2>
-                    <div className={styles.controls}>
+                <div className="flex justify-between items-center pt-2">
+                    <CardTitle className="text-xl">Reader Input</CardTitle>
+                    <div className="flex gap-2">
                         {currentServiceType === 'ollama' && (
-                            <select
-                                className={styles.select}
-                                style={{ marginRight: '0.5rem' }}
-                                onChange={(e) => setServiceType('ollama', { model: e.target.value })}
-                                defaultValue=""
+                            <Select
+                                value={((aiService as any).model) || ""} // Type casting for now, ideally fix Interface
+                                onValueChange={(val) => setServiceType('ollama', { model: val })}
                             >
-                                <option value="" disabled>Select Model</option>
-                                {availableModels.length > 0 ? (
-                                    availableModels.map(m => <option key={m} value={m}>{m}</option>)
-                                ) : (
-                                    <>
-                                        <option value="llama2">llama2 (Default)</option>
-                                        <option value="mistral">mistral</option>
-                                    </>
-                                )}
-                            </select>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Select Model" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {availableModels.length > 0 ? (
+                                        availableModels.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)
+                                    ) : (
+                                        <>
+                                            <SelectItem value="llama2">llama2 (Default)</SelectItem>
+                                            <SelectItem value="mistral">mistral</SelectItem>
+                                        </>
+                                    )}
+                                </SelectContent>
+                            </Select>
                         )}
-                        <select
+                        <Select
                             value={currentServiceType}
-                            onChange={(e) => setServiceType(e.target.value as 'mock' | 'ollama')}
-                            className={styles.select}
+                            onValueChange={(val) => setServiceType(val as 'mock' | 'ollama')}
                         >
-                            <option value="mock">Mock AI</option>
-                            <option value="ollama">Ollama (Local)</option>
-                        </select>
+                            <SelectTrigger className="w-[150px]">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="mock">Mock AI</SelectItem>
+                                <SelectItem value="ollama">Ollama (Local)</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
-            </div>
+                <CardDescription>
+                    Enter text below or generate a story to practice reading.
+                </CardDescription>
+            </CardHeader>
 
-            <textarea
-                className={styles.textarea}
-                placeholder="Paste text here, or generate..."
-                value={inputText}
-                onChange={handleManualChange}
-            />
+            <CardContent className="space-y-4">
+                <Textarea
+                    placeholder="Paste text here, or generate..."
+                    className="min-h-[160px] font-mono text-lg shadow-sm resize-none focus-visible:ring-primary"
+                    value={inputText}
+                    onChange={handleManualChange}
+                />
 
-            <div className={styles.actions}>
-                <button
-                    className="btn-primary"
-                    onClick={handleGenerate}
-                    disabled={isGenerating}
-                >
-                    {isGenerating ? 'Generating...' : 'Generate with AI'}
-                </button>
+                <div className="flex gap-4">
+                    <Button
+                        onClick={handleGenerate}
+                        disabled={isGenerating}
+                        className="w-full sm:w-auto"
+                    >
+                        {isGenerating ? 'Generating...' : 'Generate with AI'}
+                    </Button>
 
-                <label className="btn-primary" style={{ cursor: 'pointer', display: 'inline-block' }}>
-                    Load File
-                    <input type="file" onChange={handleFileUpload} style={{ display: 'none' }} />
-                </label>
-            </div>
-        </div>
+                    <Button variant="outline" className="relative w-full sm:w-auto cursor-pointer">
+                        Load File
+                        <input
+                            type="file"
+                            onChange={handleFileUpload}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                    </Button>
+                </div>
+            </CardContent>
+        </Card>
     );
 };

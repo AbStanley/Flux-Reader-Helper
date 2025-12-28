@@ -20,7 +20,7 @@ Use **Dependency Injection** (via React Context or Hook factories) to decouple t
 
 ## 3. Technology Stack
 - **Framework**: React (Vite) + TypeScript
-- **Styling**: **Tailwind CSS** + **shadcn/ui**. *Focus on maintainability, scalability, and premium design tokens.*
+- **Styling**: **Tailwind CSS** + **shadcn/ui** (MCP Configured). *Focus on maintainability, scalability, and premium design tokens.*
 - **State Management**: React Context + Hooks (Clean and simple for MVP, scalable enough).
 
 ## 4. Design & Aesthetics (The "Premium" Look)

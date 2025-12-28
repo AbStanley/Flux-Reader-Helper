@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useServices } from '../../contexts/ServiceContext';
 import styles from './ReaderView.module.css';
+import { Card, CardContent } from "../../components/ui/card";
 
 interface ReaderViewProps {
     text: string;
@@ -164,6 +165,11 @@ export const ReaderView: React.FC<ReaderViewProps> = ({ text, sourceLang, target
     // We want to know which token starts a group to render the popup
     const groups = getSelectionGroups(selectedIndices);
     const groupStarts = new Map<number, string>(); // index -> translation
+
+    // Map to store position of each token in a group for styling
+    // 'single' | 'start' | 'middle' | 'end'
+    const tokenPositions = new Map<number, string>();
+
     groups.forEach(group => {
         const start = group[0];
         const end = group[group.length - 1];
@@ -172,48 +178,60 @@ export const ReaderView: React.FC<ReaderViewProps> = ({ text, sourceLang, target
         if (translation) {
             groupStarts.set(start, translation);
         }
+
+        if (group.length === 1) {
+            tokenPositions.set(start, 'single');
+        } else {
+            group.forEach((idx, i) => {
+                if (i === 0) tokenPositions.set(idx, 'start');
+                else if (i === group.length - 1) tokenPositions.set(idx, 'end');
+                else tokenPositions.set(idx, 'middle');
+            });
+        }
     });
 
     return (
-        <div className={styles.container}>
-            <div className={styles.textArea}>
-                {tokens.map((token, index) => {
-                    const isSelected = selectedIndices.has(index);
-                    const isHovered = hoveredIndex === index;
-                    const isWhitespace = !token.trim();
-                    const groupTranslation = groupStarts.get(index);
+        <Card className="h-full border-none shadow-none bg-transparent">
+            <CardContent className="p-0">
+                <div className={styles.textArea}>
+                    {tokens.map((token, index) => {
+                        const isSelected = selectedIndices.has(index);
+                        const isHovered = hoveredIndex === index;
+                        const isWhitespace = !token.trim();
+                        const groupTranslation = groupStarts.get(index);
+                        const position = tokenPositions.get(index);
 
-                    return (
-                        <span
-                            key={index}
-                            className={`
-                                ${styles.token} 
-                                ${isSelected ? styles.selected : ''} 
-                                ${!isWhitespace ? styles.interactive : ''}
-                            `}
-                            onClick={() => !isWhitespace && handleTokenClick(index)}
-                            onMouseEnter={() => !isWhitespace && handleMouseEnter(index)}
-                            onMouseLeave={handleMouseLeave}
-                            style={{ position: 'relative' }}
-                        >
-                            {/* Selection Translation Popup - Rendered at start of group */}
-                            {groupTranslation && (
-                                <span className={styles.selectionPopupValid}>
-                                    {groupTranslation}
-                                </span>
-                            )}
+                        return (
+                            <span
+                                key={index}
+                                className={`
+                                    ${styles.token} 
+                                    ${isSelected ? styles.selected : ''} 
+                                    ${!isWhitespace ? styles.interactive : ''}
+                                    ${position ? styles[position] : ''}
+                                `}
+                                onClick={() => !isWhitespace && handleTokenClick(index)}
+                                onMouseEnter={() => !isWhitespace && handleMouseEnter(index)}
+                                onMouseLeave={handleMouseLeave}
+                                style={{ position: 'relative' }}
+                            >
+                                {groupTranslation && (
+                                    <span className={styles.selectionPopupValid}>
+                                        {groupTranslation}
+                                    </span>
+                                )}
 
-                            {token}
+                                {token}
 
-                            {/* Hover Popup */}
-                            {isHovered && hoverTranslation && !isSelected && (
-                                <span className={styles.hoverPopup}>{hoverTranslation}</span>
-                            )}
-                        </span>
-                    );
-                })}
-            </div>
-        </div>
+                                {isHovered && hoverTranslation && !isSelected && (
+                                    <span className={styles.hoverPopup}>{hoverTranslation}</span>
+                                )}
+                            </span>
+                        );
+                    })}
+                </div>
+            </CardContent>
+        </Card>
     );
 };
 

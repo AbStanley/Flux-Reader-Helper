@@ -30,6 +30,7 @@ We follow **Clean Architecture** principles with a strict **Presentation-Domain-
 ### Features
 - **Clean, Premium UI**: Glassmorphism design, smooth transitions, distraction-free reading.
 - **Unified Design System**: Built with **shadcn/ui** and **Tailwind CSS** for consistency and accessibility.
+- **MCP Server Ready**: Configured for AI assistants (VS Code/Cursor) to browse and install components.
 - **Local AI Integration**: Seamless connection to local Ollama models.
 - **Smart Translation**: Hover and selection-based translations.
 - **Language Controls**: Top-level source/target language selection.
