@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useServices } from '../../../contexts/ServiceContext';
 import { useReaderStore } from '../store/useReaderStore';
 
@@ -10,10 +11,10 @@ export const useReader = () => {
     const PAGE_SIZE = useReaderStore(state => state.PAGE_SIZE);
 
     // Derived State (Selector logic or computed here)
-    const paginatedTokens = useReaderStore(state => {
-        const start = (state.currentPage - 1) * state.PAGE_SIZE;
-        return state.tokens.slice(start, start + state.PAGE_SIZE);
-    });
+    const paginatedTokens = useMemo(() => {
+        const start = (currentPage - 1) * PAGE_SIZE;
+        return tokens.slice(start, start + PAGE_SIZE);
+    }, [tokens, currentPage, PAGE_SIZE]);
 
     const totalPages = Math.ceil(tokens.length / PAGE_SIZE);
 
