@@ -33,10 +33,45 @@ export class OllamaService implements IAIService {
         }
     }
 
-    async translateText(text: string, targetLanguage: string = 'en'): Promise<string> {
+    async translateText(text: string, targetLanguage: string = 'en', context?: string): Promise<string> {
         // Ollama translation usually requires a specific prompt engineering or a translation model.
         // For MVP, we'll use a prompt.
-        const prompt = `Translate the following text to ${targetLanguage}. Return ONLY the translation. Do not include any explanations, thinking process, or tags.\n\nText: "${text}"`;
+        let prompt = `You are a precise translator assistant. Translate the following to ${targetLanguage}.
+Rules:
+1. Translate ONLY the "Target Text".
+2. The "Target Text" is a specific fragment extracted from the "Context".
+3. Provide the translation for that fragment primarily.
+4. If the fragment is an idiom or phrase, translate its meaning in that context.
+5. If the fragment is a single word, provide its specific meaning in that context.
+6. DO NOT output the whole sentence.
+7. DO NOT be chatty. Just return the translated text.
+
+Examples:
+Context: "El gato negro salta la valla"
+Target Text: "El gato"
+Output: The cat
+
+Context: "No creo que sea verdad lo que dices"
+Target Text: "que sea"
+Output: that it is
+
+Context: "Por favor dame el pan"
+Target Text: "dame"
+Output: give me
+
+Context: "She is running a business"
+Target Text: "running"
+Output: managing
+
+Strictly output only the translation.`;
+
+        if (context) {
+            prompt += `\n\nContext: "${context}"`;
+            prompt += `\nTarget Text: "${text}"`;
+        } else {
+            prompt += `\n\nTarget Text: "${text}"`;
+        }
+
         const rawResponse = await this.generateText(prompt);
 
         // Post-processing to remove <think> blocks and whitespace

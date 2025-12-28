@@ -7,8 +7,8 @@ export class MockAIService implements IAIService {
         return `[Mock Generated] content based on: "${prompt}". This is a placeholder for actual AI generation.`;
     }
 
-    async translateText(text: string, targetLanguage: string = 'en'): Promise<string> {
-        console.log(`[MockAI] Translating "${text}" to ${targetLanguage}`);
+    async translateText(text: string, targetLanguage: string = 'en', context?: string): Promise<string> {
+        console.log(`[MockAI] Translating "${text}" to ${targetLanguage} (Context: ${context || 'None'})`);
         await new Promise(resolve => setTimeout(resolve, 800)); // Simulate delay
         return `[Translated to ${targetLanguage}]: ${text}`;
     }

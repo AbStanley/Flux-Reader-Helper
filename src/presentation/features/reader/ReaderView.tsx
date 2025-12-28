@@ -12,15 +12,15 @@ export const ReaderView: React.FC<ReaderViewProps> = ({ text }) => {
     const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [hoverTranslation, setHoverTranslation] = useState<string | null>(null);
-    const [selectionTranslation, setSelectionTranslation] = useState<string | null>(null);
+    // Map group key "start-end" to translation
+    const [selectionTranslations, setSelectionTranslations] = useState<Map<string, string>>(new Map());
 
     // Tokenize text on change, preserving whitespace
     useEffect(() => {
         // Split by whitespace but keep delimiters.
-        // Regex: split by (spaces/newlines), capturing the delimiter.
         setTokens(text.split(/(\s+)/));
         setSelectedIndices(new Set());
-        setSelectionTranslation(null);
+        setSelectionTranslations(new Map());
     }, [text]);
 
     const handleTokenClick = (index: number) => {
@@ -37,41 +37,115 @@ export const ReaderView: React.FC<ReaderViewProps> = ({ text }) => {
 
         // Trigger translation for selection
         if (newSelection.size > 0) {
-            translateSelection(newSelection);
+            translateSelections(newSelection);
         } else {
-            setSelectionTranslation(null);
+            setSelectionTranslations(new Map());
         }
     };
 
-    const translateSelection = async (indices: Set<number>) => {
-        // Sort indices to maintain order
-        const sortedIndices = Array.from(indices).sort((a, b) => a - b);
-        const textToTranslate = sortedIndices.map(i => tokens[i]).join(' '); // Join with space (simplification)
+    // Helper to extract context (current line) for a given token index
+    const getContextForIndex = (index: number): string => {
+        if (index < 0 || index >= tokens.length) return '';
 
-        try {
-            const result = await aiService.translateText(textToTranslate);
-            setSelectionTranslation(result);
-        } catch (e) {
-            console.error(e);
-            setSelectionTranslation("Error translating.");
+        let startIndex = index;
+        while (startIndex > 0 && !tokens[startIndex - 1].includes('\n')) {
+            startIndex--;
         }
+
+        let endIndex = index;
+        while (endIndex < tokens.length - 1 && !tokens[endIndex + 1].includes('\n')) {
+            endIndex++;
+        }
+
+        return tokens.slice(startIndex, endIndex + 1).join('');
     };
+
+    const getSelectionGroups = (indices: Set<number>): number[][] => {
+        const sorted = Array.from(indices).sort((a, b) => a - b);
+        if (sorted.length === 0) return [];
+
+        const groups: number[][] = [];
+        let currentGroup: number[] = [sorted[0]];
+
+        for (let i = 1; i < sorted.length; i++) {
+            const prev = sorted[i - 1];
+            const curr = sorted[i];
+
+            // Check if there are only whitespace tokens between prev and curr
+            let isContiguous = true;
+            for (let k = prev + 1; k < curr; k++) {
+                if (tokens[k].trim().length > 0) {
+                    isContiguous = false;
+                    break;
+                }
+            }
+
+            if (isContiguous) {
+                currentGroup.push(curr);
+            } else {
+                groups.push(currentGroup);
+                currentGroup = [curr];
+            }
+        }
+        groups.push(currentGroup);
+        return groups;
+    };
+
+    const translateSelections = async (indices: Set<number>) => {
+        const groups = getSelectionGroups(indices);
+        const newTranslations = new Map<string, string>();
+
+        await Promise.all(groups.map(async (group) => {
+            if (group.length === 0) return;
+            const start = group[0];
+            const end = group[group.length - 1];
+            const key = `${start}-${end}`;
+
+            // Check if we already have a translation for this exact group (not perfect caching but helps)
+            // Ideally should check content, but key is safe enough for current session reset on text change.
+            // Actually, let's just re-fetch to be safe or maybe simple cache?
+            // For now, re-fetch to ensure context updates if context relies on grouping (though it usually doesn't).
+
+            const textToTranslate = group.map(i => tokens[i]).join('');
+
+            // Get context from the full sentence(s) the group spans
+            // Simplify: just get context of the first word for now, or merge contexts.
+            // Usually words are in the same sentence.
+            const context = getContextForIndex(start);
+
+            try {
+                // Determine if we need to trim the input or if tokens include whitespace (split keeps whitespace)
+                // textToTranslate might look like "word " or " word". 
+                // We should probably strip leading/trailing whitespace for the translation payload, but keep it for display if needed.
+                const cleanText = textToTranslate.trim();
+
+                const result = await aiService.translateText(cleanText, undefined, context);
+                newTranslations.set(key, result);
+            } catch (e) {
+                console.error(e);
+                newTranslations.set(key, "Error");
+            }
+        }));
+
+        setSelectionTranslations(newTranslations);
+    };
+
+    const hoverRef = React.useRef<number | null>(null);
 
     const handleMouseEnter = async (index: number) => {
         const token = tokens[index];
         if (!token.trim()) return;
 
         setHoveredIndex(index);
-        // Debounce or immediate? Immediate for "on the go" but might be spammy for API.
-        // For MVP Mock, immediate is fine. For Real, maybe wait 300ms.
-        // We'll just trigger it.
+        hoverRef.current = index;
+
+        const context = getContextForIndex(index);
+
         try {
-            const result = await aiService.translateText(token);
-            if (index === hoveredIndex) { // Check race condition roughly (not perfect)
-                // Actually this logic is flawed via closure, need ref or effect. 
-                // For MVP let's just set it.
+            const result = await aiService.translateText(token, undefined, context);
+            if (hoverRef.current === index) {
+                setHoverTranslation(result);
             }
-            setHoverTranslation(result);
         } catch (e) {
             // ignore
         }
@@ -80,22 +154,31 @@ export const ReaderView: React.FC<ReaderViewProps> = ({ text }) => {
     const handleMouseLeave = () => {
         setHoveredIndex(null);
         setHoverTranslation(null);
+        hoverRef.current = null;
     };
+
+    // Calculate grouping for rendering
+    // We want to know which token starts a group to render the popup
+    const groups = getSelectionGroups(selectedIndices);
+    const groupStarts = new Map<number, string>(); // index -> translation
+    groups.forEach(group => {
+        const start = group[0];
+        const end = group[group.length - 1];
+        const key = `${start}-${end}`;
+        const translation = selectionTranslations.get(key);
+        if (translation) {
+            groupStarts.set(start, translation);
+        }
+    });
 
     return (
         <div className={styles.container}>
-            {/* Selection Translation Popup */}
-            {selectionTranslation && (
-                <div className={styles.selectionPopup}>
-                    <strong>Selection:</strong> {selectionTranslation}
-                </div>
-            )}
-
             <div className={styles.textArea}>
                 {tokens.map((token, index) => {
                     const isSelected = selectedIndices.has(index);
                     const isHovered = hoveredIndex === index;
                     const isWhitespace = !token.trim();
+                    const groupTranslation = groupStarts.get(index);
 
                     return (
                         <span
@@ -110,9 +193,17 @@ export const ReaderView: React.FC<ReaderViewProps> = ({ text }) => {
                             onMouseLeave={handleMouseLeave}
                             style={{ position: 'relative' }}
                         >
+                            {/* Selection Translation Popup - Rendered at start of group */}
+                            {isValidAndPresent(groupTranslation) && (
+                                <span className={styles.selectionPopupValid}>
+                                    {groupTranslation}
+                                </span>
+                            )}
+
                             {token}
+
                             {/* Hover Popup */}
-                            {isHovered && hoverTranslation && (
+                            {isHovered && hoverTranslation && !isSelected && (
                                 <span className={styles.hoverPopup}>{hoverTranslation}</span>
                             )}
                         </span>
@@ -122,3 +213,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({ text }) => {
         </div>
     );
 };
+
+function isValidAndPresent(str: string | undefined): boolean {
+    return !!str;
+}
