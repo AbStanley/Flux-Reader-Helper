@@ -108,7 +108,8 @@ Instructions:
      - Each tense should list pronouns and their corresponding conjugated forms.
 3. Explain WHY it is used this way (grammar rule).
 4. Provide 2-3 usage examples with translations.
-5. Provide 1-2 common alternatives if applicable.
+5. Provide 1-2 common alternatives if applicable. 
+   - IMPORTANT: 'alternatives' must be a simple array of strings. Do NOT include explanations (e.g. "alt1 (masculine)"). If you need to explain, use separate strings or omit the explanation.
 
 Output Format: JSON ONLY. Do not include any other text.
 Structure:
@@ -135,11 +136,28 @@ Structure:
 `;
 
         const rawResponse = await this.generateText(prompt);
-        // Clean response to ensure valid JSON
-        const jsonString = rawResponse.replace(/<think>[\s\S]*?<\/think>/g, '').replace(/```json/g, '').replace(/```/g, '').trim();
+
+        // Robust JSON extraction
+        // 1. Remove <think> blocks
+        let cleanResponse = rawResponse.replace(/<think>[\s\S]*?<\/think>/g, '');
+
+        // 2. Extract JSON block if present (Markdown code fence)
+        const jsonBlockMatch = cleanResponse.match(/```json([\s\S]*?)```/);
+        if (jsonBlockMatch) {
+            cleanResponse = jsonBlockMatch[1];
+        } else {
+            // Fallback: Try to find the first '{' and last '}'
+            const start = cleanResponse.indexOf('{');
+            const end = cleanResponse.lastIndexOf('}');
+            if (start !== -1 && end !== -1) {
+                cleanResponse = cleanResponse.substring(start, end + 1);
+            }
+        }
+
+        cleanResponse = cleanResponse.trim();
 
         try {
-            return JSON.parse(jsonString);
+            return JSON.parse(cleanResponse);
         } catch (e) {
             console.error("Failed to parse rich translation JSON", rawResponse);
             throw new Error("Failed to parse rich translation response");
