@@ -141,11 +141,17 @@ export const ReaderView: React.FC = () => {
     };
 
     return (
-        <div className="relative flex flex-col md:flex-row w-full h-[90vh] md:h-[92vh] max-w-[98%] mx-auto my-4 transition-all duration-300 gap-4">
+        <div className="relative flex flex-col md:flex-row w-full h-[90vh] md:h-[92vh] max-w-full mx-auto my-4 transition-all duration-300 gap-6">
+            {/* Center Column: Reading Card */}
             <Card className="flex-1 h-full border-none shadow-sm glass overflow-hidden flex flex-col">
-                <CardContent className={`p-8 md:p-12 relative flex-1 overflow-y-auto ${styles.textAreaContainer}`}>
-                    <PlayerControls />
-                    <div className={styles.textArea}>
+                <CardContent className={`p-0 relative flex-1 overflow-y-auto ${styles.textAreaContainer} flex flex-col`}>
+
+                    {/* Player Controls - Sticky Top */}
+                    <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b shadow-sm">
+                        <PlayerControls />
+                    </div>
+
+                    <div className={`${styles.textArea} p-8 md:p-12 pb-12`}>
                         {paginatedTokens.map((token, index) => {
                             const globalIndex = (currentPage - 1) * PAGE_SIZE + index;
                             const groupTranslation = groupStarts.get(globalIndex);
@@ -192,7 +198,7 @@ export const ReaderView: React.FC = () => {
                         })}
                     </div>
 
-                    <div className="mt-8">
+                    <div className="mt-auto px-8 md:px-0 py-8">
                         <ReaderPagination
                             currentPage={currentPage}
                             totalPages={totalPages}
@@ -202,12 +208,26 @@ export const ReaderView: React.FC = () => {
                 </CardContent>
             </Card>
 
-            <RichInfoPanel
-                isOpen={isRichInfoOpen}
-                isLoading={isRichInfoLoading}
-                data={richTranslation}
-                onClose={closeRichInfo}
-            />
+            {/* Right Column: Info Panel - Sticky Sidebar */}
+            <div className="hidden md:flex flex-col w-72 flex-shrink-0 relative overflow-y-auto h-full pl-2">
+                {/* Translation Info Panel */}
+                <RichInfoPanel
+                    isOpen={isRichInfoOpen}
+                    isLoading={isRichInfoLoading}
+                    data={richTranslation}
+                    onClose={closeRichInfo}
+                />
+            </div>
+
+            {/* Mobile Bottom Sheet (Info Panel) - Managed by RichInfoPanel internally with media queries */}
+            <div className="md:hidden">
+                <RichInfoPanel
+                    isOpen={isRichInfoOpen}
+                    isLoading={isRichInfoLoading}
+                    data={richTranslation}
+                    onClose={closeRichInfo}
+                />
+            </div>
         </div>
     );
 };

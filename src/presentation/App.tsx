@@ -16,7 +16,7 @@ function App() {
 
   return (
     <ServiceProvider>
-      <div className="container max-w-4xl mx-auto py-8 px-4 min-h-screen">
+      <div className={`container mx-auto py-8 px-4 min-h-screen ${isReading ? 'max-w-[95vw]' : 'max-w-4xl'}`}>
         <header className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold tracking-tight text-primary">Reader Helper</h1>
           <ModeToggle />

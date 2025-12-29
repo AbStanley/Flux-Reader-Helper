@@ -7,7 +7,11 @@ import { useAudioStore } from '../store/useAudioStore';
 import { useReaderStore } from '../store/useReaderStore';
 import { SelectionMode } from '../../../../core/types';
 
-export const PlayerControls: React.FC = () => {
+interface PlayerControlsProps {
+    vertical?: boolean;
+}
+
+export const PlayerControls: React.FC<PlayerControlsProps> = ({ vertical = false }) => {
     const {
         isPlaying,
         isPaused,
@@ -80,46 +84,55 @@ export const PlayerControls: React.FC = () => {
     if (!text.trim()) return null;
 
     return (
-        <div className="w-full p-4 border-b border-border/40 bg-background/95 backdrop-blur z-40 flex flex-col gap-4">
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between w-full">
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-10 w-10 rounded-full"
-                        onClick={handlePlayPause}
-                    >
-                        {isPlaying ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current ml-0.5" />}
-                    </Button>
+        <div className={`w-full p-4 border-border/40 bg-background/95 backdrop-blur z-40 flex gap-4 ${vertical
+            ? 'flex-col border rounded-xl shadow-sm'
+            : 'flex-col border-b'
+            }`}>
+            <div className={`flex gap-4 items-center justify-between w-full ${vertical ? 'flex-col items-stretch' : 'flex-col md:flex-row'}`}>
+                <div className={`flex items-center gap-2 ${vertical ? 'justify-between' : ''}`}>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-10 w-10 rounded-full"
+                            onClick={handlePlayPause}
+                        >
+                            {isPlaying ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current ml-0.5" />}
+                        </Button>
 
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleStop}
-                        disabled={!isPlaying && !isPaused}
-                    >
-                        <Square className="h-4 w-4 fill-current" />
-                    </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleStop}
+                            disabled={!isPlaying && !isPaused}
+                        >
+                            <Square className="h-4 w-4 fill-current" />
+                        </Button>
+                    </div>
 
-                    <div className="h-6 w-px bg-border/50 mx-2" />
+                    {!vertical && <div className="h-6 w-px bg-border/50 mx-2" />}
 
-                    <div className="text-xs font-medium text-muted-foreground mb-1.5 ml-1">Selection Mode</div>
-                    <Select
-                        value={useReaderStore(state => state.selectionMode)}
-                        onValueChange={(val) => useReaderStore.getState().setSelectionMode(val as SelectionMode)}
-                    >
-                        <SelectTrigger className="w-full bg-secondary/50 border-border/50 h-8 text-xs">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value={SelectionMode.Word} className="text-xs">Word Selection</SelectItem>
-                            <SelectItem value={SelectionMode.Sentence} className="text-xs">Sentence Selection</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    {vertical && <div className="flex-1" />}
+
+                    <div className={`flex items-center gap-2 ${vertical ? 'flex-col items-end' : ''}`}>
+                        {!vertical && <div className="text-xs font-medium text-muted-foreground mb-1.5 ml-1">Selection Mode</div>}
+                        <Select
+                            value={useReaderStore(state => state.selectionMode)}
+                            onValueChange={(val) => useReaderStore.getState().setSelectionMode(val as SelectionMode)}
+                        >
+                            <SelectTrigger className={`bg-secondary/50 border-border/50 h-8 text-xs ${vertical ? 'w-[140px]' : 'w-full'}`}>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value={SelectionMode.Word} className="text-xs">Word Selection</SelectItem>
+                                <SelectItem value={SelectionMode.Sentence} className="text-xs">Sentence Selection</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-4 flex-1 w-full md:w-auto overflow-hidden">
-                    <div className="flex items-center gap-2 min-w-[200px] flex-1">
+                <div className={`flex items-center gap-4 flex-1 w-full ${vertical ? 'flex-col items-stretch' : 'md:w-auto overflow-hidden'}`}>
+                    <div className={`flex items-center gap-2 flex-1 ${vertical ? 'w-full' : 'min-w-[200px]'}`}>
                         <Volume2 className="h-4 w-4 text-muted-foreground" />
                         <Select
                             value={selectedVoice?.name || ""}
@@ -128,7 +141,7 @@ export const PlayerControls: React.FC = () => {
                                 if (voice) setVoice(voice);
                             }}
                         >
-                            <SelectTrigger className="h-8 text-xs bg-secondary/50 border-0">
+                            <SelectTrigger className="h-8 text-xs bg-secondary/50 border-0 w-full">
                                 <SelectValue placeholder="Select Voice" />
                             </SelectTrigger>
                             <SelectContent>
@@ -141,7 +154,7 @@ export const PlayerControls: React.FC = () => {
                         </Select>
                     </div>
 
-                    <div className="flex items-center gap-2 w-[120px]">
+                    <div className={`flex items-center gap-2 ${vertical ? 'w-full' : 'w-[120px]'}`}>
                         <span className="text-xs text-muted-foreground w-8">{playbackRate}x</span>
                         <Slider
                             value={[playbackRate]}
