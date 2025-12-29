@@ -23,6 +23,7 @@ interface AudioState {
     setTokens: (tokens: string[]) => void;
 
     play: (text: string) => void;
+    playSingle: (text: string) => void;
     pause: () => void;
     resume: () => void;
     stop: () => void;
@@ -122,5 +123,21 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     stop: () => {
         audioService.stop();
         set({ isPlaying: false, isPaused: false, currentWordIndex: null });
+    },
+
+    playSingle: (text: string) => {
+        const { selectedVoice, playbackRate } = get();
+        // Stop global playback if running, to avoid overlap
+        audioService.stop();
+        // Ensure global state is reset so highlights don't persist/move
+        set({ isPlaying: false, isPaused: false, currentWordIndex: null });
+
+        audioService.play(
+            text,
+            selectedVoice,
+            playbackRate,
+            () => { }, // No-op: Don't update highlight for single word
+            () => { }  // No-op: No state change on end
+        );
     }
 }));

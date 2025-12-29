@@ -40,7 +40,7 @@ export const ReaderView: React.FC = () => {
     } = useTranslation();
 
     // Audio Store consumption
-    const { currentWordIndex, play } = useAudioStore();
+    const { currentWordIndex, play, playSingle } = useAudioStore();
 
     // Calculate grouping for rendering
     const groups = getSelectionGroups(selectedIndices);
@@ -117,6 +117,25 @@ export const ReaderView: React.FC = () => {
         }
     };
 
+    const onPlayClick = (index: number) => {
+        const globalIndex = (currentPage - 1) * PAGE_SIZE + index;
+        const group = groups.find(g => g.includes(globalIndex));
+
+        let textToPlay = "";
+
+        if (group) {
+            const start = group[0];
+            const end = group[group.length - 1];
+            textToPlay = tokens.slice(start, end + 1).join('');
+        } else {
+            textToPlay = tokens[globalIndex];
+        }
+
+        if (textToPlay) {
+            playSingle(textToPlay);
+        }
+    };
+
     return (
         <div className="flex flex-row gap-4 max-w-[90%] mx-auto my-8 h-[80vh]">
             <Card className="flex-1 h-full border-none shadow-sm glass overflow-hidden flex flex-col">
@@ -150,6 +169,7 @@ export const ReaderView: React.FC = () => {
                                     onMouseLeave={clearHover}
                                     onContextMenu={handleTokenContextMenu}
                                     onMoreInfo={onMoreInfoClick}
+                                    onPlay={onPlayClick}
                                 />
                             );
                         })}

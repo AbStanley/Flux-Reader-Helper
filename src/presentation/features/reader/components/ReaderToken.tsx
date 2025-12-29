@@ -1,7 +1,9 @@
 import React from 'react';
 import styles from '../ReaderView.module.css';
 
-import { Search } from 'lucide-react'; // Import icon
+import { Search, Volume2 } from 'lucide-react'; // Import icon
+import { cn } from '../../../../lib/utils';
+
 
 interface ReaderTokenProps {
     token: string;
@@ -15,7 +17,8 @@ interface ReaderTokenProps {
     onClick: (index: number) => void;
     onMouseEnter: (index: number) => void;
     onMouseLeave: () => void;
-    onMoreInfo: (index: number) => void; // New prop
+    onMoreInfo: (index: number) => void;
+    onPlay: (index: number) => void; // New prop for audio
 }
 
 export const ReaderToken: React.FC<ReaderTokenProps & {
@@ -35,24 +38,50 @@ export const ReaderToken: React.FC<ReaderTokenProps & {
     onMouseEnter,
     onMouseLeave,
     onContextMenu,
-    onMoreInfo
+    onMoreInfo,
+    onPlay
 }) => {
         // Render helper for popup content
-        const renderPopup = (translation: string) => (
-            <span className="flex items-center gap-1" >
-                {translation}
-                <button
-                    className="ml-1 p-0.5 hover:bg-white/20 rounded-full cursor-pointer opacity-70 hover:opacity-100 transition-opacity"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onMoreInfo(index); // Pass index so parent can resolve full text/context
-                    }}
-                    title="More Info"
-                >
-                    <Search size={12} />
-                </button>
-            </span>
-        );
+        const renderPopup = (translation: string) => {
+            const buttonClass = cn(
+                "ml-1 p-1 rounded-full cursor-pointer shadow-sm border border-white/10",
+                "bg-white/20 hover:bg-white/30 text-white",
+                "transition-all duration-300 ease-in-out",
+                // Mobile: always visible
+                "opacity-100 scale-100",
+                // Desktop: hidden by default, visible on group hover
+                "md:opacity-0 md:scale-75 md:w-0 md:p-0 md:ml-0",
+                "md:group-hover:opacity-100 md:group-hover:scale-100 md:group-hover:w-auto md:group-hover:p-1 md:group-hover:ml-1"
+            );
+
+            return (
+                <span className="flex items-center group">
+                    {translation}
+                    <div className="flex items-center overflow-hidden transition-all duration-300 ease-in-out">
+                        <button
+                            className={buttonClass}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onPlay(index);
+                            }}
+                            title="Listen"
+                        >
+                            <Volume2 size={14} strokeWidth={3} />
+                        </button>
+                        <button
+                            className={buttonClass}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onMoreInfo(index);
+                            }}
+                            title="More Info"
+                        >
+                            <Search size={14} strokeWidth={3} />
+                        </button>
+                    </div>
+                </span>
+            );
+        };
 
         return (
             <span
