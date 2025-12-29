@@ -15,7 +15,7 @@ interface ReaderTokenProps {
     onClick: (index: number) => void;
     onMouseEnter: (index: number) => void;
     onMouseLeave: () => void;
-    onMoreInfo: (text: string) => void; // New prop
+    onMoreInfo: (index: number) => void; // New prop
 }
 
 export const ReaderToken: React.FC<ReaderTokenProps & {
@@ -45,7 +45,7 @@ export const ReaderToken: React.FC<ReaderTokenProps & {
                     className="ml-1 p-0.5 hover:bg-white/20 rounded-full cursor-pointer opacity-70 hover:opacity-100 transition-opacity"
                     onClick={(e) => {
                         e.stopPropagation();
-                        onMoreInfo(token); // Or translation? Probably the token text.
+                        onMoreInfo(index); // Pass index so parent can resolve full text/context
                     }}
                     title="More Info"
                 >

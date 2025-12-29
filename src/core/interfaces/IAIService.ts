@@ -14,6 +14,9 @@ export interface RichTranslationResult {
         translation: string;
     }>;
     alternatives: string[];
+    conjugations?: {
+        [tense: string]: Array<{ pronoun: string; conjugation: string }>;
+    };
 }
 
 export interface IAIService {

@@ -102,7 +102,10 @@ Input Data:
 Instructions:
 1. Translate the segment accurately within the given context.
 2. Identify the Part of Speech (e.g., Verb, Noun, Adjective). 
-   - If it's a conjugated verb, identify the Tense, Person, Number, and provide the Infinitive form.
+   - If it's a conjugated verb:
+     - Identify the Tense, Person, Number, and provide the Infinitive form.
+     - Provide full conjugation tables for at least 3 common tenses (e.g., Present, Past, Future) relevant to the language.
+     - Each tense should list pronouns and their corresponding conjugated forms.
 3. Explain WHY it is used this way (grammar rule).
 4. Provide 2-3 usage examples with translations.
 5. Provide 1-2 common alternatives if applicable.
@@ -120,6 +123,10 @@ Structure:
     "infinitive": "base form (optional)",
     "explanation": "Brief explanation of the grammar rule or usage"
   },
+  "conjugations": { 
+     "Present": [{ "pronoun": "I", "conjugation": "am" }, ...],
+     "Past": [{ "pronoun": "I", "conjugation": "was" }, ...]
+  } (optional, ONLY for verbs),
   "examples": [
     { "sentence": "example sentence 1", "translation": "translated example 1" }
   ],

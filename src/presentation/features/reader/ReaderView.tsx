@@ -14,6 +14,7 @@ import { PlayerControls } from './components/PlayerControls';
 
 export const ReaderView: React.FC = () => {
     const {
+        tokens,
         paginatedTokens,
         currentPage,
         totalPages,
@@ -90,12 +91,30 @@ export const ReaderView: React.FC = () => {
     };
 
     // Better More Info handler:
-    const onMoreInfoClick = (text: string) => {
-        // We'll use the text as the primary key. 
-        // Ideally we'd pass the sentence context. 
-        // Since we are inside the View, lets try to find the sentence. 
-        // For now, passing text is the MVP.
-        fetchRichTranslation(text, "");
+    // Better More Info handler:
+    const onMoreInfoClick = (index: number) => {
+        const globalIndex = (currentPage - 1) * PAGE_SIZE + index;
+
+        // Check if this token is part of a selected group
+        // groups is a list of [start, ... end] arrays
+        const group = groups.find(g => g.includes(globalIndex));
+
+        let textToTranslate = "";
+
+        if (group) {
+            const start = group[0];
+            const end = group[group.length - 1];
+            // Slice full tokens to get the phrase
+            textToTranslate = tokens.slice(start, end + 1).join('');
+        } else {
+            // Fallback to single token (e.g. if hovered but not selected, though UI only shows default button on selection usually? 
+            // Actually hover popup also returns onMoreInfo.
+            textToTranslate = tokens[globalIndex];
+        }
+
+        if (textToTranslate) {
+            fetchRichTranslation(textToTranslate, "");
+        }
     };
 
     return (
