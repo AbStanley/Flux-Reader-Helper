@@ -5,15 +5,14 @@ import { Card, CardContent } from "../../components/ui/card";
 import { useReader } from './hooks/useReader';
 import { useTranslation } from './hooks/useTranslation';
 import { useVisualSplits } from './hooks/useVisualSplits';
-import { useReaderStore, getSentenceRange } from './store/useReaderStore';
-import { useTranslationStore } from './store/useTranslationStore';
-import { SelectionMode, HoverPosition } from '../../../core/types';
+
 import { ReaderPagination } from './components/ReaderPagination';
-import { ReaderToken } from './components/ReaderToken';
+import { ReaderTextContent } from './components/ReaderTextContent';
 import { RichInfoPanel } from './components/RichInfoPanel';
 
 import { useAudioStore } from './store/useAudioStore';
 import { PlayerControls } from './components/PlayerControls';
+import { useHighlighting } from './hooks/useHighlighting';
 
 export const ReaderView: React.FC = () => {
     const {
@@ -88,33 +87,7 @@ export const ReaderView: React.FC = () => {
         }
     });
 
-    const hoveredIndex = useTranslationStore(s => s.hoveredIndex);
-
-    const highlightIndices = React.useMemo(() => {
-        if (hoveredIndex === null || hoveredIndex === undefined || hoveredIndex === -1 || richTranslation) return new Set<number>();
-
-        // 1. Priority: Check if hovered index is part of an existing selection group
-        // groups is array of number[] (indices)
-        const existingGroup = groups.find(g => g.includes(hoveredIndex));
-        if (existingGroup) {
-            const min = existingGroup[0];
-            const max = existingGroup[existingGroup.length - 1];
-            // Create range to ensure gaps (like spaces) are included
-            const range = Array.from({ length: max - min + 1 }, (_, i) => min + i);
-            return new Set(range);
-        }
-
-        const selectionMode = useReaderStore.getState().selectionMode;
-
-        if (selectionMode === SelectionMode.Sentence) {
-            // Highlight full sentence in Sentence Mode
-            const range = getSentenceRange(hoveredIndex, tokens);
-            return new Set(range);
-        } else {
-            // Just the word in Word Mode
-            return new Set([hoveredIndex]);
-        }
-    }, [hoveredIndex, tokens, richTranslation, groups]);
+    const highlightIndices = useHighlighting(tokens, groups, richTranslation);
 
 
 
@@ -174,56 +147,19 @@ export const ReaderView: React.FC = () => {
                         <PlayerControls />
                     </div>
 
-                    <div
-                        ref={textAreaRef}
-                        className={`${styles.textArea} p-8 min-[1200px]:p-12 pb-12`}
-                    >
-                        {paginatedTokens.map((token, index) => {
-                            const globalIndex = (currentPage - 1) * PAGE_SIZE + index;
-                            // Prefer visual split translation, fallback (should cover initial render) to basic group start
-                            const groupTranslation = visualGroupStarts.get(globalIndex) || groupStarts.get(globalIndex);
-                            const position = tokenPositions.get(globalIndex);
-
-
-
-                            // Use the index from the hook if available
-                            // Calculate hover ranges (always sentence level for highlighting visual)
-                            if (hoveredIndex !== null && hoveredIndex !== undefined) {
-                                // we calculate highlightIndices in the memo above
-                            }
-
-                            // Calculate hover position
-                            let hoverPosition: HoverPosition | undefined;
-                            const isHoveredSentence = highlightIndices.has(globalIndex);
-                            const isHoveredWord = hoveredIndex === globalIndex;
-
-                            if (isHoveredSentence) {
-                                const prev = highlightIndices.has(globalIndex - 1);
-                                const next = highlightIndices.has(globalIndex + 1);
-
-                                if (!prev && !next) hoverPosition = HoverPosition.Single;
-                                else if (!prev && next) hoverPosition = HoverPosition.Start;
-                                else if (prev && next) hoverPosition = HoverPosition.Middle;
-                                else if (prev && !next) hoverPosition = HoverPosition.End;
-                            }
-
-                            return (
-                                <ReaderToken
-                                    key={index}
-                                    index={index}
-                                    token={token}
-                                    groupTranslation={groupTranslation}
-                                    position={position}
-                                    isHovered={isHoveredSentence} // Now represents the full sentence hover
-                                    isHoveredWord={isHoveredWord} // Specific word
-                                    hoverPosition={hoverPosition}
-                                    onClick={handleTokenClick}
-                                    onMoreInfo={onMoreInfoClick}
-                                    onPlay={onPlayClick}
-                                />
-                            );
-                        })}
-                    </div>
+                    <ReaderTextContent
+                        paginatedTokens={paginatedTokens}
+                        currentPage={currentPage}
+                        PAGE_SIZE={PAGE_SIZE}
+                        visualGroupStarts={visualGroupStarts}
+                        groupStarts={groupStarts}
+                        tokenPositions={tokenPositions}
+                        highlightIndices={highlightIndices}
+                        textAreaRef={textAreaRef}
+                        handleTokenClick={handleTokenClick}
+                        onMoreInfoClick={onMoreInfoClick}
+                        onPlayClick={onPlayClick}
+                    />
 
                     <div className="mt-auto px-8 min-[1200px]:px-0 py-8">
                         <ReaderPagination
