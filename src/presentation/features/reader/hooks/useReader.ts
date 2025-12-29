@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
-import { useServices } from '../../../contexts/ServiceContext';
+
 import { useReaderStore } from '../store/useReaderStore';
 
 export const useReader = () => {
-    const { aiService } = useServices();
+
 
     // Store Selectors
     const tokens = useReaderStore(state => state.tokens);
@@ -20,28 +20,18 @@ export const useReader = () => {
 
     // Simple State Selectors
     const selectedIndices = useReaderStore(state => state.selectedIndices);
-    const hoveredIndex = useReaderStore(state => state.hoveredIndex);
-    const hoverTranslation = useReaderStore(state => state.hoverTranslation);
 
+    // Actions
     // Actions
     const setPage = useReaderStore(state => state.setPage);
     const handleSelection = useReaderStore(state => state.handleSelection);
-    const handleHover = useReaderStore(state => state.handleHover);
-    const clearHover = useReaderStore(state => state.clearHover);
 
     // View Event Handlers
     const handleTokenClick = (index: number) => {
         const globalIndex = (currentPage - 1) * PAGE_SIZE + index;
-        handleSelection(globalIndex, aiService);
+        handleSelection(globalIndex); // Remove aiService arg as it is no longer used in store
     };
 
-    const handleMouseEnter = (index: number) => {
-        handleHover(index, aiService);
-    };
-
-    const handleMouseLeave = () => {
-        clearHover();
-    };
 
     // Duplicate helper for View rendering (pure visual logic)
     const getSelectionGroups = (indices: Set<number>): number[][] => {
@@ -75,8 +65,7 @@ export const useReader = () => {
         return groups;
     };
 
-    // We also need `selectionTranslations` for the view to render the popups
-    const selectionTranslations = useReaderStore(state => state.selectionTranslations);
+
 
     return {
         // State
@@ -85,16 +74,11 @@ export const useReader = () => {
         currentPage,
         totalPages,
         selectedIndices,
-        hoveredIndex,
-        hoverTranslation,
-        selectionTranslations,
         PAGE_SIZE,
 
         // Actions
         setCurrentPage: setPage,
         handleTokenClick,
-        handleMouseEnter,
-        handleMouseLeave,
         getSelectionGroups
     };
 };

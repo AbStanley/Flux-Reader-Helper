@@ -1,6 +1,8 @@
 import React from 'react';
 import styles from '../ReaderView.module.css';
 
+import { Search } from 'lucide-react'; // Import icon
+
 interface ReaderTokenProps {
     token: string;
     index: number;
@@ -13,6 +15,7 @@ interface ReaderTokenProps {
     onClick: (index: number) => void;
     onMouseEnter: (index: number) => void;
     onMouseLeave: () => void;
+    onMoreInfo: (text: string) => void; // New prop
 }
 
 export const ReaderToken: React.FC<ReaderTokenProps & {
@@ -31,8 +34,26 @@ export const ReaderToken: React.FC<ReaderTokenProps & {
     onClick,
     onMouseEnter,
     onMouseLeave,
-    onContextMenu
+    onContextMenu,
+    onMoreInfo
 }) => {
+        // Render helper for popup content
+        const renderPopup = (translation: string) => (
+            <span className="flex items-center gap-1" >
+                {translation}
+                <button
+                    className="ml-1 p-0.5 hover:bg-white/20 rounded-full cursor-pointer opacity-70 hover:opacity-100 transition-opacity"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onMoreInfo(token); // Or translation? Probably the token text.
+                    }}
+                    title="More Info"
+                >
+                    <Search size={12} />
+                </button>
+            </span>
+        );
+
         return (
             <span
                 className={`
@@ -54,14 +75,16 @@ export const ReaderToken: React.FC<ReaderTokenProps & {
             >
                 {groupTranslation && (
                     <span className={styles.selectionPopupValid}>
-                        {groupTranslation}
+                        {renderPopup(groupTranslation)}
                     </span>
                 )}
 
                 {token}
 
                 {isHovered && hoverTranslation && !isSelected && (
-                    <span className={styles.hoverPopup}>{hoverTranslation}</span>
+                    <span className={styles.hoverPopup}>
+                        {renderPopup(hoverTranslation)}
+                    </span>
                 )}
             </span>
         );

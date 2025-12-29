@@ -1,9 +1,13 @@
+
+
 import React from 'react';
 import styles from './ReaderView.module.css';
 import { Card, CardContent } from "../../components/ui/card";
 import { useReader } from './hooks/useReader';
+import { useTranslation } from './hooks/useTranslation'; // NEW
 import { ReaderPagination } from './components/ReaderPagination';
 import { ReaderToken } from './components/ReaderToken';
+import { RichInfoPanel } from './components/RichInfoPanel'; // NEW
 
 import { useAudioStore } from './store/useAudioStore';
 import { PlayerControls } from './components/PlayerControls';
@@ -14,16 +18,25 @@ export const ReaderView: React.FC = () => {
         currentPage,
         totalPages,
         selectedIndices,
-        hoveredIndex,
-        hoverTranslation,
-        selectionTranslations,
         PAGE_SIZE,
         setCurrentPage,
         handleTokenClick,
-        handleMouseEnter,
-        handleMouseLeave,
         getSelectionGroups
     } = useReader();
+
+    // Translation Hook
+    const {
+        selectionTranslations,
+        hoveredIndex,
+        hoverTranslation,
+        richTranslation,
+        isRichInfoOpen,
+        isRichInfoLoading,
+        handleHover,
+        clearHover,
+        fetchRichTranslation,
+        closeRichInfo
+    } = useTranslation();
 
     // Audio Store consumption
     const { currentWordIndex, play } = useAudioStore();
@@ -36,6 +49,8 @@ export const ReaderView: React.FC = () => {
     // 'single' | 'start' | 'middle' | 'end'
     const tokenPositions = new Map<number, string>();
     const visualSelectedIndices = new Set(selectedIndices);
+
+
 
     groups.forEach(group => {
         const start = group[0];
@@ -63,73 +78,81 @@ export const ReaderView: React.FC = () => {
     });
 
     const handleTokenContextMenu = (index: number, e: React.MouseEvent) => {
-        e.preventDefault(); // Prevent default browser context menu
-
-        // Find the token text from paginatedTokens
-        // We need the global index logic here as well
-        // Wait, handleTokenClick uses globalIndex derived from page.
-        // pass local index to a handler that converts to global?
-        // ReaderToken gives back the index passed to it.
-        // In the map below, we pass current `index` (local to page).
-
-
-
-        // We need mapped tokens
-        // Actually, we can just grab the text content from the event target or use the store
-        // But let's use the store for correctness.
-        // We'll need to export a helper or just get the token from useReader store directly?
-        // useReader exposes `paginatedTokens`.
+        e.preventDefault();
         const token = paginatedTokens[index];
         if (token) {
             play(token);
         }
     };
 
+    const handleTokenMouseEnter = (index: number) => {
+        handleHover(index);
+    };
+
+    // Better More Info handler:
+    const onMoreInfoClick = (text: string) => {
+        // We'll use the text as the primary key. 
+        // Ideally we'd pass the sentence context. 
+        // Since we are inside the View, lets try to find the sentence. 
+        // For now, passing text is the MVP.
+        fetchRichTranslation(text, "");
+    };
+
     return (
-        <Card className="h-full border-none shadow-sm glass max-w-4xl mx-auto my-8">
-            <CardContent className="p-8 md:p-12 relative">
-                <PlayerControls />
-                <div className={styles.textArea}>
-                    {paginatedTokens.map((token, index) => {
-                        const globalIndex = (currentPage - 1) * PAGE_SIZE + index;
-                        const isSelected = visualSelectedIndices.has(globalIndex);
-                        const isHovered = hoveredIndex === index;
-                        const isWhitespace = !token.trim();
-                        const groupTranslation = groupStarts.get(globalIndex);
-                        const position = tokenPositions.get(globalIndex);
+        <div className="flex flex-row gap-4 max-w-[90%] mx-auto my-8 h-[80vh]">
+            <Card className="flex-1 h-full border-none shadow-sm glass overflow-hidden flex flex-col">
+                <CardContent className="p-8 md:p-12 relative flex-1 overflow-y-auto">
+                    <PlayerControls />
+                    <div className={styles.textArea}>
+                        {paginatedTokens.map((token, index) => {
+                            const globalIndex = (currentPage - 1) * PAGE_SIZE + index;
+                            const isSelected = visualSelectedIndices.has(globalIndex);
+                            const isHovered = hoveredIndex === index;
+                            const isWhitespace = !token.trim();
+                            const groupTranslation = groupStarts.get(globalIndex);
+                            const position = tokenPositions.get(globalIndex);
+                            const isAudioHighlighted = currentWordIndex === globalIndex;
 
-                        // Audio highlighting
-                        // Check if currentWordIndex matches globalIndex
-                        const isAudioHighlighted = currentWordIndex === globalIndex;
 
-                        return (
-                            <ReaderToken
-                                key={index}
-                                index={index}
-                                token={token}
-                                isSelected={isSelected}
-                                isHovered={isHovered}
-                                isWhitespace={isWhitespace}
-                                groupTranslation={groupTranslation}
-                                position={position}
-                                hoverTranslation={hoverTranslation}
-                                isAudioHighlighted={isAudioHighlighted}
-                                onClick={handleTokenClick}
-                                onMouseEnter={handleMouseEnter}
-                                onMouseLeave={handleMouseLeave}
-                                onContextMenu={handleTokenContextMenu}
-                            />
-                        );
-                    })}
-                </div>
+                            return (
+                                <ReaderToken
+                                    key={index}
+                                    index={index}
+                                    token={token}
+                                    isSelected={isSelected}
+                                    isHovered={isHovered}
+                                    isWhitespace={isWhitespace}
+                                    groupTranslation={groupTranslation}
+                                    position={position}
+                                    hoverTranslation={hoverTranslation}
+                                    isAudioHighlighted={isAudioHighlighted}
+                                    onClick={handleTokenClick}
+                                    onMouseEnter={handleTokenMouseEnter}
+                                    onMouseLeave={clearHover}
+                                    onContextMenu={handleTokenContextMenu}
+                                    onMoreInfo={onMoreInfoClick}
+                                />
+                            );
+                        })}
+                    </div>
 
-                <ReaderPagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
-                />
-            </CardContent>
-        </Card>
+                    <div className="mt-8">
+                        <ReaderPagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={setCurrentPage}
+                        />
+                    </div>
+                </CardContent>
+            </Card>
+
+            <RichInfoPanel
+                isOpen={isRichInfoOpen}
+                isLoading={isRichInfoLoading}
+                data={richTranslation}
+                onClose={closeRichInfo}
+            />
+        </div>
     );
 };
 

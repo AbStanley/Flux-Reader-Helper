@@ -87,6 +87,58 @@ Required Output:
         return rawResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
     }
 
+    async getRichTranslation(text: string, targetLanguage: string = 'en', context?: string, sourceLanguage?: string): Promise<any> {
+        console.log(`[OllamaService] getRichTranslation`, { text, target: targetLanguage, source: sourceLanguage });
+
+        const fromLang = (sourceLanguage && sourceLanguage !== 'Auto') ? `from ${sourceLanguage} ` : '';
+
+        const prompt = `Role: Expert Linguist and Translator.
+Task: Analyze the text segment "${text}" ${fromLang}and translate it to ${targetLanguage}. Provide detailed grammatical information, usage examples, and alternatives.
+
+Input Data:
+- Full Sentence (Context): "${context || 'None'}"
+- Segment to Analyze: "${text}"
+
+Instructions:
+1. Translate the segment accurately within the given context.
+2. Identify the Part of Speech (e.g., Verb, Noun, Adjective). 
+   - If it's a conjugated verb, identify the Tense, Person, Number, and provide the Infinitive form.
+3. Explain WHY it is used this way (grammar rule).
+4. Provide 2-3 usage examples with translations.
+5. Provide 1-2 common alternatives if applicable.
+
+Output Format: JSON ONLY. Do not include any other text.
+Structure:
+{
+  "translation": "translated text",
+  "segment": "original text",
+  "grammar": {
+    "partOfSpeech": "Verb/Noun/etc",
+    "tense": "Present/Past/etc (optional)",
+    "gender": "Masculine/Feminine (optional)",
+    "number": "Singular/Plural (optional)",
+    "infinitive": "base form (optional)",
+    "explanation": "Brief explanation of the grammar rule or usage"
+  },
+  "examples": [
+    { "sentence": "example sentence 1", "translation": "translated example 1" }
+  ],
+  "alternatives": ["alt1", "alt2"]
+}
+`;
+
+        const rawResponse = await this.generateText(prompt);
+        // Clean response to ensure valid JSON
+        const jsonString = rawResponse.replace(/<think>[\s\S]*?<\/think>/g, '').replace(/```json/g, '').replace(/```/g, '').trim();
+
+        try {
+            return JSON.parse(jsonString);
+        } catch (e) {
+            console.error("Failed to parse rich translation JSON", rawResponse);
+            throw new Error("Failed to parse rich translation response");
+        }
+    }
+
     async getAvailableModels(): Promise<string[]> {
         try {
             const response = await fetch(`${this.baseUrl}/api/tags`);

@@ -1,3 +1,21 @@
+export interface RichTranslationResult {
+    translation: string;
+    segment: string;
+    grammar: {
+        partOfSpeech: string;
+        tense?: string;
+        gender?: string;
+        number?: string;
+        infinitive?: string;
+        explanation: string;
+    };
+    examples: Array<{
+        sentence: string;
+        translation: string;
+    }>;
+    alternatives: string[];
+}
+
 export interface IAIService {
     /**
      * Generates text based on a prompt.
@@ -13,6 +31,11 @@ export interface IAIService {
      * @returns The translated text.
      */
     translateText(text: string, targetLanguage?: string, context?: string, sourceLanguage?: string): Promise<string>;
+
+    /**
+     * Helper to get rich translation info with grammar and examples
+     */
+    getRichTranslation(text: string, targetLanguage?: string, context?: string, sourceLanguage?: string): Promise<RichTranslationResult>;
 
     /**
      * Checks if the service is available/healthy.

@@ -116,3 +116,13 @@
     position: relative;
     /* Ensure it stands out */
 }
+
+/* Ensure popups are interactive */
+.hoverPopup,
+.selectionPopupValid {
+    pointer-events: auto !important;
+    z-index: 50;
+    /* Ensure on top */
+    display: flex;
+    align-items: center;
+}
