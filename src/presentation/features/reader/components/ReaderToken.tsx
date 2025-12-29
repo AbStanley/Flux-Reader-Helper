@@ -80,8 +80,8 @@ export const ReaderToken: React.FC<ReaderTokenProps> = ({
             // Mobile: always visible
             "opacity-100 scale-100",
             // Desktop: hidden by default, visible on group hover
-            "md:opacity-0 md:scale-75 md:w-0 md:p-0 md:ml-0",
-            "md:group-hover:opacity-100 md:group-hover:scale-100 md:group-hover:w-auto md:group-hover:p-1 md:group-hover:ml-1"
+            "min-[1200px]:opacity-0 min-[1200px]:scale-75 min-[1200px]:w-0 min-[1200px]:p-0 min-[1200px]:ml-0",
+            "min-[1200px]:group-hover:opacity-100 min-[1200px]:group-hover:scale-100 min-[1200px]:group-hover:w-auto min-[1200px]:group-hover:p-1 min-[1200px]:group-hover:ml-1"
         );
 
         return (

@@ -18,7 +18,7 @@ export const RichInfoPanel: React.FC<RichInfoPanelProps> = ({ isOpen, isLoading,
     if (!isOpen) return null;
 
     return (
-        <Card className="fixed bottom-0 right-0 z-50 h-[50vh] w-full border-t shadow-2xl flex flex-col rounded-t-xl glass bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 animate-in slide-in-from-bottom duration-300 md:static md:h-auto md:w-full md:border md:shadow-sm md:rounded-xl md:z-0 md:bg-transparent md:backdrop-blur-none md:mt-4">
+        <Card className="fixed bottom-0 right-0 z-50 h-[50vh] w-full border-t shadow-2xl flex flex-col rounded-t-xl glass bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 animate-in slide-in-from-bottom duration-300 min-[1200px]:static min-[1200px]:h-auto min-[1200px]:w-full min-[1200px]:border min-[1200px]:shadow-sm min-[1200px]:rounded-xl min-[1200px]:z-0 min-[1200px]:bg-transparent min-[1200px]:backdrop-blur-none min-[1200px]:mt-4">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                 <CardTitle className="text-xl font-bold">Details</CardTitle>
                 <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">

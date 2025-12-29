@@ -141,7 +141,7 @@ export const ReaderView: React.FC = () => {
     };
 
     return (
-        <div className="relative flex flex-col md:flex-row w-full h-[90vh] md:h-[92vh] max-w-full mx-auto my-4 transition-all duration-300 gap-6">
+        <div className="relative flex flex-col min-[1200px]:flex-row w-full h-[90vh] min-[1200px]:h-[92vh] max-w-full mx-auto my-4 transition-all duration-300 gap-6">
             {/* Center Column: Reading Card */}
             <Card className="flex-1 h-full border-none shadow-sm glass overflow-hidden flex flex-col">
                 <CardContent className={`p-0 relative flex-1 overflow-y-auto ${styles.textAreaContainer} flex flex-col`}>
@@ -151,7 +151,7 @@ export const ReaderView: React.FC = () => {
                         <PlayerControls />
                     </div>
 
-                    <div className={`${styles.textArea} p-8 md:p-12 pb-12`}>
+                    <div className={`${styles.textArea} p-8 min-[1200px]:p-12 pb-12`}>
                         {paginatedTokens.map((token, index) => {
                             const globalIndex = (currentPage - 1) * PAGE_SIZE + index;
                             const groupTranslation = groupStarts.get(globalIndex);
@@ -198,7 +198,7 @@ export const ReaderView: React.FC = () => {
                         })}
                     </div>
 
-                    <div className="mt-auto px-8 md:px-0 py-8">
+                    <div className="mt-auto px-8 min-[1200px]:px-0 py-8">
                         <ReaderPagination
                             currentPage={currentPage}
                             totalPages={totalPages}
@@ -209,7 +209,7 @@ export const ReaderView: React.FC = () => {
             </Card>
 
             {/* Right Column: Info Panel - Sticky Sidebar */}
-            <div className={`hidden md:flex flex-col flex-shrink-0 relative overflow-y-auto h-full transition-all duration-300 ${isRichInfoOpen ? 'w-[500px] pl-2' : 'w-0 pl-0'
+            <div className={`hidden min-[1200px]:flex flex-col flex-shrink-0 relative overflow-y-auto h-full transition-all duration-300 ${isRichInfoOpen ? 'w-[500px] pl-2' : 'w-0 pl-0'
                 }`}>
                 <div className="w-[450px]"> {/* Fixed width inner container to prevent content squashing during transition */}
                     {/* Translation Info Panel */}
@@ -223,7 +223,7 @@ export const ReaderView: React.FC = () => {
             </div>
 
             {/* Mobile Bottom Sheet (Info Panel) - Managed by RichInfoPanel internally with media queries */}
-            <div className="md:hidden">
+            <div className="min-[1200px]:hidden">
                 <RichInfoPanel
                     isOpen={isRichInfoOpen}
                     isLoading={isRichInfoLoading}
