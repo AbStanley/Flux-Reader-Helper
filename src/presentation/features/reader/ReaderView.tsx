@@ -22,6 +22,7 @@ export const ReaderView: React.FC = () => {
         totalPages,
         selectedIndices,
         PAGE_SIZE,
+        selectionMode,
         setCurrentPage,
         handleTokenClick,
         getSelectionGroups
@@ -154,6 +155,7 @@ export const ReaderView: React.FC = () => {
                         richTranslation={richTranslation}
                         currentPage={currentPage}
                         PAGE_SIZE={PAGE_SIZE}
+                        selectionMode={selectionMode}
                         visualGroupStarts={visualGroupStarts}
                         groupStarts={groupStarts}
                         tokenPositions={tokenPositions}

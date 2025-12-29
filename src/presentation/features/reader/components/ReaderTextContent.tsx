@@ -8,6 +8,8 @@ import { useAudioStore } from '../store/useAudioStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { useHighlighting } from '../hooks/useHighlighting';
 
+import { SelectionMode } from '../../../../core/types';
+
 interface ReaderTextContentProps {
     tokens: string[]; // Needed for highlighting logic
     paginatedTokens: string[];
@@ -15,6 +17,7 @@ interface ReaderTextContentProps {
     richTranslation: any; // Needed for highlighting
     currentPage: number;
     PAGE_SIZE: number;
+    selectionMode: SelectionMode; // Updated: Needed for display logic
     visualGroupStarts: Map<number, string>;
     groupStarts: Map<number, string>;
     tokenPositions: Map<number, string>;
@@ -31,6 +34,7 @@ const ReaderTextContentComponent: React.FC<ReaderTextContentProps> = ({
     richTranslation,
     currentPage,
     PAGE_SIZE,
+    selectionMode, // Destructure
     visualGroupStarts,
     groupStarts,
     tokenPositions,
@@ -64,7 +68,9 @@ const ReaderTextContentComponent: React.FC<ReaderTextContentProps> = ({
                 // Calculate hover position
                 let hoverPosition: HoverPosition | undefined;
                 const isHoveredSentence = highlightIndices.has(globalIndex);
-                const isHoveredWord = hoveredIndex === globalIndex;
+                // Only show word-specific highlight if we are in Word mode OR if the sentence highlight is effectively just one word
+                // This prevents the "First word strong, rest weak" visual discrepancy in Sentence/Group mode.
+                const isHoveredWord = (hoveredIndex === globalIndex) && (selectionMode === SelectionMode.Word);
                 const isAudioHighlighted = currentWordIndex === globalIndex;
 
                 if (isHoveredSentence) {
