@@ -8,12 +8,15 @@ import { cn } from '../../../../lib/utils';
 import { useReaderStore } from '../store/useReaderStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { useAudioStore } from '../store/useAudioStore';
+import { HoverPosition } from '../../../../core/types';
 
 interface ReaderTokenProps {
     token: string;
     index: number;
     groupTranslation: string | undefined;
     position: string | undefined;
+    isHovered?: boolean;
+    hoverPosition?: HoverPosition;
     onClick: (index: number) => void;
     onMoreInfo: (index: number) => void;
     onPlay: (index: number) => void;
@@ -24,6 +27,8 @@ export const ReaderToken: React.FC<ReaderTokenProps> = ({
     index,
     groupTranslation,
     position,
+    isHovered: propIsHovered,
+    hoverPosition,
     onClick,
     onMoreInfo,
     onPlay
@@ -45,7 +50,10 @@ export const ReaderToken: React.FC<ReaderTokenProps> = ({
     const globalIndex = (currentPage - 1) * PAGE_SIZE + index;
     const isWhitespace = !token.trim();
     const isSelected = !!position; // If position is assigned, it's selected/grouped
-    const isHovered = hoveredIndex === index;
+
+    // Use prop if provided, fallback to local check (for compatibility or simplified usage)
+    const isHovered = propIsHovered !== undefined ? propIsHovered : hoveredIndex === index;
+
     const isAudioHighlighted = currentWordIndex === globalIndex;
 
     const handleMouseEnter = () => {
@@ -111,6 +119,7 @@ export const ReaderToken: React.FC<ReaderTokenProps> = ({
                 ${!isWhitespace ? styles.interactive : ''}
                 ${position ? styles[position] : ''}
                 ${isAudioHighlighted ? styles.audioHighlight : ''}
+                ${(isHovered && !isSelected) ? cn(styles.hovered, hoverPosition && styles[hoverPosition]) : ''} 
             `}
             onClick={() => {
                 if (!isWhitespace) {
@@ -131,7 +140,7 @@ export const ReaderToken: React.FC<ReaderTokenProps> = ({
 
             {token}
 
-            {isHovered && hoverTranslation && !isSelected && (
+            {(hoveredIndex === index) && hoverTranslation && !isSelected && (
                 <span className={styles.hoverPopup}>
                     {renderPopup(hoverTranslation)}
                 </span>

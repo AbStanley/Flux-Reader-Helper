@@ -8,11 +8,10 @@
 .token {
     display: inline-block;
     border-radius: 0.375rem;
-    /* rounded-md */
     cursor: default;
     transition: all 0.15s ease;
     padding: 0 0.1em;
-    margin: 0 0.05em;
+    margin: 0;
 }
 
 .interactive {
@@ -21,7 +20,6 @@
 
 .interactive:hover {
     background-color: hsl(var(--accent));
-    /* Visible hover color */
     color: hsl(var(--accent-foreground));
 }
 
@@ -38,26 +36,25 @@
     background-color: hsl(var(--link-color) / 0.1);
 }
 
-/* Grouping Styles ensuring seamless connection */
+.hovered {
+    background-color: hsl(var(--accent) / 0.5);
+    border-radius: 0.25em;
+}
+
+/* Grouping Styles ensuring seamless connection without layout shift */
+/* Grouping Styles ensuring seamless connection without layout shift */
 .start {
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
-    margin-right: 0;
-    padding-right: 0.2em;
-    /* visual balance */
 }
 
 .middle {
     border-radius: 0;
-    margin-left: 0;
-    margin-right: 0;
 }
 
 .end {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
-    margin-left: 0;
-    padding-left: 0.2em;
 }
 
 /* Popups still use custom CSS for precise absolute positioning relative to span */
@@ -81,7 +78,8 @@
 
 .selectionPopupValid {
     position: absolute;
-    top: -2.3rem;
+    bottom: 120%;
+    /* Changed from Top to Bottom for better stability */
     left: 0;
     background-color: hsl(var(--link-color));
     color: hsl(var(--primary-foreground));

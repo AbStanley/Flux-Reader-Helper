@@ -36,9 +36,12 @@ export const ControlPanel: React.FC = () => {
                 if (models.length > 0) {
                     setAvailableModels(models);
 
-                    // Only default if current model is not set
+                    // Validate current model exists in available models
                     const currentModel = (aiService as any).model;
-                    if (!currentModel) {
+                    const isValidModel = models.includes(currentModel);
+
+                    if (!currentModel || !isValidModel) {
+                        // Default to the first available model
                         setServiceType('ollama', { model: models[1] });
                     }
                 }

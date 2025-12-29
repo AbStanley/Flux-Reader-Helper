@@ -1,13 +1,15 @@
 
-
 import React from 'react';
 import styles from './ReaderView.module.css';
 import { Card, CardContent } from "../../components/ui/card";
 import { useReader } from './hooks/useReader';
-import { useTranslation } from './hooks/useTranslation'; // NEW
+import { useTranslation } from './hooks/useTranslation';
+import { useReaderStore, getSentenceRange } from './store/useReaderStore';
+import { useTranslationStore } from './store/useTranslationStore';
+import { SelectionMode, HoverPosition } from '../../../core/types';
 import { ReaderPagination } from './components/ReaderPagination';
 import { ReaderToken } from './components/ReaderToken';
-import { RichInfoPanel } from './components/RichInfoPanel'; // NEW
+import { RichInfoPanel } from './components/RichInfoPanel';
 
 import { useAudioStore } from './store/useAudioStore';
 import { PlayerControls } from './components/PlayerControls';
@@ -74,9 +76,22 @@ export const ReaderView: React.FC = () => {
         }
     });
 
+    const hoveredIndex = useTranslationStore(s => s.hoveredIndex);
+    const selectionMode = useReaderStore(s => s.selectionMode);
+
+    const highlightIndices = React.useMemo(() => {
+        if (hoveredIndex === null || hoveredIndex === undefined || hoveredIndex === -1 || richTranslation) return new Set<number>();
+
+        if (selectionMode === SelectionMode.Sentence) {
+            const range = getSentenceRange(hoveredIndex, tokens);
+            return new Set(range);
+        } else {
+            return new Set([hoveredIndex]);
+        }
+    }, [hoveredIndex, selectionMode, tokens, richTranslation]);
 
 
-    // Better More Info handler:
+
     // Better More Info handler:
     const onMoreInfoClick = (index: number) => {
         const globalIndex = (currentPage - 1) * PAGE_SIZE + index;
@@ -133,6 +148,29 @@ export const ReaderView: React.FC = () => {
                             const groupTranslation = groupStarts.get(globalIndex);
                             const position = tokenPositions.get(globalIndex);
 
+
+
+                            // Use the index from the hook if available
+                            if (hoveredIndex !== null && hoveredIndex !== undefined) {
+                                if (useReaderStore.getState().selectionMode === SelectionMode.Sentence) {
+                                    // Check for sentence mode
+                                }
+                            }
+
+                            // Calculate hover position
+                            let hoverPosition: HoverPosition | undefined;
+                            const isHovered = highlightIndices.has(globalIndex);
+
+                            if (isHovered) {
+                                const prev = highlightIndices.has(globalIndex - 1);
+                                const next = highlightIndices.has(globalIndex + 1);
+
+                                if (!prev && !next) hoverPosition = HoverPosition.Single;
+                                else if (!prev && next) hoverPosition = HoverPosition.Start;
+                                else if (prev && next) hoverPosition = HoverPosition.Middle;
+                                else if (prev && !next) hoverPosition = HoverPosition.End;
+                            }
+
                             return (
                                 <ReaderToken
                                     key={index}
@@ -140,6 +178,8 @@ export const ReaderView: React.FC = () => {
                                     token={token}
                                     groupTranslation={groupTranslation}
                                     position={position}
+                                    isHovered={isHovered}
+                                    hoverPosition={hoverPosition}
                                     onClick={handleTokenClick}
                                     onMoreInfo={onMoreInfoClick}
                                     onPlay={onPlayClick}

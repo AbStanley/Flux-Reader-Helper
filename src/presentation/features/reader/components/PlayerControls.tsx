@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Play, Pause, Square, Volume2 } from "lucide-react";
 import { useAudioStore } from '../store/useAudioStore';
 import { useReaderStore } from '../store/useReaderStore';
+import { SelectionMode } from '../../../../core/types';
 
 export const PlayerControls: React.FC = () => {
     const {
@@ -14,10 +15,10 @@ export const PlayerControls: React.FC = () => {
         playbackRate,
         selectedVoice,
         availableVoices,
-        currentWordIndex, // NEW
-        tokens,           // NEW
+        currentWordIndex,
+        tokens,
         play,
-        seek,             // NEW
+        seek,
         pause,
         resume,
         stop,
@@ -100,6 +101,22 @@ export const PlayerControls: React.FC = () => {
                     >
                         <Square className="h-4 w-4 fill-current" />
                     </Button>
+
+                    <div className="h-6 w-px bg-border/50 mx-2" />
+
+                    <div className="text-xs font-medium text-muted-foreground mb-1.5 ml-1">Selection Mode</div>
+                    <Select
+                        value={useReaderStore(state => state.selectionMode)}
+                        onValueChange={(val) => useReaderStore.getState().setSelectionMode(val as SelectionMode)}
+                    >
+                        <SelectTrigger className="w-full bg-secondary/50 border-border/50 h-8 text-xs">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value={SelectionMode.Word} className="text-xs">Word Selection</SelectItem>
+                            <SelectItem value={SelectionMode.Sentence} className="text-xs">Sentence Selection</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 <div className="flex items-center gap-4 flex-1 w-full md:w-auto overflow-hidden">

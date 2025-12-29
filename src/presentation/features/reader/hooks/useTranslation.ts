@@ -52,6 +52,10 @@ export const useTranslation = (enableAutoFetch = false) => {
         // Actually, debounce here is tricky because we want immediate feedback for UI state (hoveredIndex), but delayed fetch.
         // The store handles immediate `hoveredIndex` set. We just need to delay the *call* or let the store handle it?
         // Since `ReaderToken` calls this on MouseEnter, let's debounce the *fetching* part.
+
+        // Prevent redundant triggers if we are hovering over the same effective "item"
+        if (hoveredIndex === index) return;
+
         if (hoverTimeoutRef.current) {
             clearTimeout(hoverTimeoutRef.current);
         }
