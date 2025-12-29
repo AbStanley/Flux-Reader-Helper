@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import styles from './ReaderView.module.css';
 import { Card, CardContent } from "../../components/ui/card";
 import { useReader } from './hooks/useReader';
@@ -47,6 +47,76 @@ export const ReaderView: React.FC = () => {
     // Map to store position of each token in a group for styling
     // 'single' | 'start' | 'middle' | 'end'
     const tokenPositions = new Map<number, string>();
+
+    // Visual Translation Splitting Logic
+    const [visualGroupStarts, setVisualGroupStarts] = useState<Map<number, string>>(new Map());
+
+    useLayoutEffect(() => {
+        const newVisualStarts = new Map<number, string>();
+
+        groups.forEach(group => {
+            const start = group[0];
+            const end = group[group.length - 1];
+            const key = `${start}-${end}`;
+            const fullTranslation = selectionTranslations.get(key);
+
+            if (!fullTranslation) return;
+
+            // 1. Get DOM elements
+            const tokenElements: { index: number, el: HTMLElement, top: number }[] = [];
+            for (let i = start; i <= end; i++) {
+                const el = document.getElementById(`token-${i}`);
+                if (el) {
+                    tokenElements.push({ index: i, el, top: el.getBoundingClientRect().top });
+                }
+            }
+
+            if (tokenElements.length === 0) return;
+
+            // 2. Group by visual line (allow small tolerance for float layout)
+            const lines: { startIndex: number, count: number }[] = [];
+            let currentLineStart = tokenElements[0];
+            let currentCount = 1;
+            let lastTop = currentLineStart.top;
+
+            for (let i = 1; i < tokenElements.length; i++) {
+                const token = tokenElements[i];
+                if (Math.abs(token.top - lastTop) > 5) {
+                    // New Line detected
+                    lines.push({ startIndex: currentLineStart.index, count: currentCount });
+                    currentLineStart = token;
+                    currentCount = 1;
+                    lastTop = token.top;
+                } else {
+                    currentCount++;
+                }
+            }
+            // Push last line
+            lines.push({ startIndex: currentLineStart.index, count: currentCount });
+
+            // 3. Split translation string
+            // Heuristic: Split proportional to token count
+            const words = fullTranslation.split(' ');
+            const totalTokens = tokenElements.length;
+
+            let wordCursor = 0;
+            lines.forEach((line, lineIdx) => {
+                if (lineIdx === lines.length - 1) {
+                    // Last line gets the rest
+                    const segment = words.slice(wordCursor).join(' ');
+                    if (segment) newVisualStarts.set(line.startIndex, segment);
+                } else {
+                    const lineShare = line.count / totalTokens;
+                    const wordCountForLine = Math.max(1, Math.round(words.length * lineShare));
+                    const segment = words.slice(wordCursor, wordCursor + wordCountForLine).join(' ');
+                    if (segment) newVisualStarts.set(line.startIndex, segment);
+                    wordCursor += wordCountForLine;
+                }
+            });
+        });
+
+        setVisualGroupStarts(newVisualStarts);
+    }, [selectedIndices, selectionTranslations, currentPage, paginatedTokens]); // Re-run on selection/page change
 
 
 
@@ -154,7 +224,8 @@ export const ReaderView: React.FC = () => {
                     <div className={`${styles.textArea} p-8 min-[1200px]:p-12 pb-12`}>
                         {paginatedTokens.map((token, index) => {
                             const globalIndex = (currentPage - 1) * PAGE_SIZE + index;
-                            const groupTranslation = groupStarts.get(globalIndex);
+                            // Prefer visual split translation, fallback (should cover initial render) to basic group start
+                            const groupTranslation = visualGroupStarts.get(globalIndex) || groupStarts.get(globalIndex);
                             const position = tokenPositions.get(globalIndex);
 
 

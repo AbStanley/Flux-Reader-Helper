@@ -48,8 +48,9 @@
 
 /* Apply margin ONLY when selected to reserve space for the popup */
 .selected.start,
-.selected.single {
-    margin-top: 2.2rem;
+.selected.single,
+.visualStart {
+    margin-top: 3rem;
 }
 
 .middle {
@@ -80,7 +81,7 @@
     box-shadow: 0 0 0 1px hsl(var(--accent));
     /* increased visibility */
     border-radius: 0.25em;
-    z-index: 2;
+    z-index: 5;
     position: relative;
     /* Ensure it sits on top */
 }
@@ -123,12 +124,12 @@
 @keyframes fadeUp {
     from {
         opacity: 0;
-        transform: translateY(5px);
+        transform: translate(-50%, 5px);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translate(-50%, 0);
     }
 }
 

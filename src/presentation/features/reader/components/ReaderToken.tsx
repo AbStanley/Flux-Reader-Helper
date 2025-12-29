@@ -115,11 +115,13 @@ export const ReaderToken: React.FC<ReaderTokenProps> = ({
 
     return (
         <span
+            id={`token-${globalIndex}`}
             className={`
                 ${styles.token} 
                 ${isSelected ? styles.selected : ''} 
                 ${!isWhitespace ? styles.interactive : ''}
                 ${position ? styles[position] : ''} 
+                ${groupTranslation ? styles.visualStart : ''}
                 ${isAudioHighlighted ? styles.audioHighlight : ''}
                 ${(isHovered && !isSelected) ? cn(
                 styles.hoveredSentence,
