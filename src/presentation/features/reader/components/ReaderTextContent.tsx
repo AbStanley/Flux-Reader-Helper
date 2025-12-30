@@ -25,6 +25,7 @@ interface ReaderTextContentProps {
     handleTokenClick: (index: number) => void;
     onMoreInfoClick: (index: number) => void;
     onPlayClick: (index: number) => void;
+    showTranslations: boolean;
 }
 
 const ReaderTextContentComponent: React.FC<ReaderTextContentProps> = ({
@@ -40,7 +41,8 @@ const ReaderTextContentComponent: React.FC<ReaderTextContentProps> = ({
     textAreaRef,
     handleTokenClick,
     onMoreInfoClick,
-    onPlayClick
+    onPlayClick,
+    showTranslations
 }) => {
     // State Consumption
     const hoveredIndex = useTranslationStore(s => s.hoveredIndex);
@@ -62,7 +64,10 @@ const ReaderTextContentComponent: React.FC<ReaderTextContentProps> = ({
             {paginatedTokens.map((token, index) => {
                 const globalIndex = (currentPage - 1) * PAGE_SIZE + index;
                 // Prefer visual split translation, fallback (should cover initial render) to basic group start
-                const groupTranslation = visualGroupStarts.get(globalIndex) || groupStarts.get(globalIndex);
+                const visualTrans = visualGroupStarts.get(globalIndex) || groupStarts.get(globalIndex);
+                // Respect global show/hide switch
+                const groupTranslation = showTranslations ? visualTrans : undefined;
+
                 const position = tokenPositions.get(globalIndex);
 
                 // Calculate hover position

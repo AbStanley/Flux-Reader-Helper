@@ -17,6 +17,9 @@ interface TranslationState {
     isRichInfoOpen: boolean;
     isRichInfoLoading: boolean;
 
+    // Visibility Control
+    showTranslations: boolean;
+
     // Actions
     translateSelection: (
         indices: Set<number>,
@@ -50,6 +53,10 @@ interface TranslationState {
 
     closeRichInfo: () => void;
     toggleRichInfo: () => void;
+
+    // Visibility Actions
+    toggleShowTranslations: () => void;
+    clearSelectionTranslations: () => void;
 }
 
 // Helper: Extract context (current line) for a given token index
@@ -128,6 +135,7 @@ export const useTranslationStore = create<TranslationState>((set, get) => ({
     richTranslation: null,
     isRichInfoOpen: false,
     isRichInfoLoading: false,
+    showTranslations: true,
 
     translateSelection: async (indices, tokens, sourceLang, targetLang, aiService, force = false, targetIndex?: number) => {
         // If selection is empty, just return (don't clear cache)
@@ -238,4 +246,7 @@ export const useTranslationStore = create<TranslationState>((set, get) => ({
 
     closeRichInfo: () => set({ isRichInfoOpen: false }),
     toggleRichInfo: () => set(state => ({ isRichInfoOpen: !state.isRichInfoOpen })),
+
+    toggleShowTranslations: () => set(state => ({ showTranslations: !state.showTranslations })),
+    clearSelectionTranslations: () => set({ selectionTranslations: new Map() }),
 }));

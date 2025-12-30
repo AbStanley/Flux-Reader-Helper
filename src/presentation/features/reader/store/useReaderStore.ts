@@ -26,6 +26,7 @@ interface ReaderState {
     setSelectionMode: (mode: SelectionMode) => void;
     setPage: (page: number) => void;
     handleSelection: (globalIndex: number) => Promise<void>;
+    clearSelection: () => void;
 }
 
 // Helper: Group selected indices into contiguous blocks (Still used?)
@@ -139,6 +140,8 @@ export const useReaderStore = create<ReaderState>((set, get) => ({
 
         set({ selectedIndices: newSelection });
     },
+
+    clearSelection: () => set({ selectedIndices: new Set() }),
 }));
 
 // Helper to find sentence boundaries

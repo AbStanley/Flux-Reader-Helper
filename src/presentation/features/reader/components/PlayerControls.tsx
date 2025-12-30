@@ -2,9 +2,10 @@ import React, { useEffect } from 'react';
 import { Button } from "../../../components/ui/button";
 import { Slider } from "../../../components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
-import { Play, Pause, Square, Volume2 } from "lucide-react";
+import { Play, Pause, Square, Volume2, Eye, EyeOff, Eraser } from "lucide-react";
 import { useAudioStore } from '../store/useAudioStore';
 import { useReaderStore } from '../store/useReaderStore';
+import { useTranslation } from '../hooks/useTranslation';
 import { SelectionMode } from '../../../../core/types';
 
 interface PlayerControlsProps {
@@ -31,7 +32,15 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ vertical = false
         setTokens
     } = useAudioStore();
 
-    const { text, tokens: readerTokens } = useReaderStore();
+    // Reader Store Actions
+    const { text, tokens: readerTokens, clearSelection } = useReaderStore();
+
+    // Translation Controls
+    const {
+        showTranslations,
+        toggleShowTranslations,
+        clearSelectionTranslations
+    } = useTranslation();
 
     // Local state for smooth slider movement
     const [sliderValue, setSliderValue] = React.useState([0]);
@@ -168,24 +177,58 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ vertical = false
                 </div>
             </div>
 
-            {/* Timeline Slider */}
-            <div className="w-full flex items-center gap-2">
-                <span className="text-xs text-muted-foreground w-10 text-right">
-                    {sliderValue[0]}
-                </span>
-                <Slider
-                    value={sliderValue}
-                    min={0}
-                    max={maxTokens}
-                    step={1}
-                    onValueChange={handleSliderChange}
-                    onValueCommit={handleSliderCommit}
-                    className="flex-1"
-                />
-                <span className="text-xs text-muted-foreground w-10">
-                    {maxTokens}
-                </span>
+            <div className="flex gap-2 w-full justify-between items-center">
+
+                {/* Timeline Slider */}
+                <div className="flex items-center gap-2 flex-1">
+                    <span className="text-xs text-muted-foreground w-10 text-right">
+                        {sliderValue[0]}
+                    </span>
+                    <Slider
+                        value={sliderValue}
+                        min={0}
+                        max={maxTokens}
+                        step={1}
+                        onValueChange={handleSliderChange}
+                        onValueCommit={handleSliderCommit}
+                        className="flex-1"
+                    />
+                    <span className="text-xs text-muted-foreground w-10">
+                        {maxTokens}
+                    </span>
+                </div>
+
+                <div className="h-6 w-px bg-border/50 mx-2" />
+
+                {/* Translation Controls */}
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={toggleShowTranslations}
+                        title={showTranslations ? "Hide Translations" : "Show Translations"}
+                    >
+                        {showTranslations ?
+                            <Eye className="h-4 w-4 text-muted-foreground" /> :
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        }
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                            clearSelectionTranslations();
+                            clearSelection();
+                        }}
+                        title="Clear All Translations"
+                    >
+                        <Eraser className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                </div>
+
             </div>
-        </div>
+        </div >
     );
 };

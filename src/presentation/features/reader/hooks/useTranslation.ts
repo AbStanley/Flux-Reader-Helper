@@ -27,6 +27,7 @@ export const useTranslation = (enableAutoFetch = false) => {
     const richTranslation = useTranslationStore(state => state.richTranslation);
     const isRichInfoOpen = useTranslationStore(state => state.isRichInfoOpen);
     const isRichInfoLoading = useTranslationStore(state => state.isRichInfoLoading);
+    const showTranslations = useTranslationStore(state => state.showTranslations);
 
     // Translation Store Actions
     const translateSelection = useTranslationStore(state => state.translateSelection);
@@ -35,6 +36,9 @@ export const useTranslation = (enableAutoFetch = false) => {
     const fetchRichTranslationAction = useTranslationStore(state => state.fetchRichTranslation);
     const closeRichInfo = useTranslationStore(state => state.closeRichInfo);
     const toggleRichInfo = useTranslationStore(state => state.toggleRichInfo);
+
+    const toggleShowTranslations = useTranslationStore(state => state.toggleShowTranslations);
+    const clearSelectionTranslations = useTranslationStore(state => state.clearSelectionTranslations);
 
     // Effect: Automatically trigger translation when selection changes
     useEffect(() => {
@@ -104,6 +108,7 @@ export const useTranslation = (enableAutoFetch = false) => {
         richTranslation,
         isRichInfoOpen,
         isRichInfoLoading,
+        showTranslations,
 
         // Actions
         handleHover,
@@ -111,6 +116,8 @@ export const useTranslation = (enableAutoFetch = false) => {
         fetchRichTranslation,
         closeRichInfo,
         toggleRichInfo,
+        toggleShowTranslations,
+        clearSelectionTranslations,
         regenerateSelection: (index?: number) => translateSelection(selectedIndices, tokens, sourceLang, targetLang, aiService, true, index)
     };
 };

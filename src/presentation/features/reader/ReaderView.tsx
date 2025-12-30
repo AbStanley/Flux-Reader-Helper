@@ -37,7 +37,8 @@ export const ReaderView: React.FC = () => {
         isRichInfoOpen,
         isRichInfoLoading,
         fetchRichTranslation,
-        closeRichInfo
+        closeRichInfo,
+        showTranslations
     } = useTranslation(true);
 
     // Audio Store consumption
@@ -150,6 +151,7 @@ export const ReaderView: React.FC = () => {
                         handleTokenClick={handleTokenClick}
                         onMoreInfoClick={onMoreInfoClick}
                         onPlayClick={onPlayClick}
+                        showTranslations={showTranslations}
                     />
 
                     <div className="mt-auto px-8 min-[1200px]:px-0 py-8">
