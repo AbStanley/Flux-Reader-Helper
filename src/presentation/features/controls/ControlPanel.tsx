@@ -60,13 +60,12 @@ export const ControlPanel: React.FC = () => {
         abortControllerRef.current = new AbortController();
 
         try {
-            let prompt = `Write a short, interesting story in ${sourceLang}. Output ONLY the story text. Do not include any introductory or concluding remarks. Do not include translations.`;
-
+            let prompt = "";
             if (isLearningMode) {
                 const topicPhrase = topic ? ` about "${topic}"` : " about a random interesting topic";
-                prompt = `Write a short story${topicPhrase} in ${sourceLang} suitable for a ${proficiencyLevel} proficiency level learner. The vocabulary and grammar should be appropriate for ${proficiencyLevel}. Output ONLY the story text.`;
+                prompt = `Write a short story ${topicPhrase} in ${sourceLang} suitable for a ${proficiencyLevel} proficiency level learner. The vocabulary and grammar should be appropriate for ${proficiencyLevel}. Include a title starting with '## '. Output ONLY the title and the story text. Do not include any introductory or concluding remarks. Do NOT include translations.`;
             } else {
-                prompt = `Write a short, interesting story in ${sourceLang} about a robot learning to paint. Output ONLY the story text.`;
+                prompt = `Write a short, interesting story in ${sourceLang} about a robot learning to paint. Include a title starting with '## '. Output ONLY the title and the story text. Do not include any introductory or concluding remarks. Do NOT include translations.`;
             }
 
             await aiService.generateText(prompt, {
