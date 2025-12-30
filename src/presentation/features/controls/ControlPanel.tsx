@@ -21,8 +21,9 @@ export const ControlPanel: React.FC = () => {
     const targetLang = useReaderStore(state => state.targetLang);
     const setTargetLang = useReaderStore(state => state.setTargetLang);
     const setIsReading = useReaderStore(state => state.setIsReading);
+    const isGenerating = useReaderStore(state => state.isGenerating);
+    const setIsGenerating = useReaderStore(state => state.setIsGenerating);
 
-    const [isGenerating, setIsGenerating] = useState(false);
     const [availableModels, setAvailableModels] = useState<string[]>([]);
 
     const abortControllerRef = React.useRef<AbortController | null>(null);
@@ -214,13 +215,24 @@ export const ControlPanel: React.FC = () => {
             </CardHeader>
 
             <CardContent className="space-y-4">
-                <Textarea
-                    placeholder="Paste text here, or generate..."
-                    className="min-h-[160px] font-mono text-lg shadow-sm resize-none focus-visible:ring-primary bg-secondary/30 border-border/50"
-                    value={text}
-                    onChange={handleManualChange}
-                    disabled={isGenerating}
-                />
+                <div className="relative">
+                    <Textarea
+                        placeholder="Paste text here, or generate..."
+                        className={`min-h-[160px] font-mono text-lg shadow-sm resize-none focus-visible:ring-primary bg-secondary/30 border-border/50 ${isGenerating ? 'overflow-hidden select-none' : ''}`}
+                        value={text}
+                        onChange={handleManualChange}
+                        disabled={isGenerating}
+                    />
+
+                    {isGenerating && (
+                        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/10 backdrop-blur-[2px] rounded-md transition-all duration-500">
+                            <div className="flex items-center gap-3 p-4 bg-background/60 rounded-xl shadow-xl border border-primary/10 backdrop-blur-md animate-pulse">
+                                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                                <span className="text-sm font-semibold tracking-wide text-primary">Creating Story...</span>
+                            </div>
+                        </div>
+                    )}
+                </div>
 
                 <div className="flex gap-4 flex-wrap">
                     {isGenerating ? (

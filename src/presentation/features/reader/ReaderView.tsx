@@ -13,6 +13,8 @@ import { RichInfoPanel } from './components/RichInfoPanel';
 
 import { useAudioStore } from './store/useAudioStore';
 import { PlayerControls } from './components/PlayerControls';
+import { Loader2 } from 'lucide-react';
+import { useReaderStore } from './store/useReaderStore';
 
 
 export const ReaderView: React.FC = () => {
@@ -29,6 +31,9 @@ export const ReaderView: React.FC = () => {
         handleTokenClick,
         getSelectionGroups
     } = useReader();
+
+    // Direct store access for specific flags
+    const isGenerating = useReaderStore(state => state.isGenerating);
 
     // Translation Hook
     const {
@@ -129,7 +134,7 @@ export const ReaderView: React.FC = () => {
         <div className="relative flex flex-col min-[1200px]:flex-row w-full flex-1 h-full min-h-0 max-w-full mx-auto my-0 transition-all duration-300 gap-6">
             {/* Center Column: Reading Card */}
             <Card className="flex-1 h-full border-none shadow-sm glass overflow-hidden flex flex-col">
-                <CardContent className={`p-0 relative flex-1 overflow-y-auto ${styles.textAreaContainer} flex flex-col`}>
+                <CardContent className={`p-0 relative flex-1 ${isGenerating ? 'overflow-hidden select-none' : 'overflow-y-auto'} ${styles.textAreaContainer} flex flex-col`}>
 
                     {/* Player Controls - Sticky Top */}
                     <div className="sticky top-0 z-[60] bg-background/95 backdrop-blur-sm border-b shadow-sm">
@@ -161,6 +166,16 @@ export const ReaderView: React.FC = () => {
                             onPageChange={setCurrentPage}
                         />
                     </div>
+
+                    {/* Glass UI Overlay for Generation */}
+                    {isGenerating && (
+                        <div className="absolute inset-0 z-[70] flex flex-col items-center justify-center bg-background/10 backdrop-blur-[2px] transition-all duration-500">
+                            <div className="flex items-center gap-3 p-4 bg-background/60 rounded-xl shadow-xl border border-primary/10 backdrop-blur-md animate-pulse">
+                                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                                <span className="text-sm font-semibold tracking-wide text-primary">Creating Story...</span>
+                            </div>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 

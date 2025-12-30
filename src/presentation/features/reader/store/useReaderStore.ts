@@ -14,6 +14,7 @@ interface ReaderState {
     sourceLang: string;
     targetLang: string;
     isReading: boolean;
+    isGenerating: boolean; // Global generation status
     PAGE_SIZE: number;
     selectionMode: SelectionMode; // Updated type
 
@@ -23,6 +24,7 @@ interface ReaderState {
     setSourceLang: (lang: string) => void;
     setTargetLang: (lang: string) => void;
     setIsReading: (isReading: boolean) => void;
+    setIsGenerating: (isGenerating: boolean) => void; // Setter
     setSelectionMode: (mode: SelectionMode) => void;
     setPage: (page: number) => void;
     handleSelection: (globalIndex: number) => Promise<void>;
@@ -41,6 +43,7 @@ export const useReaderStore = create<ReaderState>((set, get) => ({
     sourceLang: "Spanish",
     targetLang: "English",
     isReading: false,
+    isGenerating: false,
     PAGE_SIZE: 500,
     selectionMode: SelectionMode.Word,
 
@@ -76,6 +79,7 @@ export const useReaderStore = create<ReaderState>((set, get) => ({
     setSourceLang: (sourceLang) => set({ sourceLang }),
     setTargetLang: (targetLang) => set({ targetLang }),
     setIsReading: (isReading) => set({ isReading }),
+    setIsGenerating: (isGenerating) => set({ isGenerating }),
     setSelectionMode: (selectionMode) => set({ selectionMode }),
 
     setPage: (currentPage) => {
