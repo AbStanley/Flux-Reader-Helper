@@ -24,6 +24,7 @@ export const ReaderView: React.FC = () => {
         selectedIndices,
         PAGE_SIZE,
         selectionMode,
+        sourceLang,
         setCurrentPage,
         handleTokenClick,
         getSelectionGroups
@@ -40,7 +41,14 @@ export const ReaderView: React.FC = () => {
     } = useTranslation(true);
 
     // Audio Store consumption
-    const { playSingle } = useAudioStore();
+    const { playSingle, availableVoices, setVoiceByLanguageName } = useAudioStore();
+
+    // Effect: Auto-select voice when source language changes or voices load
+    React.useEffect(() => {
+        if (sourceLang) {
+            setVoiceByLanguageName(sourceLang);
+        }
+    }, [sourceLang, availableVoices, setVoiceByLanguageName]);
 
     // Calculate grouping for rendering
     const groups = useMemo(() => getSelectionGroups(selectedIndices), [getSelectionGroups, selectedIndices]);

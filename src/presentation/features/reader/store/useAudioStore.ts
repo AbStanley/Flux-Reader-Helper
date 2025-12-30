@@ -29,6 +29,7 @@ interface AudioState {
     pause: () => void;
     resume: () => void;
     stop: () => void;
+    setVoiceByLanguageName: (languageName: string) => void;
 }
 
 // Create a singleton service instance
@@ -164,6 +165,33 @@ export const useAudioStore = create<AudioState>((set, get) => ({
             () => { }, // No-op: Don't update highlight for single word
             () => { }  // No-op: No state change on end
         );
+    },
+
+    setVoiceByLanguageName: (languageName: string) => {
+        const { availableVoices } = get();
+        const code = LANGUAGE_CODE_MAP[languageName];
+        if (!code) return;
+
+        // Find the first voice that matches the language code
+        const matchingVoice = availableVoices.find(v => v.lang.startsWith(code));
+
+        if (matchingVoice) {
+            set({ selectedVoice: matchingVoice });
+        }
     }
 }));
+
+const LANGUAGE_CODE_MAP: Record<string, string> = {
+    "Spanish": "es",
+    "English": "en",
+    "French": "fr",
+    "German": "de",
+    "Italian": "it",
+    "Japanese": "ja",
+    "Russian": "ru",
+    "Chinese": "zh",
+    "Portuguese": "pt",
+    "Korean": "ko",
+    // Add more as needed
+};
 

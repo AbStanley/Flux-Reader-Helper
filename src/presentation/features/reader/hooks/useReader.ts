@@ -21,6 +21,7 @@ export const useReader = () => {
     // Simple State Selectors
     const selectedIndices = useReaderStore(state => state.selectedIndices);
     const selectionMode = useReaderStore(state => state.selectionMode);
+    const sourceLang = useReaderStore(state => state.sourceLang);
 
     // Actions
     // Actions
@@ -81,6 +82,7 @@ export const useReader = () => {
         selectedIndices,
         PAGE_SIZE,
         selectionMode,
+        sourceLang,
 
         // Actions
         setCurrentPage: setPage,
