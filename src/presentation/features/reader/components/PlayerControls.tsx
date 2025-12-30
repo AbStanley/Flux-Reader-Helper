@@ -157,11 +157,11 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ vertical = false
                     <div className={`flex items-center gap-2 ${vertical ? 'w-full' : 'w-[120px]'}`}>
                         <span className="text-xs text-muted-foreground w-8">{playbackRate}x</span>
                         <Slider
-                            value={[playbackRate]}
+                            defaultValue={[playbackRate]}
                             min={0.5}
                             max={2}
                             step={0.1}
-                            onValueChange={(vals: number[]) => setRate(vals[0])}
+                            onValueCommit={(vals: number[]) => setRate(vals[0])}
                             className="flex-1"
                         />
                     </div>

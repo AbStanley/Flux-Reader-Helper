@@ -21,7 +21,8 @@ export class WebSpeechAudioService implements IAudioService {
     ): void {
         this.stop();
 
-        this.utterance = new SpeechSynthesisUtterance(text);
+        const safeText = text.replace(/\*/g, ' ');
+        this.utterance = new SpeechSynthesisUtterance(safeText);
         if (voice) {
             this.utterance.voice = voice;
         }

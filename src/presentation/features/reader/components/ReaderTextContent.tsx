@@ -47,9 +47,10 @@ const ReaderTextContentComponent: React.FC<ReaderTextContentProps> = ({
     const hoveredIndex = useTranslationStore(s => s.hoveredIndex);
     const hoverTranslation = useTranslationStore(s => s.hoverTranslation);
     const currentWordIndex = useAudioStore(s => s.currentWordIndex);
+    const seek = useAudioStore(s => s.seek);
 
     // Actions
-    const { handleHover, clearHover } = useTranslation();
+    const { handleHover, clearHover, regenerateSelection } = useTranslation();
 
     // Highlighting Logic (Local to this component now)
     const highlightIndices = useHighlighting(tokens, groups, richTranslation);
@@ -101,6 +102,8 @@ const ReaderTextContentComponent: React.FC<ReaderTextContentProps> = ({
                         onClearHover={clearHover}
                         onMoreInfo={onMoreInfoClick}
                         onPlay={onPlayClick}
+                        onSeek={seek}
+                        onRegenerate={() => regenerateSelection()}
                     />
                 );
             })}

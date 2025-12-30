@@ -9,16 +9,19 @@ export class OllamaService implements IAIService {
         this.model = model;
     }
 
-    async generateText(prompt: string): Promise<string> {
+    async generateText(prompt: string, options?: any): Promise<string> {
         try {
+            const body = {
+                model: this.model,
+                prompt: prompt,
+                stream: false,
+                ...options
+            };
+
             const response = await fetch(`${this.baseUrl}/api/generate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: this.model,
-                    prompt: prompt,
-                    stream: false
-                })
+                body: JSON.stringify(body)
             });
 
             if (!response.ok) {
@@ -53,7 +56,8 @@ Instructions:
 2. Identify its meaning within the "Full Sentence".
 3. Negation Check: If the segment itself does not contain "no"/"not", the translation MUST be positive.
 4. Preposition Check: If the segment does not include a preposition, do not add one.
-5. Return ONLY the translation of the segment.
+5. STRICT: Translate ONLY the words in "Segment to Translate". Do NOT translate the surrounding words from the context.
+6. Return ONLY the translation text. No explanations.
 
 Examples:
 Input: Context="yo no veo donde estas", Segment="estas"
@@ -105,14 +109,12 @@ Instructions:
    - If it's a conjugated verb:
      - Identify the Tense, Person, Number, and provide the Infinitive form.
      - Provide full conjugation tables for at least 3 common tenses (e.g., Present, Past, Future) relevant to the language.
-     - Each tense should list pronouns and their corresponding conjugated forms.
+     - Each tense MUST list ALL standard pronouns (e.g., I, You, He/She, We, You(pl), They) and their corresponding conjugated forms.
 3. Explain WHY it is used this way (grammar rule).
 4. Provide 2-3 usage examples with translations.
 5. Provide 1-2 common alternatives if applicable. 
    - IMPORTANT: 'alternatives' must be a simple array of strings. Do NOT include explanations (e.g. "alt1 (masculine)"). If you need to explain, use separate strings or omit the explanation.
    - CRITICAL: Ensure all JSON strings are properly escaped. If the translation contains double quotes, they MUST be escaped (e.g. "He said \\"Hello\\"").
-
-114: Output Format: JSON ONLY. Do not include any other text.
 
 Output Format: JSON ONLY. Do not include any other text.
 Structure:
@@ -138,7 +140,8 @@ Structure:
 }
 `;
 
-        const rawResponse = await this.generateText(prompt);
+        // Use a larger token limit for rich translation to ensure JSON isn't truncated
+        const rawResponse = await this.generateText(prompt, { num_predict: 2048 });
 
         // Robust JSON extraction
         // 1. Remove <think> blocks
@@ -163,18 +166,6 @@ Structure:
             return JSON.parse(cleanResponse);
         } catch (e) {
             console.warn("Initial JSON parse failed, attempting repair...", e);
-
-            // Repair attempt 1: Fix unescaped quotes in values
-            // This is risky but helps with common LLM errors like: "key": "He said "Hello""
-            // Strategy: Look for " : "..." where inside content has "
-
-            // Simple repair: often the issue is specifically in the 'alternatives' array or translation string logic.
-            // Let's rely on a more aggressive fallback or just accept failure.
-            // Actually, simply double-escaping backslashes sometimes helps if the model output single backslashes.
-
-            // Try to rescue unescaped quotes? 
-            // Regex to match "key": "value" is hard.
-
             console.error("Failed to parse rich translation JSON", rawResponse);
             throw new Error("Failed to parse rich translation response");
         }
