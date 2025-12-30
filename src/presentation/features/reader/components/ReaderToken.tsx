@@ -183,7 +183,7 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
 
             {/* Render token with markdown support */}
             {(() => {
-                // Simple parser for **bold** and *italic*
+                // Simple parser for **bold** and *italic* and hastags
 
                 const renderParts = (text: string, bold: boolean) => {
                     const italicRegex = /\*([^*]+)\*/g;
@@ -201,6 +201,8 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
                 };
 
                 const boldRegex = /\*\*(.*?)\*\*/g;
+                const hashtagRegex = /#\w+/g;
+
                 if (boldRegex.test(token)) {
                     const parts = token.split(boldRegex);
                     return (

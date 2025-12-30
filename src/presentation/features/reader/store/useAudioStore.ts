@@ -71,6 +71,9 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     },
 
     setTokens: (tokens) => {
+        // Stop any current playback when tokens (text content) change
+        audioService.stop();
+
         // Pre-calculate start indices for performance
         const offsets: number[] = [];
         let currentLen = 0;
@@ -78,7 +81,15 @@ export const useAudioStore = create<AudioState>((set, get) => ({
             offsets.push(currentLen);
             currentLen += token.length;
         });
-        set({ tokenOffsets: offsets, tokens: tokens });
+
+        // Update state and RESET audio tracking
+        set({
+            tokenOffsets: offsets,
+            tokens: tokens,
+            isPlaying: false,
+            isPaused: false,
+            currentWordIndex: null
+        });
     },
 
     play: (_text) => {
