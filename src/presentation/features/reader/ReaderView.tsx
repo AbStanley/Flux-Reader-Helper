@@ -5,6 +5,7 @@ import { Card, CardContent } from "../../components/ui/card";
 import { useReader } from './hooks/useReader';
 import { useTranslation } from './hooks/useTranslation';
 import { useVisualSplits } from './hooks/useVisualSplits';
+import { useTokenStyling } from './hooks/useTokenStyling';
 
 import { ReaderPagination } from './components/ReaderPagination';
 import { ReaderTextContent } from './components/ReaderTextContent';
@@ -59,34 +60,12 @@ export const ReaderView: React.FC = () => {
 
     // Map to store position of each token in a group for styling
     // 'single' | 'start' | 'middle' | 'end'
-    const { groupStarts, tokenPositions } = useMemo(() => {
-        const starts = new Map<number, string>(); // index -> translation
-        const positions = new Map<number, string>();
-
-        groups.forEach(group => {
-            const start = group[0];
-            const end = group[group.length - 1];
-            const key = `${start}-${end}`;
-            const translation = selectionTranslations.get(key);
-            if (translation) {
-                starts.set(start, translation);
-            }
-
-            // Iterate through the full range including whitespace
-            for (let i = start; i <= end; i++) {
-                if (start === end) {
-                    positions.set(i, 'single');
-                } else if (i === start) {
-                    positions.set(i, 'start');
-                } else if (i === end) {
-                    positions.set(i, 'end');
-                } else {
-                    positions.set(i, 'middle');
-                }
-            }
-        });
-        return { groupStarts: starts, tokenPositions: positions };
-    }, [groups, selectionTranslations]);
+    // Map to store position of each token in a group for styling
+    // 'single' | 'start' | 'middle' | 'end'
+    const { groupStarts, tokenPositions } = useTokenStyling({
+        groups,
+        selectionTranslations
+    });
 
 
 
