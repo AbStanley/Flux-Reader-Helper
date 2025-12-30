@@ -24,7 +24,7 @@ interface ReaderTextContentProps {
     textAreaRef: React.RefObject<HTMLDivElement | null>;
     handleTokenClick: (index: number) => void;
     onMoreInfoClick: (index: number) => void;
-    onPlayClick: (index: number) => void;
+    onPlayClick: (index: number, forceSingle?: boolean) => void;
     showTranslations: boolean;
 }
 

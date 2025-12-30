@@ -82,10 +82,14 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     },
 
     play: (_text) => {
-        // Just an alias for playing from start
-        // NOTE: For consistency, if we have tokens, we should probably prefer playing from tokens[0] 
-        // to ensure offsets match, but `text` passed here is usually the full text.
-        get().seek(0);
+        // Resume from current spot if available, else start (token 0)
+        // If we are "paused" (stopped for single word), currentWordIndex should be valid.
+        const { currentWordIndex, tokens } = get();
+        if (currentWordIndex !== null && currentWordIndex < tokens.length) {
+            get().seek(currentWordIndex);
+        } else {
+            get().seek(0);
+        }
     },
 
     seek: (tokenIndex: number) => {
@@ -142,8 +146,17 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     },
 
     resume: () => {
-        audioService.resume();
-        set({ isPaused: false, isPlaying: true });
+        const { currentWordIndex } = get();
+        // Native resume only works if the speech synthesis was actually paused.
+        // If we "paused" via playSingle (which calls stop), or if the engine was stopped/interrupted,
+        // native resume() does nothing.
+        // We fallback to seeking to the current index to restart playback from there.
+        if (currentWordIndex !== null) {
+            get().seek(currentWordIndex);
+        } else {
+            audioService.resume();
+            set({ isPaused: false, isPlaying: true });
+        }
     },
 
     stop: () => {
@@ -154,9 +167,11 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     playSingle: (text: string) => {
         const { selectedVoice, playbackRate } = get();
         // Stop global playback if running, to avoid overlap
+        // We set isPaused=true so the UI shows "Play" button (or Resume state), 
+        // and we DO NOT clear currentWordIndex so we can resume.
         audioService.stop();
-        // Ensure global state is reset so highlights don't persist/move
-        set({ isPlaying: false, isPaused: false, currentWordIndex: null });
+
+        set({ isPlaying: false, isPaused: true }); // treat interruption as pause
 
         audioService.play(
             text,

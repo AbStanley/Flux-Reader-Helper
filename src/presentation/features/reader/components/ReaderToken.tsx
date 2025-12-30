@@ -27,7 +27,7 @@ interface ReaderTokenProps {
     onHover: (index: number) => void;
     onClearHover: () => void;
     onMoreInfo: (index: number) => void;
-    onPlay: (index: number) => void;
+    onPlay: (index: number, forceSingle?: boolean) => void;
     onSeek: (index: number) => void;
     onRegenerate: (index: number) => void;
 }
@@ -52,6 +52,9 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
     onRegenerate
 }) => {
     const isWhitespace = !token.trim();
+    // Check if it contains newline
+    const hasNewline = isWhitespace && token.includes('\n');
+
     const isSelected = !!position; // If position is assigned, it's selected/grouped
 
     const handleMouseEnter = () => {
@@ -63,13 +66,14 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
     const handleContextMenu = (e: React.MouseEvent) => {
         if (!isWhitespace) {
             e.preventDefault();
-            onPlay(index);
+            // Right click triggers specific word audio
+            onPlay(index, true);
         }
     };
 
 
 
-    const renderPopup = (translation: string) => {
+    const renderPopup = (translation: string, isHoverPopup: boolean) => {
         const buttonClass = cn(
             "ml-1 p-1 rounded-full cursor-pointer shadow-sm border border-white/10",
             "bg-white/20 hover:bg-white/30 text-white",
@@ -100,7 +104,7 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
                 <div className="flex items-center overflow-hidden transition-all duration-300 ease-in-out">
                     <button
                         className={buttonClass}
-                        onClick={(e) => handleInteraction(e, () => onPlay(index))}
+                        onClick={(e) => handleInteraction(e, () => onPlay(index, isHoverPopup))}
                         onMouseDown={(e) => e.stopPropagation()}
                         onMouseUp={(e) => e.stopPropagation()}
                         onTouchStart={(e) => e.stopPropagation()}
@@ -132,6 +136,10 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
             </span>
         );
     };
+
+    if (hasNewline) {
+        return <br />;
+    }
 
     return (
         <span
@@ -169,7 +177,7 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
         >
             {groupTranslation && (
                 <span className={styles.selectionPopupValid}>
-                    {renderPopup(groupTranslation)}
+                    {renderPopup(groupTranslation, false)}
                 </span>
             )}
 
@@ -218,7 +226,7 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
              */}
             {(isHoveredWord) && hoverTranslation && !(isSelected && position === 'single') && (
                 <span className={isSelected ? styles.hoverPopupBelow : styles.hoverPopup}>
-                    {renderPopup(hoverTranslation)}
+                    {renderPopup(hoverTranslation, true)}
                 </span>
             )}
         </span>

@@ -111,13 +111,13 @@ export const ReaderView: React.FC = () => {
         }
     }, [currentPage, PAGE_SIZE, groups, tokens, fetchRichTranslation]);
 
-    const onPlayClick = useCallback((index: number) => {
+    const onPlayClick = useCallback((index: number, forceSingle: boolean = false) => {
         const globalIndex = (currentPage - 1) * PAGE_SIZE + index;
         const group = groups.find(g => g.includes(globalIndex));
 
         let textToPlay = "";
 
-        if (group) {
+        if (group && !forceSingle) {
             const start = group[0];
             const end = group[group.length - 1];
             textToPlay = tokens.slice(start, end + 1).join('');
