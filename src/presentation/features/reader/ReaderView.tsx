@@ -138,7 +138,7 @@ export const ReaderView: React.FC = () => {
     }, [currentPage, PAGE_SIZE, groups, tokens, playSingle]);
 
     return (
-        <div className="relative flex flex-col min-[1200px]:flex-row w-full h-[90vh] min-[1200px]:h-[92vh] max-w-full mx-auto my-4 transition-all duration-300 gap-6">
+        <div className="relative flex flex-col min-[1200px]:flex-row w-full flex-1 h-full min-h-0 max-w-full mx-auto my-0 transition-all duration-300 gap-6">
             {/* Center Column: Reading Card */}
             <Card className="flex-1 h-full border-none shadow-sm glass overflow-hidden flex flex-col">
                 <CardContent className={`p-0 relative flex-1 overflow-y-auto ${styles.textAreaContainer} flex flex-col`}>

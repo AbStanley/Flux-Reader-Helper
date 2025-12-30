@@ -18,7 +18,7 @@ export const FocusLayout: React.FC<FocusLayoutProps> = ({
     readerViewSlot,
 }) => {
     return (
-        <div className="flex flex-col gap-8 relative min-h-[600px]">
+        <div className="flex flex-col gap-4 relative w-full flex-1 h-full overflow-hidden">
             <AnimatePresence>
                 {!isReading && (
                     <motion.div
@@ -40,7 +40,7 @@ export const FocusLayout: React.FC<FocusLayoutProps> = ({
                 <motion.div
                     layout
                     transition={{ duration: 0.4, ease: "easeInOut" }}
-                    className="w-full flex flex-col gap-4"
+                    className="w-full flex-1 flex flex-col gap-4 overflow-hidden"
                 >
                     <AnimatePresence>
                         {isReading && (

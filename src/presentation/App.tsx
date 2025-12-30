@@ -12,7 +12,7 @@ function App() {
 
   return (
     <ServiceProvider>
-      <div className={`container mx-auto py-8 px-4 min-h-screen ${isReading ? 'max-w-[95vw]' : 'max-w-4xl'}`}>
+      <div className={`container mx-auto px-4 h-screen overflow-hidden flex flex-col ${isReading ? 'max-w-[95vw]' : 'max-w-4xl py-8'}`}>
         <AppContent />
       </div>
     </ServiceProvider>
