@@ -110,6 +110,6 @@ export const useTranslation = (enableAutoFetch = false) => {
         fetchRichTranslation,
         closeRichInfo,
         toggleRichInfo,
-        regenerateSelection: () => translateSelection(selectedIndices, tokens, sourceLang, targetLang, aiService, true)
+        regenerateSelection: (index?: number) => translateSelection(selectedIndices, tokens, sourceLang, targetLang, aiService, true, index)
     };
 };

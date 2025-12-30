@@ -121,7 +121,7 @@ export const RichInfoPanel: React.FC<RichInfoPanelProps> = ({ isOpen, isLoading,
 
                             {/* Explanation */}
                             <div className="bg-muted p-3 rounded-lg text-sm">
-                                <p className="font-medium mb-1">Why?</p>
+                                <p className="font-medium mb-1">Explanation</p>
                                 <p className="text-muted-foreground">{data.grammar.explanation}</p>
                             </div>
 

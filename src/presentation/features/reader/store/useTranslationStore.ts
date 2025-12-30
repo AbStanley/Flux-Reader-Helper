@@ -21,7 +21,8 @@ interface TranslationState {
         sourceLang: string,
         targetLang: string,
         aiService: IAIService,
-        force?: boolean
+        force?: boolean,
+        targetIndex?: number
     ) => Promise<void>;
 
     handleHover: (
@@ -125,7 +126,7 @@ export const useTranslationStore = create<TranslationState>((set, get) => ({
     isRichInfoOpen: false,
     isRichInfoLoading: false,
 
-    translateSelection: async (indices, tokens, sourceLang, targetLang, aiService, force = false) => {
+    translateSelection: async (indices, tokens, sourceLang, targetLang, aiService, force = false, targetIndex?: number) => {
         // If selection is empty, just return (don't clear cache)
         if (indices.size === 0) {
             return;
@@ -140,6 +141,13 @@ export const useTranslationStore = create<TranslationState>((set, get) => ({
 
         await Promise.all(groups.map(async (group) => {
             if (group.length === 0) return;
+
+            // If a specific targetIndex is provided (e.g., from Regeneration), 
+            // only process the group that contains this index.
+            if (targetIndex !== undefined && !group.includes(targetIndex)) {
+                return;
+            }
+
             const start = group[0];
             const end = group[group.length - 1];
             const key = `${start}-${end}`;

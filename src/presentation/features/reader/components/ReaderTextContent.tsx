@@ -103,7 +103,7 @@ const ReaderTextContentComponent: React.FC<ReaderTextContentProps> = ({
                         onMoreInfo={onMoreInfoClick}
                         onPlay={onPlayClick}
                         onSeek={seek}
-                        onRegenerate={() => regenerateSelection()}
+                        onRegenerate={() => regenerateSelection(globalIndex)}
                     />
                 );
             })}
