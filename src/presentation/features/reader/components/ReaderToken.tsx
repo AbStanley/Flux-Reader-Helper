@@ -4,7 +4,7 @@ import styles from '../ReaderView.module.css';
 import { Search, Volume2, RefreshCcw } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { HoverPosition } from '../../../../core/types';
-import { useLongPress } from '../hooks/useLongPress';
+
 
 interface ReaderTokenProps {
     token: string;
@@ -67,20 +67,7 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
         }
     };
 
-    const longPressHandlers = useLongPress({
-        onLongPress: (_e) => {
-            if (!isWhitespace) {
-                onSeek(index);
-            }
-        },
-        onClick: () => {
-            if (!isWhitespace) {
-                onClearHover();
-                onClick(index);
-            }
-        },
-        threshold: 500
-    });
+
 
     const renderPopup = (translation: string) => {
         const buttonClass = cn(
@@ -162,9 +149,21 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
             ) : ''} 
                 ${(isHoveredWord && !isSelected) ? styles.hoveredWord : ''}
             `}
-            {...longPressHandlers}
+            onClick={() => {
+                if (!isWhitespace) {
+                    onClearHover();
+                    onClick(index);
+                }
+            }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={onClearHover}
+            onDoubleClick={(e) => {
+                // Double click gesture for audio seeking
+                e.stopPropagation();
+                if (!isWhitespace) {
+                    onSeek(index);
+                }
+            }}
             onContextMenu={handleContextMenu}
             style={{ position: 'relative' }}
         >

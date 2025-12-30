@@ -109,8 +109,31 @@ export const useReaderStore = create<ReaderState>((set, get) => ({
             // Word mode (Default)
             if (newSelection.has(globalIndex)) {
                 newSelection.delete(globalIndex);
+
+                // Logic: If we deselect a word, check if adjacent whitespace becomes "orphaned"
+                // (i.e., not next to another selected word) and deselect it too.
+                const checkAndDeselect = (idx: number) => {
+                    if (!newSelection.has(idx)) return;
+                    // Check if *neither* neighbor is selected
+                    const prev = idx - 1;
+                    const next = idx + 1;
+                    const prevSelected = prev >= 0 && newSelection.has(prev);
+                    const nextSelected = next < tokens.length && newSelection.has(next);
+
+                    if (!prevSelected && !nextSelected) {
+                        newSelection.delete(idx);
+                    }
+                };
+
+                // Check Left
+                if (globalIndex > 0) checkAndDeselect(globalIndex - 1);
+                // Check Right
+                if (globalIndex < tokens.length - 1) checkAndDeselect(globalIndex + 1);
+
             } else {
                 newSelection.add(globalIndex);
+                // Note: We don't automatically select whitespace when selecting a word in Word mode.
+                // It's only selected via Sentence mode.
             }
         }
 
