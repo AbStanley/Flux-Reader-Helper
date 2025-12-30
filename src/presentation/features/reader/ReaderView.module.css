@@ -31,7 +31,7 @@
     vertical-align: baseline;
 }
 
-.selected:hover {
+.selected.interactive:hover {
     background-color: hsl(var(--link-color) / 0.1);
 }
 
@@ -128,6 +128,25 @@
     pointer-events: none;
 }
 
+.hoverPopupBelow {
+    position: absolute;
+    top: 100%;
+    /* Position below */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: hsl(var(--popover));
+    color: hsl(var(--popover-foreground));
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    z-index: 10;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid hsl(var(--border));
+    margin-top: 4px;
+    pointer-events: none;
+}
+
 .selectionPopupValid {
     position: absolute;
     bottom: 120%;
@@ -167,12 +186,20 @@
     /* Ensure it stands out */
 }
 
-/* Ensure popups are interactive */
-.hoverPopup,
+/* Ensure popups are interactive and layered correctly */
 .selectionPopupValid {
     pointer-events: auto !important;
-    z-index: 50;
-    /* Ensure on top */
+    z-index: 30;
+    /* Base layer for persistent popups */
+    display: flex;
+    align-items: center;
+}
+
+.hoverPopup,
+.hoverPopupBelow {
+    pointer-events: auto !important;
+    z-index: 100;
+    /* Top layer for active hover */
     display: flex;
     align-items: center;
 }
