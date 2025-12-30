@@ -22,7 +22,7 @@ export const useHighlighting = (tokens: string[], groups: number[][], richTransl
     }, [groups]);
 
     const highlightIndices = useMemo(() => {
-        if (hoveredIndex === null || hoveredIndex === undefined || hoveredIndex === -1 || richTranslation) {
+        if (hoveredIndex === null || hoveredIndex === undefined || hoveredIndex === -1) {
             return new Set<number>();
         }
 

@@ -183,8 +183,8 @@ export const useTranslationStore = create<TranslationState>((set, get) => ({
         const context = getContextForIndex(tokens, globalIndex);
         const result = await fetchTranslationHelper(token, context, sourceLang, targetLang, aiService);
 
-        // Check race condition
-        if (get().hoveredIndex === index && result) {
+        // Check race condition (Use globalIndex)
+        if (get().hoveredIndex === globalIndex && result) {
             set({ hoverTranslation: result });
 
             // Cache the result!
