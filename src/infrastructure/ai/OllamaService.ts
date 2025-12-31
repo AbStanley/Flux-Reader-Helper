@@ -149,40 +149,51 @@ Input Data:
 - Segment to Analyze: "${text}"
 
 Instructions:
-1. Translate the segment accurately within the given context.
-2. Identify the Part of Speech (e.g., Verb, Noun, Adjective). 
-   - If it's a conjugated verb:
-     - Identify the Tense, Person, Number, and provide the Infinitive form.
-     - CRITICAL: Provide full conjugation tables for AT LEAST 3 distinct tenses: Present, Past, and Future.
-     - Each tense MUST list ALL standard pronouns (e.g., I, You, He/She, We, You(pl), They) and their corresponding conjugated forms. Do not skip any.
-3. Explain WHY it is used this way (grammar rule).
-4. Provide 2-3 usage examples with translations.
-5. Provide 1-2 common alternatives if applicable. 
-   - IMPORTANT: 'alternatives' must be a simple array of strings. Do NOT include explanations.
-   - CRITICAL: Ensure all JSON strings are properly escaped.
+1. Determine if "Segment to Analyze" is a SINGLE WORD or a SENTENCE (phrases/multiple words).
+2. Translate the segment accurately within the given context.
 
-Output Format: JSON ONLY. Do not include any other text.
+IF IT IS A *SENTENCE* (or Phrase):
+   - Set "type" to "sentence".
+   - Provide a "syntaxAnalysis": Improve understanding by breaking down the sentence structure (Subject + Verb + Object, etc).
+   - Provide "grammarRules": A list of specific grammar rules applied in this sentence (e.g., "Imperfect Tense used for background description").
+   - OMIT "conjugations".
+   - OMIT "grammar" object usually used for single words (Part of Speech, etc) unless relevant to the *whole* sentence structure.
+
+IF IT IS A *SINGLE WORD*:
+   - Set "type" to "word".
+   - Identify the Part of Speech.
+   - If it's a VERB, include "conjugations" (Present, Past, Future).
+   - If it's NOT a verb, OMIT "conjugations".
+   - Provide "grammar" details: Part of Speech, Tense, Gender, Number, Infinitive, etc.
+
+3. Provide 2-3 usage examples with translations.
+4. Provide 1-2 common alternatives.
+
+Output Format: JSON ONLY.
 Structure:
 {
+  "type": "word" or "sentence",
   "translation": "translated text",
   "segment": "original text",
+  
+  // IF WORD:
   "grammar": {
-    "partOfSpeech": "Verb/Noun/etc",
-    "tense": "Present/Past/etc (optional)",
-    "gender": "Masculine/Feminine (optional)",
-    "number": "Singular/Plural (optional)",
-    "infinitive": "base form (optional)",
-    "explanation": "Brief explanation"
+    "partOfSpeech": "...",
+    "tense": "...",
+    "gender": "...",
+    "infinitive": "...",
+    "explanation": "..."
   },
-  "conjugations": { 
-     "Present": [{ "pronoun": "I", "conjugation": "am" }, { "pronoun": "You", "conjugation": "are" }, ...],
-     "Past": [{ "pronoun": "I", "conjugation": "was" }, { "pronoun": "You", "conjugation": "were" }, ...],
-     "Future": [{ "pronoun": "I", "conjugation": "will be" }, ...]
-  } (REQUIRED for verbs),
+  "conjugations": { ... }, // Only if VERB
+
+  // IF SENTENCE:
+  "syntaxAnalysis": "Subject (...) + Verb (...) ...",
+  "grammarRules": ["Rule 1...", "Rule 2..."],
+
   "examples": [
-    { "sentence": "example sentence 1", "translation": "translated example 1" }
+    { "sentence": "Example usage...", "translation": "Translated example..." }
   ],
-  "alternatives": ["alt1", "alt2"]
+  "alternatives": ["Alternative 1", "Alternative 2"]
 }
 `;
 
@@ -211,7 +222,22 @@ Structure:
 
 
         try {
-            return JSON.parse(cleanResponse);
+            const data = JSON.parse(cleanResponse);
+
+            // Post-processing to normalize data structures
+            if (data.examples && Array.isArray(data.examples)) {
+                data.examples = data.examples.map((ex: any) => {
+                    if (typeof ex === 'string') {
+                        return { sentence: ex, translation: "" };
+                    }
+                    return {
+                        sentence: ex.sentence || ex.example || ex.text || ex.source || "",
+                        translation: ex.translation || ex.meaning || ""
+                    };
+                }).filter((ex: any) => ex.sentence);
+            }
+
+            return data;
         } catch (e) {
             console.warn("Initial JSON parse failed, attempting fallback extraction...", e);
 

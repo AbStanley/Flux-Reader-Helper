@@ -40,46 +40,74 @@ export const RichInfoPanel: React.FC<RichInfoPanelProps> = ({ isOpen, isLoading,
                                 <p className="text-2xl font-bold">{data.translation}</p>
                             </div>
 
-                            {/* Grammar Table */}
-                            <div className="rounded-md border">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead colSpan={2}>Grammar</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        <TableRow>
-                                            <TableCell className="font-medium">Type</TableCell>
-                                            <TableCell>{data.grammar.partOfSpeech}</TableCell>
-                                        </TableRow>
-                                        {data.grammar.infinitive && (
+                            {/* Sentence Analysis (Sentences Only) */}
+                            {data.syntaxAnalysis && (
+                                <div className="bg-muted/50 p-4 rounded-lg border">
+                                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                                        <span className="w-1 h-4 bg-primary rounded-full"></span>
+                                        Structure Analysis
+                                    </h4>
+                                    <p className="text-sm leading-relaxed">{data.syntaxAnalysis}</p>
+                                </div>
+                            )}
+
+                            {/* Grammar Rules (Sentences Only) */}
+                            {data.grammarRules && data.grammarRules.length > 0 && (
+                                <div>
+                                    <h4 className="text-sm font-semibold mb-2">Grammar Rules</h4>
+                                    <ul className="space-y-2">
+                                        {data.grammarRules.map((rule, idx) => (
+                                            <li key={idx} className="text-sm flex gap-2">
+                                                <span className="text-primary mt-1">•</span>
+                                                <span className="text-muted-foreground">{rule}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            {/* Grammar Table (Words Only) */}
+                            {data.grammar && (
+                                <div className="rounded-md border">
+                                    <Table>
+                                        <TableHeader>
                                             <TableRow>
-                                                <TableCell className="font-medium">Infinitive</TableCell>
-                                                <TableCell>{data.grammar.infinitive}</TableCell>
+                                                <TableHead colSpan={2}>Grammar Details</TableHead>
                                             </TableRow>
-                                        )}
-                                        {data.grammar.tense && (
+                                        </TableHeader>
+                                        <TableBody>
                                             <TableRow>
-                                                <TableCell className="font-medium">Tense</TableCell>
-                                                <TableCell>{data.grammar.tense}</TableCell>
+                                                <TableCell className="font-medium">Type</TableCell>
+                                                <TableCell>{data.grammar.partOfSpeech}</TableCell>
                                             </TableRow>
-                                        )}
-                                        {data.grammar.gender && (
-                                            <TableRow>
-                                                <TableCell className="font-medium">Gender</TableCell>
-                                                <TableCell>{data.grammar.gender}</TableCell>
-                                            </TableRow>
-                                        )}
-                                        {data.grammar.number && (
-                                            <TableRow>
-                                                <TableCell className="font-medium">Number</TableCell>
-                                                <TableCell>{data.grammar.number}</TableCell>
-                                            </TableRow>
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </div>
+                                            {data.grammar.infinitive && (
+                                                <TableRow>
+                                                    <TableCell className="font-medium">Infinitive</TableCell>
+                                                    <TableCell>{data.grammar.infinitive}</TableCell>
+                                                </TableRow>
+                                            )}
+                                            {data.grammar.tense && (
+                                                <TableRow>
+                                                    <TableCell className="font-medium">Tense</TableCell>
+                                                    <TableCell>{data.grammar.tense}</TableCell>
+                                                </TableRow>
+                                            )}
+                                            {data.grammar.gender && (
+                                                <TableRow>
+                                                    <TableCell className="font-medium">Gender</TableCell>
+                                                    <TableCell>{data.grammar.gender}</TableCell>
+                                                </TableRow>
+                                            )}
+                                            {data.grammar.number && (
+                                                <TableRow>
+                                                    <TableCell className="font-medium">Number</TableCell>
+                                                    <TableCell>{data.grammar.number}</TableCell>
+                                                </TableRow>
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            )}
 
                             {/* Conjugations (Verbs Only) */}
                             {data.conjugations && Object.keys(data.conjugations).length > 0 && (
@@ -120,10 +148,13 @@ export const RichInfoPanel: React.FC<RichInfoPanelProps> = ({ isOpen, isLoading,
                             )}
 
                             {/* Explanation */}
-                            <div className="bg-muted p-3 rounded-lg text-sm">
-                                <p className="font-medium mb-1">Explanation</p>
-                                <p className="text-muted-foreground">{data.grammar.explanation}</p>
-                            </div>
+                            {/* Explanation */}
+                            {data.grammar && (
+                                <div className="bg-muted p-3 rounded-lg text-sm">
+                                    <p className="font-medium mb-1">Explanation</p>
+                                    <p className="text-muted-foreground">{data.grammar.explanation}</p>
+                                </div>
+                            )}
 
                             {/* Examples */}
                             {data.examples.length > 0 && (

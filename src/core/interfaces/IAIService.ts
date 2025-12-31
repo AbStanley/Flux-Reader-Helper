@@ -1,7 +1,9 @@
 export interface RichTranslationResult {
+    type?: 'word' | 'sentence'; // Discriminator
     translation: string;
     segment: string;
-    grammar: {
+    // Word-specific
+    grammar?: {
         partOfSpeech: string;
         tense?: string;
         gender?: string;
@@ -9,6 +11,10 @@ export interface RichTranslationResult {
         infinitive?: string;
         explanation: string;
     };
+    // Sentence-specific
+    syntaxAnalysis?: string;
+    grammarRules?: string[];
+
     examples: Array<{
         sentence: string;
         translation: string;
