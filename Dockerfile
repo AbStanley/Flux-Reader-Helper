@@ -12,6 +12,9 @@ RUN npm ci
 # Copy the rest of the application code
 COPY . .
 
+# Set API URL to empty to force relative paths (proxied by Nginx)
+ENV VITE_OLLAMA_URL=""
+
 # Build the application
 RUN npm run build
 

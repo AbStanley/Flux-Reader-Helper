@@ -2,5 +2,7 @@ services:
   web:
     build: .
     ports:
-      - "8080:80"
+      - "0.0.0.0:8080:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: always
