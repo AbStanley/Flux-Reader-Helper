@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
 import { ScrollArea } from "../../../components/ui/scroll-area";
@@ -36,8 +37,12 @@ export const RichInfoPanel: React.FC<RichInfoPanelProps> = ({ isOpen, isLoading,
                         <div className="space-y-6">
                             {/* Main Translation */}
                             <div>
-                                <h3 className="text-lg font-semibold text-primary mb-1">{data.segment}</h3>
-                                <p className="text-2xl font-bold">{data.translation}</p>
+                                <div className="text-lg font-semibold text-primary mb-1 prose dark:prose-invert prose-p:my-0 prose-headings:my-0 prose-headings:text-lg prose-headings:font-semibold prose-headings:text-primary max-w-none">
+                                    <ReactMarkdown>{data.segment}</ReactMarkdown>
+                                </div>
+                                <div className="text-2xl font-bold prose dark:prose-invert prose-p:my-0 prose-headings:my-1 max-w-none">
+                                    <ReactMarkdown>{data.translation}</ReactMarkdown>
+                                </div>
                             </div>
 
                             {/* Sentence Analysis (Sentences Only) */}
@@ -47,7 +52,9 @@ export const RichInfoPanel: React.FC<RichInfoPanelProps> = ({ isOpen, isLoading,
                                         <span className="w-1 h-4 bg-primary rounded-full"></span>
                                         Structure Analysis
                                     </h4>
-                                    <p className="text-sm leading-relaxed">{data.syntaxAnalysis}</p>
+                                    <div className="text-sm leading-relaxed prose dark:prose-invert prose-sm max-w-none">
+                                        <ReactMarkdown>{data.syntaxAnalysis}</ReactMarkdown>
+                                    </div>
                                 </div>
                             )}
 
@@ -152,7 +159,12 @@ export const RichInfoPanel: React.FC<RichInfoPanelProps> = ({ isOpen, isLoading,
                             {data.grammar && (
                                 <div className="bg-muted p-3 rounded-lg text-sm">
                                     <p className="font-medium mb-1">Explanation</p>
-                                    <p className="text-muted-foreground">{data.grammar.explanation}</p>
+                                    <div className="bg-muted p-3 rounded-lg text-sm">
+                                        <p className="font-medium mb-1">Explanation</p>
+                                        <div className="text-muted-foreground prose dark:prose-invert prose-sm max-w-none">
+                                            <ReactMarkdown>{data.grammar.explanation}</ReactMarkdown>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
@@ -163,8 +175,12 @@ export const RichInfoPanel: React.FC<RichInfoPanelProps> = ({ isOpen, isLoading,
                                     <div className="space-y-3">
                                         {data.examples.map((ex, i) => (
                                             <div key={i} className="text-sm border-l-2 border-primary pl-3 py-1">
-                                                <p className="italic mb-1">{ex.sentence}</p>
-                                                <p className="text-muted-foreground">{ex.translation}</p>
+                                                <div className="italic mb-1 prose dark:prose-invert prose-sm prose-p:my-0 max-w-none">
+                                                    <ReactMarkdown>{ex.sentence}</ReactMarkdown>
+                                                </div>
+                                                <div className="text-muted-foreground prose dark:prose-invert prose-sm prose-p:my-0 max-w-none">
+                                                    <ReactMarkdown>{ex.translation}</ReactMarkdown>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>

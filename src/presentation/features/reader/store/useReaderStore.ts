@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { SelectionMode } from '../../../../core/types'; // NEW
+import { useTranslationStore } from './useTranslationStore';
 
 
 
@@ -56,6 +57,10 @@ export const useReaderStore = create<ReaderState>((set, get) => ({
 
         const tokens = text.split(/(\s+)/);
 
+        const { closeRichInfo, clearSelectionTranslations } = useTranslationStore.getState();
+        closeRichInfo();
+        clearSelectionTranslations();
+
         set({
             text,
             sourceLang,
@@ -67,6 +72,11 @@ export const useReaderStore = create<ReaderState>((set, get) => ({
     },
 
     setText: (text) => {
+        // NEW: Clear translations and info panel
+        const { closeRichInfo, clearSelectionTranslations } = useTranslationStore.getState();
+        closeRichInfo();
+        clearSelectionTranslations();
+
         const tokens = text.split(/(\s+)/);
         set({
             text,

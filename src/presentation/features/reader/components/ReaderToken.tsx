@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import ReactMarkdown from 'react-markdown';
 import styles from '../ReaderView.module.css';
 
 import { Search, Volume2, RefreshCcw } from 'lucide-react';
@@ -110,7 +111,7 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
                 onTouchStart={(e) => e.stopPropagation()}
                 onClick={(e) => e.stopPropagation()}
             >
-                {translation}
+                <ReactMarkdown>{translation}</ReactMarkdown>
                 <div className="flex items-center overflow-hidden transition-all duration-300 ease-in-out">
                     <button
                         className={buttonClass}
@@ -205,8 +206,7 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
                                     const isItalic = i % 2 === 1;
                                     const classes = cn(
                                         bold && "font-bold",
-                                        isItalic && "italic",
-                                        "text-foreground"
+                                        isItalic && "italic"
                                     );
                                     return <span key={i} className={classes}>{part}</span>;
                                 })}
@@ -214,7 +214,7 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
                         );
                     }
                     if (bold) {
-                        return <strong className="font-bold text-foreground">{text}</strong>;
+                        return <strong className="font-bold">{text}</strong>;
                     }
                     return text;
                 };
