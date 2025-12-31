@@ -86,7 +86,7 @@ export const ReaderView: React.FC = () => {
 
 
     // Better More Info handler:
-    const onMoreInfoClick = useCallback((index: number) => {
+    const onMoreInfoClick = useCallback((index: number, forceSingle: boolean = false) => {
         const globalIndex = (currentPage - 1) * PAGE_SIZE + index;
 
         // Check if this token is part of a selected group
@@ -95,7 +95,7 @@ export const ReaderView: React.FC = () => {
 
         let textToTranslate = "";
 
-        if (group) {
+        if (group && !forceSingle) {
             const start = group[0];
             const end = group[group.length - 1];
             // Slice full tokens to get the phrase

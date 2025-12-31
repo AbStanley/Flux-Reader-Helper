@@ -23,7 +23,7 @@ interface ReaderTextContentProps {
     tokenPositions: Map<number, string>;
     textAreaRef: React.RefObject<HTMLDivElement | null>;
     handleTokenClick: (index: number) => void;
-    onMoreInfoClick: (index: number) => void;
+    onMoreInfoClick: (index: number, forceSingle?: boolean) => void;
     onPlayClick: (index: number, forceSingle?: boolean) => void;
     showTranslations: boolean;
 }

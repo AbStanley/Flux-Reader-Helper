@@ -30,7 +30,7 @@ interface ReaderTokenProps {
     onClick: (index: number) => void;
     onHover: (index: number) => void;
     onClearHover: () => void;
-    onMoreInfo: (index: number) => void;
+    onMoreInfo: (index: number, forceSingle?: boolean) => void;
     onPlay: (index: number, forceSingle?: boolean) => void;
     onSeek: (index: number) => void;
     onRegenerate: (index: number) => void;
@@ -125,7 +125,7 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
                     </button>
                     <button
                         className={buttonClass}
-                        onClick={(e) => handleInteraction(e, () => onMoreInfo(index))}
+                        onClick={(e) => handleInteraction(e, () => onMoreInfo(index, isHoverPopup))}
                         onMouseDown={(e) => e.stopPropagation()}
                         onMouseUp={(e) => e.stopPropagation()}
                         onTouchStart={(e) => e.stopPropagation()}
