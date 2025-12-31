@@ -54,6 +54,11 @@ export const useReader = () => {
                     isContiguous = false;
                     break;
                 }
+                // Break on newline
+                if (tokens[k].includes('\n')) {
+                    isContiguous = false;
+                    break;
+                }
             }
 
             if (isContiguous && /[.!?]['"”’\)]*$/.test(tokens[prev].trim())) {

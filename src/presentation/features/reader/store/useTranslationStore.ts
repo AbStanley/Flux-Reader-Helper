@@ -95,9 +95,14 @@ const getSelectionGroups = (indices: Set<number>, tokens: string[]): number[][] 
                 isContiguous = false;
                 break;
             }
+            // NEW: Break if we encounter a newline
+            if (tokens[k].includes('\n')) {
+                isContiguous = false;
+                break;
+            }
         }
 
-        // NEW: Break grouping if the previous token was a sentence end (punctuation)
+        // Break grouping if the previous token was a sentence end (punctuation)
         if (isContiguous && /[.!?]['"”’\)]*$/.test(tokens[prev].trim())) {
             isContiguous = false;
         }

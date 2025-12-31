@@ -175,61 +175,76 @@ export const getSentenceRange = (index: number, tokens: string[]): number[] => {
         return true;
     };
 
-    // Search start
+    // 1. Search Start (Backwards)
     let start = index;
-    while (start > 0) {
-        // If the PREVIOUS token was an end, then start is current.
-        // We need to look at non-whitespace tokens to decide
-        let prevIndex = start - 1;
-        while (prevIndex >= 0 && !tokens[prevIndex].trim()) {
-            prevIndex--;
+
+    // Look backwards from the token *before* the current one
+    let i = index - 1;
+    while (i >= 0) {
+        const token = tokens[i];
+
+        // Explicit newline check
+        if (token.includes('\n')) {
+            start = i + 1;
+            break;
         }
 
-        if (prevIndex < 0) {
+        // If it's a non-whitespace word, check if it ENDS a sentence
+        if (token.trim()) {
+            if (isSentenceEnd(token)) {
+                start = i + 1;
+                break;
+            }
+        }
+
+        // If we reach index 0, that's the start
+        if (i === 0) {
             start = 0;
-            break;
         }
-
-        const prevToken = tokens[prevIndex];
-        // We don't have enough context to check 'prevToken's' previous token for abbreviation 
-        // effectively without linear scan, but since we are scanning linearly here:
-        // ideally we check if prevToken IS a sentence end.
-
-        // Use a simpler check for localized "previous" token or just rely on the heuristic
-        if (isSentenceEnd(prevToken)) {
-            break;
-        }
-        start--;
+        i--;
     }
 
-    // Search end
+    // 2. Search End (Forwards)
     let end = index;
-    while (end < tokens.length - 1) {
-        const token = tokens[end];
-        if (!token.trim()) {
-            end++;
-            continue;
-        }
 
-        if (isSentenceEnd(token)) {
+    // Look forwards starting from current
+    i = index;
+    while (i < tokens.length) {
+        const token = tokens[i];
+
+        // CRITICAL FIX: explicit newline check
+        if (token.includes('\n')) {
+            end = Math.max(index, i - 1);
             break;
         }
-        end++;
+
+        if (token.trim()) {
+            if (isSentenceEnd(token)) {
+                end = i;
+                break;
+            }
+        }
+
+        // If we reach the last token
+        if (i === tokens.length - 1) {
+            end = i;
+        }
+        i++;
     }
 
-    // OPTIMIZATION: Trim leading whitespace from the range
-    while (start < end && !tokens[start].trim()) {
+    // Optimization: Trim leading whitespace
+    while (start <= end && (!tokens[start] || !tokens[start].trim())) {
         start++;
     }
 
-    // OPTIMIZATION: Trim trailing whitespace from the range (optional, but good for UI)
-    // while (end > start && !tokens[end].trim()) {
-    //     end--;
-    // }
+    // Optimization: Trim trailing whitespace
+    while (end >= start && (!tokens[end] || !tokens[end].trim())) {
+        end--;
+    }
 
     const range: number[] = [];
-    for (let i = start; i <= end; i++) {
-        range.push(i);
+    for (let k = start; k <= end; k++) {
+        range.push(k);
     }
     return range;
 };
