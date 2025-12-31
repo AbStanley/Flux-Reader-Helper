@@ -140,7 +140,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ vertical = false
     }
 
     return (
-        <div className={`w-full p-4 border-border/40 bg-background/95 backdrop-blur z-40 flex gap-4 ${vertical
+        <div className={`w-full p-2 md:p-4 border-border/40 bg-background/95 backdrop-blur z-40 flex gap-4 ${vertical
             ? 'flex-col border rounded-xl shadow-sm'
             : 'flex-col border-b'
             }`}>

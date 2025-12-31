@@ -2,7 +2,23 @@
     font-size: 1.25rem;
     line-height: 1.8;
     color: hsl(var(--foreground));
+    color: hsl(var(--foreground));
     white-space: pre-wrap;
+    /* Default desktop behavior */
+    width: 100%;
+    padding: 3rem;
+    padding-bottom: 3rem;
+}
+
+/* Mobile Layout Constraints */
+@media (max-width: 1200px) {
+    .textArea {
+        max-width: 90%;
+        margin: 0 auto;
+        /* Center the text block */
+        padding: 1rem 0;
+        /* Reduce gap: 1rem top/bottom, 0 side (handled by max-width+margin) */
+    }
 }
 
 .token {
