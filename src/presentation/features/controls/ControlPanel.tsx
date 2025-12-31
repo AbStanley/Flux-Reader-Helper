@@ -125,14 +125,14 @@ export const ControlPanel: React.FC = () => {
     return (
         <Card className="w-full mb-2 glass text-card-foreground">
             <CardHeader className="space-y-2 p-4">
-                <div className="flex flex-col sm:flex-row gap-2 pb-2 border-b border-border/40 items-stretch sm:items-end">
+                <div className="flex flex-col sm:flex-row gap-2 pb-2 border-b border-border/40 items-center sm:items-end justify-center">
                     <LanguageSelect
                         label="Source Language"
                         value={sourceLang}
                         onChange={setSourceLang}
                         options={SOURCE_LANGUAGES}
                         placeholder="Select Source"
-                        className="flex-1"
+                        className="w-full sm:w-[200px]"
                         disabled={isGenerating}
                     />
 
@@ -153,7 +153,7 @@ export const ControlPanel: React.FC = () => {
                         onChange={setTargetLang}
                         options={TARGET_LANGUAGES}
                         placeholder="Select Target"
-                        className="flex-1"
+                        className="w-full sm:w-[200px]"
                         disabled={isGenerating}
                     />
                 </div>

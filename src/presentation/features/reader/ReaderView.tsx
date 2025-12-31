@@ -141,23 +141,25 @@ export const ReaderView: React.FC = () => {
                         <PlayerControls />
                     </div>
 
-                    <ReaderTextContent
-                        tokens={tokens}
-                        paginatedTokens={paginatedTokens}
-                        groups={groups}
-                        richTranslation={richTranslation}
-                        currentPage={currentPage}
-                        PAGE_SIZE={PAGE_SIZE}
-                        selectionMode={selectionMode}
-                        visualGroupStarts={visualGroupStarts}
-                        groupStarts={groupStarts}
-                        tokenPositions={tokenPositions}
-                        textAreaRef={textAreaRef}
-                        handleTokenClick={handleTokenClick}
-                        onMoreInfoClick={onMoreInfoClick}
-                        onPlayClick={onPlayClick}
-                        showTranslations={showTranslations}
-                    />
+                    {!isGenerating && (
+                        <ReaderTextContent
+                            tokens={tokens}
+                            paginatedTokens={paginatedTokens}
+                            groups={groups}
+                            richTranslation={richTranslation}
+                            currentPage={currentPage}
+                            PAGE_SIZE={PAGE_SIZE}
+                            selectionMode={selectionMode}
+                            visualGroupStarts={visualGroupStarts}
+                            groupStarts={groupStarts}
+                            tokenPositions={tokenPositions}
+                            textAreaRef={textAreaRef}
+                            handleTokenClick={handleTokenClick}
+                            onMoreInfoClick={onMoreInfoClick}
+                            onPlayClick={onPlayClick}
+                            showTranslations={showTranslations}
+                        />
+                    )}
 
                     <div className="mt-auto px-8 min-[1200px]:px-0 py-8">
                         <ReaderPagination

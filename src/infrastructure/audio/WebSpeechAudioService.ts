@@ -19,7 +19,15 @@ export class WebSpeechAudioService implements IAudioService {
         onBoundary: (charIndex: number) => void,
         onEnd: () => void
     ): void {
+        if (!this.synthesis) {
+            console.error("SpeechSynthesis not supported");
+            return;
+        }
+
         this.stop();
+
+        // Mobile Safari/Chrome quirk: sometimes need to resume before playing if it was paused/interrupted
+        this.synthesis.resume();
 
         const safeText = text.replace(/\*/g, ' ');
         this.utterance = new SpeechSynthesisUtterance(safeText);
@@ -38,21 +46,35 @@ export class WebSpeechAudioService implements IAudioService {
         };
 
         this.utterance.onend = () => {
+            // Mobile fix: ensure we clear the reference to allow GC and reset state
+            this.utterance = null;
             onEnd();
         };
 
-        this.synthesis.speak(this.utterance);
+        this.utterance.onerror = (e) => {
+            console.error("SpeechSynthesis error:", e);
+            // Attempt to recover or notify
+            onEnd();
+        };
+
+        try {
+            this.synthesis.speak(this.utterance);
+        } catch (e) {
+            console.error("SpeechSynthesis speak failed:", e);
+            onEnd();
+        }
     }
 
     pause(): void {
-        this.synthesis.pause();
+        this.synthesis?.pause();
     }
 
     resume(): void {
-        this.synthesis.resume();
+        this.synthesis?.resume();
     }
 
     stop(): void {
+        if (!this.synthesis) return;
         this.synthesis.cancel();
         this.utterance = null;
         (window as any)._speechUtterance = null;
