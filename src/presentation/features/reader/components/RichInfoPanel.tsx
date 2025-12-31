@@ -139,7 +139,7 @@ export const RichInfoPanel: React.FC<RichInfoPanelProps> = ({ isOpen, isLoading,
                                                             </TableRow>
                                                         </TableHeader>
                                                         <TableBody>
-                                                            {forms.map((item, idx) => (
+                                                            {Array.isArray(forms) && forms.map((item, idx) => (
                                                                 <TableRow key={idx}>
                                                                     <TableCell className="font-medium text-muted-foreground">{item.pronoun}</TableCell>
                                                                     <TableCell>{item.conjugation}</TableCell>
