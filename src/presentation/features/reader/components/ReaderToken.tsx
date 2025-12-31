@@ -167,6 +167,7 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
                 hoverPosition && styles[hoverPosition] // This handles border radius/shape for sentence
             ) : ''} 
                 ${(isHoveredWord && !isSelected) ? styles.hoveredWord : ''}
+                ${isHoveredWord ? styles.zIndexTop : ''}
                 ${isTitle ? 'text-xl font-bold text-foreground inline-block my-2' : ''}
             `}
             onClick={() => {
@@ -186,6 +187,7 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
             }}
             onContextMenu={handleContextMenu}
             style={{ position: 'relative' }}
+            tabIndex={0} // Allow focus to bring to front via CSS :focus-within
         >
             {groupTranslation && (
                 <span className={styles.selectionPopupValid}>

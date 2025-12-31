@@ -104,9 +104,14 @@
     box-shadow: 0 0 0 1px hsl(var(--accent));
     /* increased visibility */
     border-radius: 0.25em;
-    z-index: 5;
+    z-index: 50;
     position: relative;
     /* Ensure it sits on top */
+}
+
+.zIndexTop {
+    z-index: 60;
+    position: relative;
 }
 
 /* Popups still use custom CSS for precise absolute positioning relative to span */
@@ -161,6 +166,13 @@
     z-index: 20;
     font-weight: 600;
     animation: fadeUp 0.2s ease-out;
+    transition: bottom 0.2s ease;
+}
+
+/* Allow focusing a token (touch/click) to bring it to front */
+.token:focus-within {
+    z-index: 100;
+    position: relative;
 }
 
 @keyframes fadeUp {
