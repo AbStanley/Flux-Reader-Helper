@@ -24,10 +24,12 @@ function AppContent() {
 
   return (
     <>
-      <header className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-bold tracking-tight text-primary">Reader Helper</h1>
-        <ModeToggle />
-      </header>
+      {!isReading && (
+        <header className="flex items-center justify-between mb-8">
+          <h1 className="text-4xl font-bold tracking-tight text-primary">Reader Helper</h1>
+          <ModeToggle />
+        </header>
+      )}
 
       <FocusLayout
         isReading={isReading}

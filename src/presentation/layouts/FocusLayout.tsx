@@ -40,7 +40,7 @@ export const FocusLayout: React.FC<FocusLayoutProps> = ({
                 <motion.div
                     layout
                     transition={{ duration: 0.4, ease: "easeInOut" }}
-                    className="w-full flex-1 flex flex-col gap-4 overflow-hidden"
+                    className="w-full flex-1 flex flex-col gap-2 overflow-hidden"
                 >
                     <AnimatePresence>
                         {isReading && (
