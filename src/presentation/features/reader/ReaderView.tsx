@@ -46,8 +46,10 @@ export const ReaderView: React.FC = () => {
         showTranslations
     } = useTranslation(true);
 
-    // Audio Store consumption
-    const { playSingle, availableVoices, setVoiceByLanguageName } = useAudioStore();
+    // Audio Store consumption - Optimized selectors
+    const playSingle = useAudioStore(s => s.playSingle);
+    const availableVoices = useAudioStore(s => s.availableVoices);
+    const setVoiceByLanguageName = useAudioStore(s => s.setVoiceByLanguageName);
 
     // Effect: Auto-select voice when source language changes or voices load
     React.useEffect(() => {
@@ -55,6 +57,19 @@ export const ReaderView: React.FC = () => {
             setVoiceByLanguageName(sourceLang);
         }
     }, [sourceLang, availableVoices, setVoiceByLanguageName]);
+
+    // Effect: Auto-switch page during audio playback
+    // Optimization: Calculate required page in selector to avoid re-renders on every word
+    const requiredAudioPage = useAudioStore(useCallback(s => {
+        if (s.currentWordIndex === null) return null;
+        return Math.floor(s.currentWordIndex / PAGE_SIZE) + 1;
+    }, [PAGE_SIZE]));
+
+    React.useEffect(() => {
+        if (requiredAudioPage !== null && requiredAudioPage !== currentPage) {
+            setCurrentPage(requiredAudioPage);
+        }
+    }, [requiredAudioPage, currentPage, setCurrentPage]);
 
     // Calculate grouping for rendering
     const groups = useMemo(() => getSelectionGroups(selectedIndices), [getSelectionGroups, selectedIndices]);
