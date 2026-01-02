@@ -21,10 +21,11 @@ export const TimelineControl: React.FC<TimelineControlProps> = ({
 
     // Sync slider with playback only when not dragging
     useEffect(() => {
-        if (!isDragging.current && currentWordIndex !== null) {
-            setSliderValue([currentWordIndex]);
+        if (!isDragging.current) {
+            setSliderValue([currentWordIndex ?? 0]);
         }
     }, [currentWordIndex]);
+
 
     const handleSliderChange = (vals: number[]) => {
         isDragging.current = true;

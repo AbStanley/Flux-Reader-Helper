@@ -119,7 +119,8 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ vertical = false
                         isPlaying={isPlaying}
                         isPaused={isPaused}
                         onPlayPause={handlePlayPause}
-                        onStop={() => { stop(); seek(0); }} // Reset slider on stop
+                        onStop={stop}
+
                     />
 
                     {!vertical && <div className="h-6 w-px bg-border/50 mx-2" />}
