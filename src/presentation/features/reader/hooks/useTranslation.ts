@@ -24,9 +24,10 @@ export const useTranslation = (enableAutoFetch = false) => {
     // Consumers like ReaderTextContent should select them directly.
 
     // Rich Info State
-    const richTranslation = useTranslationStore(state => state.richTranslation);
+    // Rich Info State
+    const richDetailsTabs = useTranslationStore(state => state.richDetailsTabs);
+    const activeTabId = useTranslationStore(state => state.activeTabId);
     const isRichInfoOpen = useTranslationStore(state => state.isRichInfoOpen);
-    const isRichInfoLoading = useTranslationStore(state => state.isRichInfoLoading);
     const showTranslations = useTranslationStore(state => state.showTranslations);
 
     // Translation Store Actions
@@ -36,6 +37,12 @@ export const useTranslation = (enableAutoFetch = false) => {
     const fetchRichTranslationAction = useTranslationStore(state => state.fetchRichTranslation);
     const closeRichInfo = useTranslationStore(state => state.closeRichInfo);
     const toggleRichInfo = useTranslationStore(state => state.toggleRichInfo);
+
+    // Tab Actions
+    const closeTab = useTranslationStore(state => state.closeTab);
+    const closeAllTabs = useTranslationStore(state => state.closeAllTabs);
+    const setActiveTab = useTranslationStore(state => state.setActiveTab);
+    const regenerateTabAction = useTranslationStore(state => state.regenerateTab);
 
     const toggleShowTranslations = useTranslationStore(state => state.toggleShowTranslations);
     const clearSelectionTranslations = useTranslationStore(state => state.clearSelectionTranslations);
@@ -102,12 +109,16 @@ export const useTranslation = (enableAutoFetch = false) => {
         fetchRichTranslationAction(text, context, sourceLang, targetLang, aiService);
     }, [fetchRichTranslationAction, sourceLang, targetLang, aiService]);
 
+    const regenerateTab = useCallback((id: string) => {
+        regenerateTabAction(id, aiService);
+    }, [regenerateTabAction, aiService]);
+
     return {
         // State
         selectionTranslations,
-        richTranslation,
+        richDetailsTabs,
+        activeTabId,
         isRichInfoOpen,
-        isRichInfoLoading,
         showTranslations,
 
         // Actions
@@ -118,6 +129,12 @@ export const useTranslation = (enableAutoFetch = false) => {
         toggleRichInfo,
         toggleShowTranslations,
         clearSelectionTranslations,
-        regenerateSelection: (index?: number) => translateSelection(selectedIndices, tokens, sourceLang, targetLang, aiService, true, index)
+        regenerateSelection: (index?: number) => translateSelection(selectedIndices, tokens, sourceLang, targetLang, aiService, true, index),
+
+        // Tab Actions
+        closeTab,
+        closeAllTabs,
+        setActiveTab,
+        regenerateTab
     };
 };

@@ -1,6 +1,17 @@
 import { create } from 'zustand';
 import type { IAIService, RichTranslationResult } from '../../../../core/interfaces/IAIService';
 
+export interface RichDetailsTab {
+    id: string; // usually the 'text' being translated
+    text: string;
+    data: RichTranslationResult | null;
+    isLoading: boolean;
+    error: string | null;
+    context: string;
+    sourceLang: string;
+    targetLang: string;
+}
+
 // In-flight request tracker (module-level singleton is fine for this store)
 const pendingRequests = new Set<string>();
 
@@ -13,9 +24,9 @@ interface TranslationState {
     hoverTranslation: string | null;
 
     // Rich Info
-    richTranslation: RichTranslationResult | null;
+    richDetailsTabs: RichDetailsTab[];
+    activeTabId: string | null;
     isRichInfoOpen: boolean;
-    isRichInfoLoading: boolean;
 
     // Visibility Control
     showTranslations: boolean;
@@ -53,6 +64,12 @@ interface TranslationState {
 
     closeRichInfo: () => void;
     toggleRichInfo: () => void;
+
+    // Tab Actions
+    closeTab: (id: string) => void;
+    closeAllTabs: () => void;
+    setActiveTab: (id: string) => void;
+    regenerateTab: (id: string, aiService: IAIService) => Promise<void>;
 
     // Visibility Actions
     toggleShowTranslations: () => void;
@@ -137,9 +154,11 @@ export const useTranslationStore = create<TranslationState>((set, get) => ({
     selectionTranslations: new Map(),
     hoveredIndex: null,
     hoverTranslation: null,
-    richTranslation: null,
+    richTranslation: null, // Deprecated/Removed from interface but keeping for safety if needed, though we should remove.
+    richDetailsTabs: [],
+    activeTabId: null,
     isRichInfoOpen: false,
-    isRichInfoLoading: false,
+    isRichInfoLoading: false, // Deprecated
     showTranslations: true,
 
     translateSelection: async (indices, tokens, sourceLang, targetLang, aiService, force = false, targetIndex?: number) => {
@@ -239,13 +258,112 @@ export const useTranslationStore = create<TranslationState>((set, get) => ({
     },
 
     fetchRichTranslation: async (text, context, sourceLang, targetLang, aiService) => {
-        set({ isRichInfoOpen: true, isRichInfoLoading: true, richTranslation: null });
+        const { richDetailsTabs } = get();
+        const existingTab = richDetailsTabs.find(t => t.id === text);
+
+        set({ isRichInfoOpen: true });
+
+        if (existingTab) {
+            set({ activeTabId: existingTab.id });
+            return;
+        }
+
+        const newTab: RichDetailsTab = {
+            id: text,
+            text,
+            data: null,
+            isLoading: true,
+            error: null,
+            context,
+            sourceLang,
+            targetLang
+        };
+
+        set({
+            richDetailsTabs: [...richDetailsTabs, newTab],
+            activeTabId: text
+        });
+
         try {
             const result = await aiService.getRichTranslation(text, targetLang, context, sourceLang);
-            set({ richTranslation: result, isRichInfoLoading: false });
-        } catch (error) {
+
+            // Update the specific tab
+            set(state => ({
+                richDetailsTabs: state.richDetailsTabs.map(tab =>
+                    tab.id === text
+                        ? { ...tab, data: result, isLoading: false }
+                        : tab
+                )
+            }));
+        } catch (error: any) {
             console.error(error);
-            set({ isRichInfoLoading: false, richTranslation: null }); // Optionally handle error state
+            set(state => ({
+                richDetailsTabs: state.richDetailsTabs.map(tab =>
+                    tab.id === text
+                        ? { ...tab, isLoading: false, error: error.message || 'Failed to load' }
+                        : tab
+                )
+            }));
+        }
+    },
+
+    closeTab: (id) => {
+        set(state => {
+            const newTabs = state.richDetailsTabs.filter(t => t.id !== id);
+            let newActiveId = state.activeTabId;
+
+            if (state.activeTabId === id) {
+                // If closing active tab, activate the last one remaining, or null
+                newActiveId = newTabs.length > 0 ? newTabs[newTabs.length - 1].id : null;
+            }
+
+            // If no tabs left, close panel
+            const isOpen = newTabs.length > 0;
+
+            return {
+                richDetailsTabs: newTabs,
+                activeTabId: newActiveId,
+                isRichInfoOpen: isOpen
+            };
+        });
+    },
+
+    closeAllTabs: () => {
+        set({
+            richDetailsTabs: [],
+            activeTabId: null,
+            isRichInfoOpen: false
+        });
+    },
+
+    setActiveTab: (id) => {
+        set({ activeTabId: id, isRichInfoOpen: true });
+    },
+
+    regenerateTab: async (id, aiService) => {
+        const tab = get().richDetailsTabs.find(t => t.id === id);
+        if (!tab) return;
+
+        // Set loading for this tab
+        set(state => ({
+            richDetailsTabs: state.richDetailsTabs.map(t =>
+                t.id === id ? { ...t, isLoading: true, error: null } : t
+            )
+        }));
+
+        try {
+            const result = await aiService.getRichTranslation(tab.text, tab.targetLang, tab.context, tab.sourceLang);
+            set(state => ({
+                richDetailsTabs: state.richDetailsTabs.map(t =>
+                    t.id === id ? { ...t, data: result, isLoading: false } : t
+                )
+            }));
+        } catch (error: any) {
+            set(state => ({
+                richDetailsTabs: state.richDetailsTabs.map(t =>
+                    t.id === id ? { ...t, isLoading: false, error: error.message || 'Regeneration failed' } : t
+                )
+            }));
         }
     },
 

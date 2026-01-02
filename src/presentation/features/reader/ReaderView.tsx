@@ -38,13 +38,21 @@ export const ReaderView: React.FC = () => {
     // Translation Hook
     const {
         selectionTranslations,
-        richTranslation,
+        richDetailsTabs,
+        activeTabId,
         isRichInfoOpen,
-        isRichInfoLoading,
         fetchRichTranslation,
         closeRichInfo,
+        setActiveTab,
+        closeTab,
+        closeAllTabs,
+        regenerateTab,
         showTranslations
     } = useTranslation(true);
+
+    const activeTabData = React.useMemo(() => {
+        return richDetailsTabs.find(t => t.id === activeTabId)?.data || null;
+    }, [richDetailsTabs, activeTabId]);
 
     // Audio Store consumption - Optimized selectors
     const playSingle = useAudioStore(s => s.playSingle);
@@ -173,7 +181,7 @@ export const ReaderView: React.FC = () => {
                             tokens={tokens}
                             paginatedTokens={paginatedTokens}
                             groups={groups}
-                            richTranslation={richTranslation}
+                            richTranslation={activeTabData}
                             currentPage={currentPage}
                             PAGE_SIZE={PAGE_SIZE}
                             selectionMode={selectionMode}
@@ -209,15 +217,19 @@ export const ReaderView: React.FC = () => {
             </Card>
 
             {/* Right Column: Info Panel - Sticky Sidebar */}
-            <div className={`hidden min-[1200px]:flex flex-col flex-shrink-0 relative overflow-y-auto h-full transition-all duration-300 ${isRichInfoOpen ? 'w-[500px] pl-2' : 'w-0 pl-0'
+            <div className={`hidden min-[1200px]:flex flex-col flex-shrink-0 relative overflow-hidden h-full transition-all duration-300 ${isRichInfoOpen ? 'w-[500px] pl-2' : 'w-0 pl-0'
                 }`}>
-                <div className="w-[450px]"> {/* Fixed width inner container to prevent content squashing during transition */}
+                <div className="w-[450px] h-full"> {/* Fixed width inner container to prevent content squashing during transition */}
                     {/* Translation Info Panel */}
                     <RichInfoPanel
                         isOpen={isRichInfoOpen}
-                        isLoading={isRichInfoLoading}
-                        data={richTranslation}
+                        tabs={richDetailsTabs}
+                        activeTabId={activeTabId}
                         onClose={closeRichInfo}
+                        onTabChange={setActiveTab}
+                        onCloseTab={closeTab}
+                        onRegenerate={regenerateTab}
+                        onClearAll={closeAllTabs}
                     />
                 </div>
             </div>
@@ -226,9 +238,13 @@ export const ReaderView: React.FC = () => {
             <div className="min-[1200px]:hidden">
                 <RichInfoPanel
                     isOpen={isRichInfoOpen}
-                    isLoading={isRichInfoLoading}
-                    data={richTranslation}
+                    tabs={richDetailsTabs}
+                    activeTabId={activeTabId}
                     onClose={closeRichInfo}
+                    onTabChange={setActiveTab}
+                    onCloseTab={closeTab}
+                    onRegenerate={regenerateTab}
+                    onClearAll={closeAllTabs}
                 />
             </div>
         </div>
