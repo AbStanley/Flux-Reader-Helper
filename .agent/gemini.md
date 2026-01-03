@@ -38,22 +38,24 @@ The UI must be **clean**, **minimalist**, and **animated**.
 ## 5. Directory Structure
 ```
 src/
-  ├── core/             # Core interfaces and shared logic
-  │   ├── constants/    # Shared constants (Languages, Configs)
-  │   ├── interfaces/
-  │   └── models/
-  ├── infrastructure/   # Concrete implementations of core interfaces
-  │   ├── ai/
-  │   └── file-system/
-  ├── presentation/     # UI Components and Pages
-  │   ├── components/   # Shared UI components (Buttons, Modals)
-  │   ├── features/     # Feature-specific components (Reader, Settings)
-  │   │   ├── components/ # Sub-components (e.g. RichInfoPanel, PlayerControls)
-  │   │   ├── hooks/      # View Models / Connectors (e.g. useTranslation)
-  │   │   └── store/      # Zustand Stores (useReaderStore, useAudioStore)
-
-  ├── services/         # Application logic (Service classes/functions)
-  └── styles/           # Global styles and themes
+  ├── core/             # Domain Interfaces, Types, and Constants
+  │   ├── constants/    # Shared constants (Languages, Prompts)
+  │   ├── interfaces/   # Application Core Interfaces (IAIService)
+  │   ├── models/       # Domain Models
+  │   └── utils/        # Pure utility functions
+  ├── infrastructure/   # External Services & Implementations
+  │   ├── ai/           # OllamaService, MockAIService
+  │   └── audio/        # AudioService (Web Speech API)
+  ├── presentation/     # UI Layer (React)
+  │   ├── components/   #
+  │   │   └── ui/       # Design System (shadcn/ui - Button, Slider, etc.)
+  │   ├── features/     # Feature-Based Modules
+  │   │   ├── reader/   # ReaderView, ReaderToken, Selection Logic
+  │   │   └── controls/ # PlaybackControls, SpeedControl, Settings
+  │   ├── layouts/      # Layout Wrappers
+  │   ├── contexts/     # Dependency/Service Injection
+  │   └── providers/    # React Providers (Theme, etc.)
+  └── styles/           # Global CSS (Tailwind imports)
 ```
 
 ## 6. Development Rules & Standards

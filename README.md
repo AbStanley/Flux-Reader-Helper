@@ -1,116 +1,106 @@
 # Flux
 
-A premium reading assistant application built with React, TypeScript, and Ollama.
+Flux is a premium, privacy-focused reading assistant application designed to bridge the gap between language learning and fluent reading. It leverages local AI to provide instant key-value translations, context-aware insights, and a natural audio reading experience.
 
-## 📖 Current Modifications (v1.2)
+## ✨ Core Features
 
-### Logic
-The application core logic revolves around text tokenization and interaction.
-1. **Input**: User pastes text or generates it via AI.
-2. **Processing**: Text is split into tokens (words/whitespace), preserving structure.
-3. **Interaction**:
-    - **Click**: Users click words to add them to a selection set. Contiguous selections form groupings.
-    - **Hover**: Users hover over words to get instant "dictionary-style" translations.
-4. **Translation**:
-    - **Context-Aware**: Translations use surrounding context (sentences) to ensure accuracy.
-    - **Target Language**: Users select a target language (e.g., Spanish), and all AI prompts are tailored to this target.
-    - **Provider**: Defaults to **Ollama** (Local LLM) for privacy and zero-cost, with a fallback Mock mode.
+### 🧠 Smart Reader
+The core reading engine allows for deep interaction with text:
+- **Interactive Tokenization**: Text is processed into interactive tokens, allowing users to select individual words or phrases.
+- **Context-Aware Dictionary**: Hover over any word to see a translation that considers the surrounding sentence context, not just the isolated definition.
+- **Streaming Generation**: Generate custom reading material with AI, featuring real-time streaming feedback and a "glass" overlay to prevent interaction during generation.
 
-### 🏗 Architecture & Performance
-> **[Read the full Architecture Guide](./ARCHITECTURE.md)** for a deep dive into state management, rendering strategies, and optimizations.
+### 🔊 Audio Experience
+A fully integrated text-to-speech system designed for learners:
+- **Neural TTS**: Utilizes the browser's best available voices for natural speech.
+- **Karaoke Highlighting**: Words are highlighted in real-time as they are spoken, aiding in pronunciation and tracking.
+- **Smart Resume**: Playback remembers your position. If paused or stopped, it resumes intelligently from the start of the last spoken sentence or word.
+- **Auto-Voice Selection**: Automatically switches the synthesis voice to match the detected language of the text.
 
-We follow **Clean Architecture** principles backed by **Zustand** for high-performance state management.
+### 🛡️ Privacy & Local AI
+Flux is built to run entirely offline (after setup) using **Ollama**:
+- **Zero Data Leakage**: All translations and text generation happen on your local machine.
+- **Cost Efficient**: No API keys or usage fees.
 
-- **Presentation Layer** (`src/presentation`):
-    - **Optimized Rendering**: `ReaderToken` and `ReaderTextContent` are heavily optimized with `React.memo` and scoped prop passing to ensure 60fps performance even with large texts.
-    - **State**: Granular Zustand stores (`useReaderStore`, `useTranslationStore`, `useAudioStore`) prevent unnecessary re-renders.
-- **Infrastructure Layer** (`src/infrastructure`):
-    - **AI Services**: Concrete implementations of `IAIService`.
-        - `OllamaService`: Connects to local Ollama instance.
+## 🏗 Technical Architecture
 
-### Features
-- **Clean, Premium UI**: Glassmorphism design, smooth transitions, distraction-free reading.
-- **Unified Design System**: Built with **shadcn/ui** and **Tailwind CSS** for consistency and accessibility.
-- **High Performance**: Optimized rendering engine ensuring zero lag on hover/interaction.
-- **MCP Server Ready**: Configured for AI assistants (VS Code/Cursor) to browse and install components.
-- **Local AI Integration**: Seamless connection to local Ollama models.
-- **Smart Translation**: 
-    - Hover and selection-based translations.
-    - **Non-blocking Details Panel**: Detailed translation insights in a non-intrusive sidebar (Desktop) or bottom sheet (Mobile).
-- **Audio Reading**:
-    - **Natural TTS**: Reads text aloud using browser synthesis.
-    - **Karaoke Highlighting**: Highlights words in real-time as they are spoken.
-    - **Scrubbing Timeline**: Interactive slider to seek and jump to any part of the text.
-- **Language Controls**: Top-level source/target language selection.
+Flux is built on **Clean Architecture** and **SOLID principles**, ensuring scalability and maintainability.
 
-### Source Tree
+### System Design
+- **Feature-Based Structure**: The codebase is organized by domain (e.g., `features/reader`, `features/controls`) rather than technical layers, making navigation intuitive.
+- **Separation of Concerns**: complex logic is decoupled from UI components.
+    - **Presentation**: React components (Views) and granular Zustand stores.
+    - **Infrastructure**: Concrete implementations of services (e.g., `OllamaService`).
+    - **Core**: Domain interfaces and contracts.
+
+### State Management
+We utilize **Zustand** for high-performance, granular state management, split into three focused stores to minimize re-renders:
+1.  **`useReaderStore`**: Manages the "book" state—content, pagination, and selection logic.
+2.  **`useTranslationStore`**: Handles transient interaction state—hover lookups, debouncing, and caching.
+3.  **`useAudioStore`**: Controls the media engine—playback state, rates, and synchronization.
+
+### Performance Optimizations
+- **Memoization**: Critical components like `ReaderToken` are memoized (`React.memo`) to prevent wasted renders during high-frequency events (like audio highlighting).
+- **Scoped Props**: Data is passed intelligently to ensure that changing the state of one word does not force the entire page to re-render.
+
+## 🛠 Tech Stack
+
+- **Frontend**: React 19, TypeScript, Vite
+- **Styling**: Tailwind CSS, Shadcn/ui, Framer Motion
+- **State**: Zustand
+- **AI/LLM**: Ollama (Local)
+- **Containerization**: Docker, Nginx
+
+## 📂 Project Structure
+
 ```
 src/
-├── core/                  # Interfaces & Models
-│   └── interfaces/        # IAIService contract
-├── infrastructure/        # External Communication
-│   └── ai/                # OllamaService & MockAIService
+├── core/                  # Domain Interfaces & Shared Types
+├── infrastructure/        # External Services (API, Audio)
 ├── presentation/          # UI Layer
-│   ├── components/        # Shared components
-│   ├── contexts/          # DI Container (ServiceContext)
-│   ├── features/
-│   │   ├── controls/      # ControlPanel (Input/Settings)
-│   │   └── reader/        # ReaderView (Main reading area)
-│   ├── App.tsx            # Root & Global State
+│   ├── components/        # Shared/Generic Components
+│   ├── features/          # Domain-Specific Modules
+│   │   ├── controls/      # Input, Settings, Audio Controls
+│   │   └── reader/        # Main Reading Surface & Logic
+│   ├── ui/                # Design System (shadcn/ui implementation)
+│   ├── App.tsx            # Application Root
 │   └── main.tsx           # Entry Point
-└── styles/                # Global CSS & Variables
+└── styles/                # Global CSS
 ```
 
-### Diagrams
+## 🚀 Getting Started
 
-#### Core Logic Flow
-```mermaid
-graph TD
-    User[User] -->|Input Text| CP[Control Panel]
-    User -->|Select Target Lang| CP
-    CP -->|Set Global State| App[App State]
-    App -->|Props| RV[Reader View]
-    
-    subgraph Reader Interaction
-        RV -->|Tokenize| Tokens[Tokens Array]
-        User -->|Click Word| Select[Selection Logic]
-        User -->|Hover Word| Hover[Hover Logic]
-        User -->|Play/Scrub| Audio[Audio Store]
+### Prerequisites
+- **Node.js**: v18+
+- **Docker**: (Optional, for containerized run)
+- **Ollama**: Installed and running (`ollama serve`). Ensure you have pulled the models you intend to use (e.g., `ollama pull llama3`).
 
-        Select -->|Form Groups| Grouping[Group Logic]
-        Grouping -->|Request Translation| Service[AI Service]
-        Audio -->|Highlight| Tokens
-    end
-    
-    Service -->|Ollama API| LLM[Local LLM]
-    LLM -->|Translation| Service
-    Service -->|Update UI| RV
-```
+### Running Locally
+To run the application directly on your host machine:
 
-#### Architecture Layers
-```mermaid
-classDiagram
-    class Presentation {
-        +App
-        +ReaderView
-        +ControlPanel
-    }
-    class Domain {
-        <<interface>>
-        +IAIService
-    }
-    class Infrastructure {
-        +OllamaService
-        +MockAIService
-    }
-    
-    Presentation ..> Domain : Depends On
-    Infrastructure --|> Domain : Implements
-    Presentation --> Infrastructure : Injected via Context
-```
+1.  **Install Dependencies**:
+    ```bash
+    npm install
+    ```
+2.  **Start Development Server**:
+    ```bash
+    npm run dev
+    ```
+3.  **Build for Production**:
+    ```bash
+    npm run build
+    ```
 
-## 🛠 Setup & Usage
-1. **Prerequisites**: [Ollama](https://ollama.ai/) installed and running (`ollama serve`).
-2. **Install**: `npm install`
-3. **Run**: `npm run dev`
-4. **Build**: `npm run build`
+### Running with Docker
+For a consistent environment with a pre-configured Nginx reverse proxy (handles CORS for Ollama automatically):
+
+1.  **Start the Stack**:
+    ```bash
+    npm run docker:up
+    ```
+    The app will be available at `http://localhost`.
+
+2.  **Stop the Stack**:
+    ```bash
+    npm run docker:down
+    ```
