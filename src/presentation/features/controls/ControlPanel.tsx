@@ -10,6 +10,7 @@ import { LearningControls } from "./LearningControls";
 import { ArrowRightLeft, Loader2 } from "lucide-react";
 import { useReaderStore } from '../reader/store/useReaderStore';
 import { useStoryGeneration } from './hooks/useStoryGeneration';
+import { FileImporter } from '../importer/FileImporter';
 
 
 export const ControlPanel: React.FC = () => {
@@ -27,6 +28,7 @@ export const ControlPanel: React.FC = () => {
     const setIsGenerating = useReaderStore(state => state.setIsGenerating);
 
     const [availableModels, setAvailableModels] = useState<string[]>([]);
+    const [isImporterOpen, setIsImporterOpen] = useState(false);
 
     // Learning Mode State
     const [isLearningMode, setIsLearningMode] = useState(true);
@@ -65,17 +67,7 @@ export const ControlPanel: React.FC = () => {
     const handleGenerate = generateStory;
     const handleStopGeneration = stopGeneration;
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const content = event.target?.result as string;
-            setText(content);
-        };
-        reader.readAsText(file);
-    };
 
     const handleManualChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setText(e.target.value);
@@ -224,14 +216,13 @@ export const ControlPanel: React.FC = () => {
                         </Button>
                     )}
 
-                    <Button variant="outline" className="relative w-full sm:w-auto cursor-pointer" disabled={isGenerating}>
-                        Load File
-                        <input
-                            type="file"
-                            onChange={handleFileUpload}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                            disabled={isGenerating}
-                        />
+                    <Button
+                        variant="outline"
+                        className="w-full sm:w-auto cursor-pointer"
+                        disabled={isGenerating}
+                        onClick={() => setIsImporterOpen(true)}
+                    >
+                        Import File (PDF/EPUB)
                     </Button>
 
                     <Button
@@ -243,6 +234,7 @@ export const ControlPanel: React.FC = () => {
                     </Button>
                 </div>
             </CardContent>
+            <FileImporter open={isImporterOpen} onOpenChange={setIsImporterOpen} />
         </Card>
     );
 };
