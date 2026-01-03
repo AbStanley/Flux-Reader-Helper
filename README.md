@@ -1,4 +1,4 @@
-# Reader Helper
+# Flux
 
 A premium reading assistant application built with React, TypeScript, and Ollama.
 
