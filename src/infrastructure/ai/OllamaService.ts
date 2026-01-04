@@ -1,16 +1,25 @@
+/// <reference types="chrome" />
 import type { IAIService } from '../../core/interfaces/IAIService';
 import { getTranslatePrompt, getRichTranslationPrompt } from './prompts/TranslationPrompts';
 import { cleanResponse, extractJson, normalizeRichTranslation } from './utils/ResponseParser';
-
 
 export class OllamaService implements IAIService {
     private baseUrl: string;
     private model: string;
 
     constructor(baseUrl: string = '', model: string = 'llama2') {
+        // Ensure protocol
+        if (baseUrl && !baseUrl.startsWith('http')) {
+            baseUrl = `http://${baseUrl}`;
+        }
         console.log('[OllamaService] Initializing adapter with baseUrl:', baseUrl || '(empty/relative)');
         this.baseUrl = baseUrl;
         this.model = model;
+    }
+
+    private isExtension(): boolean {
+        // Robust check for extension environment
+        return typeof chrome !== 'undefined' && !!chrome.runtime && !!chrome.runtime.sendMessage;
     }
 
     async generateText(prompt: string, options?: {
@@ -28,9 +37,13 @@ export class OllamaService implements IAIService {
                 ...options
             };
 
-            // Remove our custom options from the body sent to Ollama
+            // Remove custom options
             delete body.onProgress;
             delete body.signal;
+
+            if (this.isExtension()) {
+                return this.generateTextExtension(body, isStreaming, options?.onProgress);
+            }
 
             const response = await fetch(`${this.baseUrl}/api/generate`, {
                 method: 'POST',
@@ -61,7 +74,7 @@ export class OllamaService implements IAIService {
                             const json = JSON.parse(line);
                             if (json.response) {
                                 fullText += json.response;
-                                options.onProgress?.(json.response, fullText);
+                                options?.onProgress?.(json.response, fullText);
                             }
                             if (json.done) return fullText;
                         } catch (e) {
@@ -75,33 +88,69 @@ export class OllamaService implements IAIService {
                 return data.response;
             }
         } catch (error: any) {
-            if (error.name === 'AbortError') {
-                console.log('Ollama generation aborted');
-                throw error;
-            }
+            if (error.name === 'AbortError') throw error;
             console.error('Ollama generation failed:', error);
             throw error;
         }
     }
 
-    async translateText(text: string, targetLanguage: string = 'en', context?: string, sourceLanguage?: string): Promise<string> {
-        // DEBUGGING: Log parameters
-        console.log(`[OllamaService] translateText`, { text, target: targetLanguage, source: sourceLanguage });
+    private async generateTextExtension(body: any, isStreaming: boolean, onProgress?: (chunk: string, fullText: string) => void): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const port = chrome.runtime.connect({ name: 'PROXY_STREAM_CONNECTION' });
+            let fullText = '';
 
+            port.onMessage.addListener((msg: any) => {
+                if (msg.type === 'CHUNK') {
+                    const lines = msg.chunk.split('\n');
+                    for (const line of lines) {
+                        if (!line.trim()) continue;
+                        try {
+                            const json = JSON.parse(line);
+                            if (json.response) {
+                                fullText += json.response;
+                                onProgress?.(json.response, fullText);
+                            }
+                            if (json.done && isStreaming) {
+                                resolve(fullText);
+                            }
+                        } catch (e) { console.warn('Parse error', e); }
+                    }
+                } else if (msg.type === 'DONE') {
+                    resolve(fullText);
+                } else if (msg.type === 'ERROR') {
+                    reject(new Error(msg.error));
+                }
+            });
+
+            port.postMessage({
+                type: 'START_STREAM',
+                data: {
+                    url: `${this.baseUrl || 'http://127.0.0.1:11434'}/api/generate`,
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body
+                }
+            });
+
+            port.onDisconnect.addListener(() => {
+                if (chrome.runtime.lastError) {
+                    reject(new Error(chrome.runtime.lastError.message));
+                }
+            });
+        });
+    }
+
+    async translateText(text: string, targetLanguage: string = 'en', context?: string, sourceLanguage?: string): Promise<string> {
+        console.log(`[OllamaService] translateText`, { text, target: targetLanguage, source: sourceLanguage });
         const prompt = getTranslatePrompt(text, targetLanguage, context, sourceLanguage);
         const rawResponse = await this.generateText(prompt);
-
         return cleanResponse(rawResponse);
     }
 
     async getRichTranslation(text: string, targetLanguage: string = 'en', context?: string, sourceLanguage?: string): Promise<any> {
         console.log(`[OllamaService] getRichTranslation`, { text, target: targetLanguage, source: sourceLanguage });
-
         const prompt = getRichTranslationPrompt(text, targetLanguage, context, sourceLanguage);
-
-        // Use a larger token limit for rich translation to ensure JSON isn't truncated
         const rawResponse = await this.generateText(prompt, { num_predict: 4096 });
-
         try {
             const data = extractJson(rawResponse);
             return normalizeRichTranslation(data);
@@ -111,12 +160,22 @@ export class OllamaService implements IAIService {
         }
     }
 
-
     async getAvailableModels(): Promise<string[]> {
+        const url = `${this.baseUrl || 'http://127.0.0.1:11434'}/api/tags`;
         try {
-            const response = await fetch(`${this.baseUrl}/api/tags`);
-            if (!response.ok) return [];
-            const data = await response.json();
+            let data;
+            if (this.isExtension()) {
+                const response = await chrome.runtime.sendMessage({
+                    type: 'PROXY_REQUEST',
+                    data: { url, method: 'GET' }
+                });
+                if (!response.success) throw new Error(response.error);
+                data = response.data;
+            } else {
+                const response = await fetch(url);
+                if (!response.ok) return [];
+                data = await response.json();
+            }
             return data.models?.map((m: any) => m.name) || [];
         } catch (error) {
             console.error('Failed to fetch Ollama models:', error);
@@ -125,9 +184,18 @@ export class OllamaService implements IAIService {
     }
 
     async checkHealth(): Promise<boolean> {
+        const url = `${this.baseUrl || 'http://127.0.0.1:11434'}/api/tags`;
         try {
-            const response = await fetch(`${this.baseUrl}/api/tags`); // Simple endpoint to check connectivity
-            return response.ok;
+            if (this.isExtension()) {
+                const response = await chrome.runtime.sendMessage({
+                    type: 'PROXY_REQUEST',
+                    data: { url, method: 'GET' }
+                });
+                return response.success;
+            } else {
+                const response = await fetch(url);
+                return response.ok;
+            }
         } catch {
             return false;
         }

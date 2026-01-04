@@ -12,15 +12,20 @@ interface ServiceContextType {
 const ServiceContext = createContext<ServiceContextType | undefined>(undefined);
 
 export const ServiceProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [aiService, setAiService] = useState<IAIService>(new OllamaService(import.meta.env.VITE_OLLAMA_URL));
+    const defaultUrl = import.meta.env.PROD ? 'http://127.0.0.1:11434' : '';
+    const initialUrl = import.meta.env.VITE_OLLAMA_URL ?? defaultUrl;
+
+    const [aiService, setAiService] = useState<IAIService>(new OllamaService(initialUrl));
     const [currentServiceType, setCurrentServiceType] = useState<'mock' | 'ollama'>('ollama');
 
     const setServiceType = (type: 'mock' | 'ollama', config?: any) => {
         setCurrentServiceType(type);
         if (type === 'ollama') {
-            // Use config.url if provided, otherwise fallback to env var, otherwise empty string (relative path)
-            // This ensures we use the proxy (Vite or Nginx) by default.
-            const url = config?.url ?? import.meta.env.VITE_OLLAMA_URL ?? '';
+            // Use config.url if provided.
+            // In PROD (Extension), default to localhost:11434 if no ENV set (as there is no proxy).
+            // In DEV, default to empty string (relative) to use Vite proxy.
+            const defaultUrl = import.meta.env.PROD ? 'http://127.0.0.1:11434' : '';
+            const url = config?.url ?? import.meta.env.VITE_OLLAMA_URL ?? defaultUrl;
             setAiService(new OllamaService(url, config?.model));
         } else {
             setAiService(new MockAIService());
