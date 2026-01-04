@@ -2,6 +2,9 @@
     "manifest_version": 3,
     "name": "Flux - Reader Helper",
     "version": "1.0.0",
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'"
+    },
     "description": "A helper for reading and learning languages.",
     "icons": {
         "16": "flux-reader-helper.png",

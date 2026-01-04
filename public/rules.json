@@ -37,6 +37,9 @@
             "regexFilter": "^http://.*:11434/.*",
             "resourceTypes": [
                 "xmlhttprequest"
+            ],
+            "initiatorSchemes": [
+                "chrome-extension"
             ]
         }
     }
