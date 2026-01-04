@@ -12,7 +12,9 @@ interface ServiceContextType {
 const ServiceContext = createContext<ServiceContextType | undefined>(undefined);
 
 export const ServiceProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const defaultUrl = import.meta.env.PROD ? 'http://127.0.0.1:11434' : '';
+    // In both PROD (Web) and DEV, we prefer relative paths ('') to allow Proxying (Vite/Nginx).
+    // The OllamaService itself will fallback to localhost ONLY if it detects it's running as an Extension.
+    const defaultUrl = '';
     const initialUrl = import.meta.env.VITE_OLLAMA_URL ?? defaultUrl;
 
     const [aiService, setAiService] = useState<IAIService>(new OllamaService(initialUrl));
@@ -22,9 +24,6 @@ export const ServiceProvider: React.FC<{ children: ReactNode }> = ({ children })
         setCurrentServiceType(type);
         if (type === 'ollama') {
             // Use config.url if provided.
-            // In PROD (Extension), default to localhost:11434 if no ENV set (as there is no proxy).
-            // In DEV, default to empty string (relative) to use Vite proxy.
-            const defaultUrl = import.meta.env.PROD ? 'http://127.0.0.1:11434' : '';
             const url = config?.url ?? import.meta.env.VITE_OLLAMA_URL ?? defaultUrl;
             setAiService(new OllamaService(url, config?.model));
         } else {

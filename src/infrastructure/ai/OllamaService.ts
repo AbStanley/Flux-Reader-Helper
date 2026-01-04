@@ -41,6 +41,14 @@ export class OllamaService implements IAIService {
         return typeof chrome !== 'undefined' && !!chrome.runtime && !!chrome.runtime.sendMessage;
     }
 
+    private get apiBaseUrl(): string {
+        if (this.baseUrl) return this.baseUrl;
+        // If no user-configured URL:
+        // - Extension: MUST use absolute URL (localhost) because 'chrome-extension://' origin cannot use relative '/api'
+        // - Web App: uses relative path '' to allow proxying (Vite/Nginx)
+        return this.isExtension() ? 'http://127.0.0.1:11434' : '';
+    }
+
     async generateText(prompt: string, options?: {
         onProgress?: (chunk: string, fullText: string) => void;
         signal?: AbortSignal;
@@ -64,7 +72,9 @@ export class OllamaService implements IAIService {
                 return this.generateTextExtension(body, isStreaming, options?.onProgress);
             }
 
-            const response = await fetch(`${this.baseUrl}/api/generate`, {
+            // Web App Mode: Use apiBaseUrl -> relative path if empty
+            const url = `${this.apiBaseUrl}/api/generate`;
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
@@ -144,7 +154,7 @@ export class OllamaService implements IAIService {
             port.postMessage({
                 type: 'START_STREAM',
                 data: {
-                    url: `${this.baseUrl || 'http://127.0.0.1:11434'}/api/generate`,
+                    url: `${this.apiBaseUrl}/api/generate`,
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body
@@ -180,7 +190,7 @@ export class OllamaService implements IAIService {
     }
 
     async getAvailableModels(): Promise<string[]> {
-        const url = `${this.baseUrl || 'http://127.0.0.1:11434'}/api/tags`;
+        const url = `${this.apiBaseUrl}/api/tags`;
         try {
             let data;
             if (this.isExtension()) {
@@ -203,7 +213,7 @@ export class OllamaService implements IAIService {
     }
 
     async checkHealth(): Promise<boolean> {
-        const url = `${this.baseUrl || 'http://127.0.0.1:11434'}/api/tags`;
+        const url = `${this.apiBaseUrl}/api/tags`;
         try {
             if (this.isExtension()) {
                 const response = await chrome.runtime.sendMessage({
