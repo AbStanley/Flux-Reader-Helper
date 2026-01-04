@@ -1,11 +1,9 @@
 import React, { memo } from 'react';
-import ReactMarkdown from 'react-markdown';
 import styles from '../ReaderView.module.css';
-
-import { Search, Volume2, RefreshCcw } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { HoverPosition } from '../../../../core/types';
-
+import { ReaderTokenPopup } from './ReaderTokenPopup';
+import { TokenText } from './TokenText';
 
 interface ReaderTokenProps {
     token: string;
@@ -82,72 +80,6 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
         }
     };
 
-
-
-    const renderPopup = (translation: string, isHoverPopup: boolean) => {
-        const buttonClass = cn(
-            "ml-1 p-1 rounded-full cursor-pointer shadow-sm border border-white/10",
-            "bg-white/20 hover:bg-white/30 text-white",
-            "transition-all duration-300 ease-in-out",
-            // Mobile: always visible
-            "opacity-100 scale-100",
-            // Desktop: hidden by default, visible on group hover
-            "min-[1200px]:opacity-0 min-[1200px]:scale-75 min-[1200px]:w-0 min-[1200px]:p-0 min-[1200px]:ml-0",
-            "min-[1200px]:group-hover:opacity-100 min-[1200px]:group-hover:scale-100 min-[1200px]:group-hover:w-auto min-[1200px]:group-hover:p-1 min-[1200px]:group-hover:ml-1"
-        );
-
-        const handleInteraction = (e: React.MouseEvent | React.TouchEvent, action: () => void) => {
-            e.stopPropagation();
-            // Prevent the long-press hook from seeing this as a start of a press
-            // This is key because the hook might be listening on the parent
-            action();
-        };
-
-        return (
-            <span
-                className="flex items-center group"
-                onMouseDown={(e) => e.stopPropagation()}
-                onMouseUp={(e) => e.stopPropagation()}
-                onTouchStart={(e) => e.stopPropagation()}
-                onClick={(e) => e.stopPropagation()}
-            >
-                <ReactMarkdown>{translation}</ReactMarkdown>
-                <div className="flex items-center overflow-hidden transition-all duration-300 ease-in-out">
-                    <button
-                        className={buttonClass}
-                        onClick={(e) => handleInteraction(e, () => onPlay(index, isHoverPopup))}
-                        onMouseDown={(e) => e.stopPropagation()}
-                        onMouseUp={(e) => e.stopPropagation()}
-                        onTouchStart={(e) => e.stopPropagation()}
-                        title="Listen"
-                    >
-                        <Volume2 size={14} strokeWidth={3} />
-                    </button>
-                    <button
-                        className={buttonClass}
-                        onClick={(e) => handleInteraction(e, () => onMoreInfo(index, isHoverPopup))}
-                        onMouseDown={(e) => e.stopPropagation()}
-                        onMouseUp={(e) => e.stopPropagation()}
-                        onTouchStart={(e) => e.stopPropagation()}
-                        title="More Info"
-                    >
-                        <Search size={14} strokeWidth={3} />
-                    </button>
-                    <button
-                        className={buttonClass}
-                        onClick={(e) => handleInteraction(e, () => onRegenerate(index))}
-                        onMouseDown={(e) => e.stopPropagation()}
-                        onMouseUp={(e) => e.stopPropagation()}
-                        onTouchStart={(e) => e.stopPropagation()}
-                        title="Regenerate Translation"
-                    >
-                        <RefreshCcw size={14} strokeWidth={3} />
-                    </button>
-                </div>
-            </span>
-        );
-    };
-
     if (hasNewline) {
         return <br />;
     }
@@ -191,51 +123,17 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
         >
             {groupTranslation && (
                 <span className={styles.selectionPopupValid}>
-                    {renderPopup(groupTranslation, false)}
+                    <ReaderTokenPopup
+                        translation={groupTranslation}
+                        onPlay={() => onPlay(index, false)}
+                        onMoreInfo={() => onMoreInfo(index, false)}
+                        onRegenerate={() => onRegenerate(index)}
+                    />
                 </span>
             )}
 
             {/* Render token with markdown support */}
-            {(() => {
-                // Simplified parser for **bold** and *italic*
-
-                const renderParts = (text: string, bold: boolean) => {
-                    const italicRegex = /\*([^*]+)\*/g;
-                    if (italicRegex.test(text)) {
-                        return (
-                            <>
-                                {text.split(italicRegex).map((part, i) => {
-                                    const isItalic = i % 2 === 1;
-                                    const classes = cn(
-                                        bold && "font-bold",
-                                        isItalic && "italic"
-                                    );
-                                    return <span key={i} className={classes}>{part}</span>;
-                                })}
-                            </>
-                        );
-                    }
-                    if (bold) {
-                        return <strong className="font-bold">{text}</strong>;
-                    }
-                    return text;
-                };
-
-                const boldRegex = /\*\*(.*?)\*\*/g;
-                if (boldRegex.test(token)) {
-                    return (
-                        <>
-                            {token.split(boldRegex).map((part, i) => (
-                                <React.Fragment key={i}>
-                                    {renderParts(part, i % 2 === 1)}
-                                </React.Fragment>
-                            ))}
-                        </>
-                    );
-                } else {
-                    return renderParts(token, false);
-                }
-            })()}
+            <TokenText token={token} />
 
             {/* Show hover popup:
                 - If NOT selected: Standard position (above).
@@ -244,7 +142,12 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
              */}
             {(isHoveredWord) && hoverTranslation && !(isSelected && position === 'single') && (
                 <span className={isSelected ? styles.hoverPopupBelow : styles.hoverPopup}>
-                    {renderPopup(hoverTranslation, true)}
+                    <ReaderTokenPopup
+                        translation={hoverTranslation}
+                        onPlay={() => onPlay(index, true)}
+                        onMoreInfo={() => onMoreInfo(index, true)}
+                        onRegenerate={() => onRegenerate(index)}
+                    />
                 </span>
             )}
         </span>
