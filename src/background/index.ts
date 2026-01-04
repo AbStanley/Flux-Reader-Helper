@@ -29,6 +29,15 @@ chrome.runtime.onMessage.addListener((message: any, sender: any, sendResponse: a
             .catch(error => sendResponse({ success: false, error: error.message }));
         return true; // Will respond asynchronously
     }
+
+    if (message.type === 'OPEN_SIDE_PANEL') {
+        if (sender.tab?.windowId) {
+            chrome.sidePanel.open({ windowId: sender.tab.windowId })
+                .then(() => sendResponse({ success: true }))
+                .catch((e: any) => sendResponse({ success: false, error: e.message }));
+            return true;
+        }
+    }
 });
 
 chrome.runtime.onConnect.addListener((port: chrome.runtime.Port) => {

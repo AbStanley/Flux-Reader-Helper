@@ -26,6 +26,19 @@ function App() {
         }
       };
       w.chrome.runtime.onMessage.addListener(handleMessage);
+
+      // Check for pending text in storage (from "Read in Flux" action)
+      if (w.chrome.storage && w.chrome.storage.local) {
+        w.chrome.storage.local.get(['pendingText'], (result: any) => {
+          if (result.pendingText) {
+            setText(result.pendingText);
+            setIsReading(true);
+            // Clear it so it doesn't persist forever
+            w.chrome.storage.local.remove('pendingText');
+          }
+        });
+      }
+
       return () => w.chrome.runtime.onMessage.removeListener(handleMessage);
     }
   }, [setText, setIsReading]);
