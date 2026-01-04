@@ -10,8 +10,8 @@ type Mode = 'EXPLAIN' | 'TRANSLATE';
 const aiService = new OllamaService(import.meta.env.VITE_OLLAMA_URL || 'http://127.0.0.1:11434');
 
 const LANGUAGES = [
-    'English', 'Spanish', 'French', 'German', 'Italian',
-    'Portuguese', 'Japanese', 'Chinese', 'Russian', 'Korean'
+    'English', 'Spanish', 'Russian', 'French', 'German', 'Italian',
+    'Portuguese', 'Japanese', 'Chinese',
 ];
 
 /**
@@ -32,6 +32,7 @@ export const FluxContentApp: React.FC = () => {
     const [result, setResult] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [copied, setCopied] = useState(false);
 
     // New State for Controls - Default to TRANSLATE
     const [mode, setMode] = useState<Mode>('TRANSLATE');
@@ -192,20 +193,21 @@ export const FluxContentApp: React.FC = () => {
                                 e.stopPropagation();
                                 if (result) {
                                     navigator.clipboard.writeText(result);
-                                    // Visual feedback could be added here
-                                    const btn = e.currentTarget;
-                                    const originalText = btn.textContent;
-                                    btn.textContent = '✓';
-                                    setTimeout(() => btn.textContent = originalText, 1000);
+                                    setCopied(true);
+                                    setTimeout(() => setCopied(false), 2000);
                                 }
                             }}
                             title="Copy Result"
                             style={{
-                                background: '#334155', color: '#94a3b8', border: 'none',
-                                borderRadius: '6px', padding: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center'
+                                background: '#334155', color: copied ? '#4ade80' : '#94a3b8', border: 'none',
+                                borderRadius: '6px', padding: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', minWidth: '28px', justifyContent: 'center'
                             }}
                         >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            {copied ? (
+                                <span style={{ fontSize: '12px', fontWeight: 'bold' }}>✓</span>
+                            ) : (
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            )}
                         </button>
 
                         <button
