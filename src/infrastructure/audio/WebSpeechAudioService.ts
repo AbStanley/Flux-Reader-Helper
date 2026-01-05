@@ -20,8 +20,7 @@ export class WebSpeechAudioService implements IAudioService {
         onEnd: () => void
     ): void {
         if (!this.synthesis) {
-            console.error("SpeechSynthesis not supported");
-            return;
+            throw new Error("SpeechSynthesis not supported");
         }
 
         this.stop();
@@ -56,7 +55,7 @@ export class WebSpeechAudioService implements IAudioService {
             if (e.error === 'interrupted' || e.error === 'canceled') {
                 return;
             }
-            console.error("SpeechSynthesis error:", e);
+
             // Attempt to recover or notify
             onEnd();
         };
@@ -64,7 +63,7 @@ export class WebSpeechAudioService implements IAudioService {
         try {
             this.synthesis.speak(this.utterance);
         } catch (e) {
-            console.error("SpeechSynthesis speak failed:", e);
+
             onEnd();
         }
     }

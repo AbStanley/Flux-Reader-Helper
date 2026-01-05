@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-// @ts-ignore
 import ePub from 'epubjs';
 import type { Chapter } from '../utils/epubUtils';
 import { processToc, extractEpubText } from '../utils/epubUtils';

@@ -1,42 +1,34 @@
 import { create } from 'zustand';
-import { SelectionMode } from '../../../../core/types'; // NEW
+import { SelectionMode } from '../../../../core/types';
 import { useTranslationStore } from './useTranslationStore';
-
-
+import { getSentenceRange } from '../../../../core/utils/text-utils';
 
 interface ReaderState {
-    // State
     tokens: string[];
     currentPage: number;
     selectedIndices: Set<number>;
 
-    // Config
     text: string;
     sourceLang: string;
     targetLang: string;
     isReading: boolean;
-    isGenerating: boolean; // Global generation status
+    isGenerating: boolean;
     PAGE_SIZE: number;
-    selectionMode: SelectionMode; // Updated type
+    selectionMode: SelectionMode;
 
-    // Actions
     setConfig: (text: string, sourceLang: string, targetLang: string) => void;
     setText: (text: string) => void;
     setSourceLang: (lang: string) => void;
     setTargetLang: (lang: string) => void;
     setIsReading: (isReading: boolean) => void;
-    setIsGenerating: (isGenerating: boolean) => void; // Setter
+    setIsGenerating: (isGenerating: boolean) => void;
     setSelectionMode: (mode: SelectionMode) => void;
     setPage: (page: number) => void;
     handleSelection: (globalIndex: number) => Promise<void>;
     clearSelection: () => void;
 }
 
-// Helper: Group selected indices into contiguous blocks (Still used?)
-// Actually, `setConfig` and `setText` used to reset translation state. I need to fix that too.
-
 export const useReaderStore = create<ReaderState>((set, get) => ({
-    // Initial State
     tokens: [],
     currentPage: 1,
     selectedIndices: new Set(),
@@ -48,9 +40,7 @@ export const useReaderStore = create<ReaderState>((set, get) => ({
     PAGE_SIZE: 500,
     selectionMode: SelectionMode.Word,
 
-    // Actions
     setConfig: (text, sourceLang, targetLang) => {
-        // Avoid resetting if unchanged
         if (text === get().text && sourceLang === get().sourceLang && targetLang === get().targetLang) {
             return;
         }
@@ -72,7 +62,6 @@ export const useReaderStore = create<ReaderState>((set, get) => ({
     },
 
     setText: (text) => {
-        // NEW: Clear translations and info panel
         const { closeRichInfo, clearSelectionTranslations } = useTranslationStore.getState();
         closeRichInfo();
         clearSelectionTranslations();
@@ -109,7 +98,7 @@ export const useReaderStore = create<ReaderState>((set, get) => ({
             const start = range[0];
             const end = range[range.length - 1];
 
-            // Toggle logic: If the clicked token was selected, deselect the group.
+            // If the clicked token was selected, deselect the group.
             const wasSelected = newSelection.has(globalIndex);
 
             for (let i = start; i <= end; i++) {
@@ -121,11 +110,10 @@ export const useReaderStore = create<ReaderState>((set, get) => ({
             }
 
         } else {
-            // Word mode (Default)
             if (newSelection.has(globalIndex)) {
                 newSelection.delete(globalIndex);
 
-                // Logic: If we deselect a word, check if adjacent whitespace becomes "orphaned"
+                // If we deselect a word, check if adjacent whitespace becomes "orphaned"
                 // (i.e., not next to another selected word) and deselect it too.
                 const checkAndDeselect = (idx: number) => {
                     if (!newSelection.has(idx)) return;
@@ -147,8 +135,6 @@ export const useReaderStore = create<ReaderState>((set, get) => ({
 
             } else {
                 newSelection.add(globalIndex);
-                // Note: We don't automatically select whitespace when selecting a word in Word mode.
-                // It's only selected via Sentence mode.
             }
         }
 
@@ -157,9 +143,5 @@ export const useReaderStore = create<ReaderState>((set, get) => ({
 
     clearSelection: () => set({ selectedIndices: new Set() }),
 }));
-
-import { getSentenceRange } from '../../../../core/utils/text-utils';
-
-// Helper to find sentence boundaries - Moved to utils
 
 

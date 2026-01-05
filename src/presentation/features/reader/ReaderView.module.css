@@ -2,22 +2,17 @@
     font-size: 1.25rem;
     line-height: 1.8;
     color: hsl(var(--foreground));
-    color: hsl(var(--foreground));
     white-space: pre-wrap;
-    /* Default desktop behavior */
     width: 100%;
     padding: 3rem;
     padding-bottom: 3rem;
 }
 
-/* Mobile Layout Constraints */
 @media (max-width: 1200px) {
     .textArea {
         max-width: 90%;
         margin: 0 auto;
-        /* Center the text block */
         padding: 1rem 0;
-        /* Reduce gap: 1rem top/bottom, 0 side (handled by max-width+margin) */
     }
 }
 
@@ -30,10 +25,7 @@
     margin: 0;
 }
 
-.interactive {
-    cursor: pointer;
-}
-
+.interactive { cursor: pointer; }
 .interactive:hover {
     background-color: hsl(var(--accent));
     color: hsl(var(--accent-foreground));
@@ -46,48 +38,24 @@
     font-weight: 500;
     vertical-align: baseline;
 }
-
-.selected.interactive:hover {
-    background-color: hsl(var(--link-color) / 0.1);
-}
+.selected.interactive:hover { background-color: hsl(var(--link-color) / 0.1); }
 
 .hovered {
     background-color: hsl(var(--accent) / 0.5);
     border-radius: 0.25em;
 }
 
-/* Grouping Styles ensuring seamless connection without layout shift */
-.start {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-}
+/* Grouping Styles */
+.start { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.middle { border-radius: 0; }
+.end { border-top-left-radius: 0; border-bottom-left-radius: 0; }
 
-/* Apply margin ONLY when selected to reserve space for the popup */
-.selected.start,
-.selected.single,
-.visualStart {
-    margin-top: 3rem;
-}
-
-.middle {
-    border-radius: 0;
-}
-
-.end {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-}
-
-.single {
-    /* No margin by default to allow hover without jump */
-}
+.selected.start, .selected.single, .visualStart { margin-top: 3rem; }
 
 /* Hover States */
 .hoveredSentence {
     background-color: hsl(var(--accent) / 0.3);
-    /* Lighter highlight for full sentence */
     border-radius: 0;
-    /* Remove rounding to avoid gaps/separation appearance */
     transition: background-color 0.15s ease;
 }
 
@@ -96,44 +64,26 @@
     color: hsl(var(--accent-foreground));
     border-radius: 0.25rem;
     box-shadow: none;
-    /* Shadow creates seams between joined words */
 }
 
-/* Ensure shape helpers override the base radius */
-.selected.hoveredSentence.middle {
-    border-radius: 0;
-}
-
-.selected.hoveredSentence.start {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-}
-
-.selected.hoveredSentence.end {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-}
+/* Shape helpers overrides */
+.selected.hoveredSentence.middle { border-radius: 0; }
+.selected.hoveredSentence.start { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.selected.hoveredSentence.end { border-top-left-radius: 0; border-bottom-left-radius: 0; }
 
 .hoveredWord {
     background-color: hsl(var(--accent) / 0.8) !important;
-    /* Stronger highlight for the specific word */
     box-shadow: 0 0 0 1px hsl(var(--accent));
-    /* increased visibility */
     border-radius: 0.25em;
     z-index: 50;
     position: relative;
-    /* Ensure it sits on top */
 }
 
-.zIndexTop {
-    z-index: 60;
-    position: relative;
-}
+.zIndexTop { z-index: 60; position: relative; }
 
-/* Popups still use custom CSS for precise absolute positioning relative to span */
-.hoverPopup {
+/* Popups Common */
+.hoverPopup, .hoverPopupBelow {
     position: absolute;
-    bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
     background-color: hsl(var(--popover));
@@ -142,36 +92,20 @@
     border-radius: 0.25rem;
     font-size: 0.875rem;
     white-space: nowrap;
-    z-index: 10;
+    z-index: 100;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     border: 1px solid hsl(var(--border));
-    margin-bottom: 4px;
-    pointer-events: none;
+    pointer-events: auto !important;
+    display: flex;
+    align-items: center;
 }
 
-.hoverPopupBelow {
-    position: absolute;
-    top: 100%;
-    /* Position below */
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: hsl(var(--popover));
-    color: hsl(var(--popover-foreground));
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.875rem;
-    white-space: nowrap;
-    z-index: 10;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    border: 1px solid hsl(var(--border));
-    margin-top: 4px;
-    pointer-events: none;
-}
+.hoverPopup { bottom: 100%; margin-bottom: 4px; }
+.hoverPopupBelow { top: 100%; margin-top: 4px; }
 
 .selectionPopupValid {
     position: absolute;
     bottom: 120%;
-    /* Changed from Top to Bottom for better stability */
     left: 0;
     background-color: hsl(var(--link-color));
     color: hsl(var(--primary-foreground));
@@ -179,28 +113,20 @@
     border-radius: 0.5rem;
     font-size: 0.9rem;
     white-space: nowrap;
-    z-index: 20;
     font-weight: 600;
     animation: fadeUp 0.2s ease-out;
     transition: bottom 0.2s ease;
+    pointer-events: auto !important;
+    z-index: 30;
+    display: flex;
+    align-items: center;
 }
 
-/* Allow focusing a token (touch/click) to bring it to front */
-.token:focus-within {
-    z-index: 100;
-    position: relative;
-}
+.token:focus-within { z-index: 100; position: relative; }
 
 @keyframes fadeUp {
-    from {
-        opacity: 0;
-        transform: translate(-50%, 5px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translate(-50%, 0);
-    }
+    from { opacity: 0; transform: translate(-50%, 5px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
 }
 
 .audioHighlight {
@@ -211,41 +137,15 @@
     transform: scale(1.05);
     z-index: 5;
     position: relative;
-    /* Ensure it stands out */
-}
-
-/* Ensure popups are interactive and layered correctly */
-.selectionPopupValid {
-    pointer-events: auto !important;
-    z-index: 30;
-    /* Base layer for persistent popups */
-    display: flex;
-    align-items: center;
-}
-
-.hoverPopup,
-.hoverPopupBelow {
-    pointer-events: auto !important;
-    z-index: 100;
-    /* Top layer for active hover */
-    display: flex;
-    align-items: center;
 }
 
 /* Custom Scrollbar */
-.textAreaContainer::-webkit-scrollbar {
-    width: 6px;
-}
-
-.textAreaContainer::-webkit-scrollbar-track {
-    background: transparent;
-}
-
+.textAreaContainer::-webkit-scrollbar { width: 6px; }
+.textAreaContainer::-webkit-scrollbar-track { background: transparent; }
 .textAreaContainer::-webkit-scrollbar-thumb {
     background-color: hsl(var(--muted-foreground) / 0.2);
     border-radius: 10px;
 }
-
 .textAreaContainer::-webkit-scrollbar-thumb:hover {
     background-color: hsl(var(--muted-foreground) / 0.4);
 }

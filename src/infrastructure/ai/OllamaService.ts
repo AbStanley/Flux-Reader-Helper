@@ -21,7 +21,7 @@ export class OllamaService implements IAIService {
         if (baseUrl.endsWith('/')) {
             baseUrl = baseUrl.slice(0, -1);
         }
-        console.log('[OllamaService] Initializing with baseUrl:', baseUrl || '(empty/relative)');
+
 
         this.transport = new OllamaTransport(baseUrl);
         this.model = model;
@@ -53,20 +53,19 @@ export class OllamaService implements IAIService {
                 signal: options?.signal
             });
         } catch (error: any) {
-            console.error('Ollama generation failed:', error);
             throw error;
         }
     }
 
     async translateText(text: string, targetLanguage: string = 'en', context?: string, sourceLanguage?: string): Promise<string> {
-        console.log(`[OllamaService] translateText`, { text, target: targetLanguage, source: sourceLanguage });
+
         const prompt = getTranslatePrompt(text, targetLanguage, context, sourceLanguage);
         const rawResponse = await this.generateText(prompt);
         return cleanResponse(rawResponse);
     }
 
     async explainText(text: string, targetLanguage: string = 'en', context?: string): Promise<string> {
-        console.log(`[OllamaService] explainText`, { text, target: targetLanguage });
+
         const { getExplainPrompt } = await import('./prompts/TranslationPrompts');
         const prompt = getExplainPrompt(text, targetLanguage, context);
         const rawResponse = await this.generateText(prompt);
@@ -74,15 +73,14 @@ export class OllamaService implements IAIService {
     }
 
     async getRichTranslation(text: string, targetLanguage: string = 'en', context?: string, sourceLanguage?: string): Promise<any> {
-        console.log(`[OllamaService] getRichTranslation`, { text, target: targetLanguage, source: sourceLanguage });
+
         const prompt = getRichTranslationPrompt(text, targetLanguage, context, sourceLanguage);
         const rawResponse = await this.generateText(prompt, { num_predict: 4096 });
         try {
             const data = extractJson(rawResponse);
             return normalizeRichTranslation(data);
         } catch (e) {
-            console.error("Failed to parse rich translation JSON", rawResponse);
-            throw new Error("Failed to parse rich translation response");
+            throw new Error(`Failed to parse rich translation response: ${rawResponse}`);
         }
     }
 
