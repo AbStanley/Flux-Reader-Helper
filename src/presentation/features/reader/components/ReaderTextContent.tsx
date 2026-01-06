@@ -117,6 +117,17 @@ const ReaderTextContentComponent: React.FC<ReaderTextContentProps> = ({
                     else if (prev && !next) hoverPosition = HoverPosition.End;
                 }
 
+                // Correctly identify the end of the group for this specific token's group
+                let groupEndId: string | undefined;
+                if (groupTranslation) {
+                    // Find the group this token belongs to
+                    const group = groups.find(g => g.includes(globalIndex));
+                    if (group) {
+                        const lastIndex = group[group.length - 1];
+                        groupEndId = `token-${lastIndex}`;
+                    }
+                }
+
                 return (
                     <ReaderToken
                         key={index}
@@ -125,12 +136,14 @@ const ReaderTextContentComponent: React.FC<ReaderTextContentProps> = ({
                         token={token}
                         groupTranslation={groupTranslation}
                         position={position}
+                        groupEndId={groupEndId} // Passed for width calculation
                         isHovered={isHoveredSentence} // Now represents the full sentence hover
                         isHoveredWord={isHoveredWord} // Specific word
                         hoverPosition={hoverPosition}
                         hoverTranslation={isHoveredWord ? (hoverTranslation || undefined) : undefined}
                         isAudioHighlighted={isAudioHighlighted}
                         isTitle={isTitleToken}
+                        containerRef={textAreaRef}
                         onClick={handleTokenClick}
                         onHover={handleHover}
                         onClearHover={clearHover}

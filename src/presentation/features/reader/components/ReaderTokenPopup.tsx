@@ -20,11 +20,7 @@ export const ReaderTokenPopup: React.FC<ReaderTokenPopupProps> = ({
         "ml-1 p-1 rounded-full cursor-pointer shadow-sm border border-white/10",
         "bg-white/20 hover:bg-white/30 text-white",
         "transition-all duration-300 ease-in-out",
-        // Mobile: always visible
-        "opacity-100 scale-100",
-        // Desktop: hidden by default, visible on group hover
-        "min-[1200px]:opacity-0 min-[1200px]:scale-75 min-[1200px]:w-0 min-[1200px]:p-0 min-[1200px]:ml-0",
-        "min-[1200px]:group-hover:opacity-100 min-[1200px]:group-hover:scale-100 min-[1200px]:group-hover:w-auto min-[1200px]:group-hover:p-1 min-[1200px]:group-hover:ml-1"
+        "opacity-100 scale-100"
     );
 
     const handleInteraction = (e: React.MouseEvent | React.TouchEvent, action: () => void) => {
@@ -34,14 +30,16 @@ export const ReaderTokenPopup: React.FC<ReaderTokenPopupProps> = ({
 
     return (
         <span
-            className="flex items-center group"
+            className="flex items-center group flex-wrap"
             onMouseDown={(e) => e.stopPropagation()}
             onMouseUp={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
         >
-            <ReactMarkdown>{translation}</ReactMarkdown>
-            <div className="flex items-center overflow-hidden transition-all duration-300 ease-in-out">
+            <span className="flex-1 min-w-0">
+                <ReactMarkdown>{translation}</ReactMarkdown>
+            </span>
+            <div className="flex items-center flex-shrink-0 transition-all duration-300 ease-in-out">
                 <button
                     className={buttonClass}
                     onClick={(e) => handleInteraction(e, onPlay)}
