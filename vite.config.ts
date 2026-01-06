@@ -38,26 +38,11 @@ export default defineConfig({
         },
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            if (id.includes('react-dom')) {
-              return 'vendor-react-dom';
-            }
-            if (id.includes('react') || id.includes('zustand')) {
-              return 'vendor-react';
-            }
+            // PDF.js is very large, keep it separate
             if (id.includes('pdfjs-dist') || id.includes('react-pdf')) {
               return 'vendor-pdf';
             }
-            if (id.includes('epubjs') || id.includes('jszip')) {
-              return 'vendor-epub';
-            }
-            if (id.includes('@radix-ui') || id.includes('lucide-react') || id.includes('shadcn') || id.includes('class-variance-authority') || id.includes('clsx') || id.includes('tailwind-merge')) {
-              return 'vendor-ui';
-            }
-            if (id.includes('framer-motion')) {
-              return 'vendor-motion';
-            }
-            // Group remaining small vendors
-            return 'vendor-utils';
+            return 'vendor';
           }
         },
       },

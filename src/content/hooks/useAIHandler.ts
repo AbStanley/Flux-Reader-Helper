@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { OllamaService } from '../../infrastructure/ai/OllamaService';
 
 // Initialize Service
-const aiService = new OllamaService(import.meta.env.VITE_OLLAMA_URL || 'http://127.0.0.1:11434');
+const aiService = new OllamaService(import.meta.env.VITE_OLLAMA_URL);
 
 export type Mode = 'EXPLAIN' | 'TRANSLATE';
 
