@@ -80,12 +80,50 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
         }
     };
 
+    const tokenRef = React.useRef<HTMLSpanElement>(null);
+    const popupContainerRef = React.useRef<HTMLSpanElement>(null);
+    const [isRightAligned, setIsRightAligned] = React.useState(false);
+    const [dynamicMarginTop, setDynamicMarginTop] = React.useState<number | undefined>(undefined);
+    const [dynamicMaxWidth, setDynamicMaxWidth] = React.useState<number | undefined>(undefined);
+
+    React.useLayoutEffect(() => {
+        if ((groupTranslation || hoverTranslation) && tokenRef.current) {
+            const rect = tokenRef.current.getBoundingClientRect();
+            const windowWidth = window.innerWidth;
+
+            const distanceToRight = windowWidth - rect.left;
+            const threshold = 400; // conservative max width
+            const isRight = distanceToRight < threshold;
+            setIsRightAligned(isRight);
+
+            // Dynamic Max Width: Use all available space
+            const padding = 40; // Safety buffer
+            const availableWidth = isRight
+                ? (rect.right - padding) // If right aligned, space to the left
+                : (windowWidth - rect.left - padding); // If left aligned, space to the right
+
+            setDynamicMaxWidth(availableWidth);
+
+            // Dynamic layout shift: Measure popup height
+            if (popupContainerRef.current) {
+                const height = popupContainerRef.current.offsetHeight;
+                if (height > 0) {
+                    setDynamicMarginTop(height + 25); // 20px padding
+                }
+            }
+        } else {
+            setDynamicMarginTop(undefined);
+            setDynamicMaxWidth(undefined);
+        }
+    }, [groupTranslation, hoverTranslation, isHovered, isSelected]);
+
     if (hasNewline) {
         return <br />;
     }
 
     return (
         <span
+            ref={tokenRef}
             id={`token-${globalIndex}`}
             className={`
                 ${styles.token} 
@@ -118,11 +156,19 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
                 }
             }}
             onContextMenu={handleContextMenu}
-            style={{ position: 'relative' }}
+            style={{
+                position: 'relative',
+                marginTop: dynamicMarginTop ? `${dynamicMarginTop}px` : undefined,
+                transition: 'margin-top 0.2s ease-out'
+            }}
             tabIndex={0} // Allow focus to bring to front via CSS :focus-within
         >
             {groupTranslation && (
-                <span className={styles.selectionPopupValid}>
+                <span
+                    ref={popupContainerRef}
+                    className={cn(styles.selectionPopupValid, isRightAligned && styles.popupRight)}
+                    style={{ maxWidth: dynamicMaxWidth ? `${dynamicMaxWidth}px` : undefined }}
+                >
                     <ReaderTokenPopup
                         translation={groupTranslation}
                         onPlay={() => onPlay(index, false)}
@@ -141,7 +187,10 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
                 - EXCEPTION: If selected is SINGLE word, disable below popup (green popup handles it).
              */}
             {(isHoveredWord) && hoverTranslation && !(isSelected && position === 'single') && (
-                <span className={isSelected ? styles.hoverPopupBelow : styles.hoverPopup}>
+                <span
+                    className={cn(isSelected ? styles.hoverPopupBelow : styles.hoverPopup, isRightAligned && styles.popupRight)}
+                    style={{ maxWidth: dynamicMaxWidth ? `${dynamicMaxWidth}px` : undefined }}
+                >
                     <ReaderTokenPopup
                         translation={hoverTranslation}
                         onPlay={() => onPlay(index, true)}

@@ -25,6 +25,4 @@ dist-ssr
 *.sln
 *.sw?
 
-# Project Documentation
-PROJECT_RULES.md
-GEMINI.md
+*.agent

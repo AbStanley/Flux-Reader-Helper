@@ -25,7 +25,10 @@
     margin: 0;
 }
 
-.interactive { cursor: pointer; }
+.interactive {
+    cursor: pointer;
+}
+
 .interactive:hover {
     background-color: hsl(var(--accent));
     color: hsl(var(--accent-foreground));
@@ -38,7 +41,10 @@
     font-weight: 500;
     vertical-align: baseline;
 }
-.selected.interactive:hover { background-color: hsl(var(--link-color) / 0.1); }
+
+.selected.interactive:hover {
+    background-color: hsl(var(--link-color) / 0.1);
+}
 
 .hovered {
     background-color: hsl(var(--accent) / 0.5);
@@ -46,11 +52,26 @@
 }
 
 /* Grouping Styles */
-.start { border-top-right-radius: 0; border-bottom-right-radius: 0; }
-.middle { border-radius: 0; }
-.end { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.start {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
 
-.selected.start, .selected.single, .visualStart { margin-top: 3rem; }
+.middle {
+    border-radius: 0;
+}
+
+.end {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.selected.start,
+.selected.single,
+.visualStart {
+    margin-top: 0;
+    /* Handled dynamically via JS or minimal default */
+}
 
 /* Hover States */
 .hoveredSentence {
@@ -67,9 +88,19 @@
 }
 
 /* Shape helpers overrides */
-.selected.hoveredSentence.middle { border-radius: 0; }
-.selected.hoveredSentence.start { border-top-right-radius: 0; border-bottom-right-radius: 0; }
-.selected.hoveredSentence.end { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.selected.hoveredSentence.middle {
+    border-radius: 0;
+}
+
+.selected.hoveredSentence.start {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.selected.hoveredSentence.end {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
 
 .hoveredWord {
     background-color: hsl(var(--accent) / 0.8) !important;
@@ -79,10 +110,14 @@
     position: relative;
 }
 
-.zIndexTop { z-index: 60; position: relative; }
+.zIndexTop {
+    z-index: 60;
+    position: relative;
+}
 
 /* Popups Common */
-.hoverPopup, .hoverPopupBelow {
+.hoverPopup,
+.hoverPopupBelow {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
@@ -91,17 +126,27 @@
     padding: 0.25rem 0.5rem;
     border-radius: 0.25rem;
     font-size: 0.875rem;
-    white-space: nowrap;
+    white-space: pre-wrap;
     z-index: 100;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     border: 1px solid hsl(var(--border));
     pointer-events: auto !important;
     display: flex;
     align-items: center;
+    max-width: min(280px, 80vw);
+    width: max-content;
+    text-align: left;
 }
 
-.hoverPopup { bottom: 100%; margin-bottom: 4px; }
-.hoverPopupBelow { top: 100%; margin-top: 4px; }
+.hoverPopup {
+    bottom: 100%;
+    margin-bottom: 4px;
+}
+
+.hoverPopupBelow {
+    top: 100%;
+    margin-top: 4px;
+}
 
 .selectionPopupValid {
     position: absolute;
@@ -112,7 +157,7 @@
     padding: 0.25rem 0.75rem;
     border-radius: 0.5rem;
     font-size: 0.9rem;
-    white-space: nowrap;
+    white-space: pre-wrap;
     font-weight: 600;
     animation: fadeUp 0.2s ease-out;
     transition: bottom 0.2s ease;
@@ -120,13 +165,54 @@
     z-index: 30;
     display: flex;
     align-items: center;
+    max-width: 80vw;
+    /* Mobile default */
+    width: max-content;
+    text-align: left;
 }
 
-.token:focus-within { z-index: 100; position: relative; }
+@media (min-width: 768px) {
+    .selectionPopupValid {
+        /* max-width handled dynamically via JS now (style prop) */
+        /* max-width: min(450px, 80vw); */
+    }
+}
+
+/* Removed 700px rule to prevent horizontal overlap with neighbor text */
+
+.popupRight {
+    /* left: auto; */
+    right: 0;
+    text-align: right;
+    /* Use left align for text inside, but anchor container right? User probably wants text read left-to-right */
+    text-align: left;
+    transform: none;
+    /* Remove centering transform if any - normally selectionPopup doesn't have it, but hover might */
+}
+
+/* Override transform for hover popup when right aligned */
+.hoverPopup.popupRight {
+    transform: none;
+    left: auto;
+    right: 0;
+}
+
+
+.token:focus-within {
+    z-index: 100;
+    position: relative;
+}
 
 @keyframes fadeUp {
-    from { opacity: 0; transform: translate(-50%, 5px); }
-    to { opacity: 1; transform: translate(-50%, 0); }
+    from {
+        opacity: 0;
+        transform: translate(-50%, 5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
 }
 
 .audioHighlight {
@@ -140,12 +226,19 @@
 }
 
 /* Custom Scrollbar */
-.textAreaContainer::-webkit-scrollbar { width: 6px; }
-.textAreaContainer::-webkit-scrollbar-track { background: transparent; }
+.textAreaContainer::-webkit-scrollbar {
+    width: 6px;
+}
+
+.textAreaContainer::-webkit-scrollbar-track {
+    background: transparent;
+}
+
 .textAreaContainer::-webkit-scrollbar-thumb {
     background-color: hsl(var(--muted-foreground) / 0.2);
     border-radius: 10px;
 }
+
 .textAreaContainer::-webkit-scrollbar-thumb:hover {
     background-color: hsl(var(--muted-foreground) / 0.4);
 }
