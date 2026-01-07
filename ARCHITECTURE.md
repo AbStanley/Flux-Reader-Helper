@@ -32,6 +32,30 @@ graph TD
     Proxy -->|Generate| Ollama
 ```
 
+```mermaid
+sequenceDiagram
+    participant UI as Frontend (React)
+    participant Nest as Backend (NestJS)
+    participant AI as Ollama (Local)
+
+    Note over UI,AI: User clicks "Explain"
+    
+    UI->>Nest: POST /api/generate { prompt: "...", stream: true }
+    
+    Nest->>AI: Call Ollama API (Stream mode)
+    
+    loop Every Chunk Generated
+        AI-->>Nest: "Word"
+        Note right of Nest: Controller receives AsyncIterator chunk
+        Nest-->>UI: Write to Response Stream (NDJSON)
+    end
+    
+    UI->>UI: Transport parses chunk & updates Text on screen
+    
+    AI-->>Nest: Done
+    Nest-->>UI: End Response
+```
+
 ## 🧩 Components
 
 ### 1. Monorepo Structure
