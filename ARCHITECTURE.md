@@ -8,7 +8,7 @@ This project is architected as a **Personal Cloud Platform**. It is designed to 
 graph TD
     subgraph "Frontend Layer (Browser)"
         UI[React Client]
-        Ext[Chrome Extension (Future)]
+        Ext["Chrome Extension (Future)"]
     end
 
     subgraph "Backend Layer (NestJS)"
