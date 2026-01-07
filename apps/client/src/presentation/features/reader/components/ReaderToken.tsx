@@ -6,6 +6,8 @@ import { HoverPosition } from '../../../../core/types';
 import { ReaderTokenPopup } from './ReaderTokenPopup';
 import { TokenText } from './TokenText';
 import { useTokenLayout } from '../hooks/useTokenLayout';
+import { WordsClient } from '../../../../infrastructure/data/WordsClient';
+
 
 interface ReaderTokenProps {
     token: string;
@@ -101,6 +103,23 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
         groupEndId
     });
 
+    const wordsClient = React.useMemo(() => new WordsClient(), []);
+
+    const handleSave = (translationText: string) => {
+        if (!token.trim()) return;
+
+        // Simple feedback for now
+        // In a real app we'd use a toast reference passed from context
+        wordsClient.saveWord({
+            text: token,
+            definition: translationText,
+            context: ""
+        }).then(() => {
+            // Visual feedback could be added here
+            console.log('Saved');
+        }).catch(err => console.error(err));
+    };
+
     if (hasNewline) {
         return <br />;
     }
@@ -161,6 +180,7 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
                         onPlay={() => onPlay(index, false)}
                         onMoreInfo={() => onMoreInfo(index, false)}
                         onRegenerate={() => onRegenerate(index)}
+                        onSave={() => handleSave(groupTranslation)}
                     />
                 </span>
             )}
@@ -183,6 +203,7 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
                         onPlay={() => onPlay(index, true)}
                         onMoreInfo={() => onMoreInfo(index, true)}
                         onRegenerate={() => onRegenerate(index)}
+                        onSave={() => handleSave(hoverTranslation)}
                     />
                 </span>
             )}

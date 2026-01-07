@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Search, Volume2, RefreshCcw } from 'lucide-react';
+import { Search, Volume2, RefreshCcw, Save } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 
 interface ReaderTokenPopupProps {
@@ -8,13 +8,15 @@ interface ReaderTokenPopupProps {
     onPlay: () => void;
     onMoreInfo: () => void;
     onRegenerate: () => void;
+    onSave: () => void;
 }
 
 export const ReaderTokenPopup: React.FC<ReaderTokenPopupProps> = ({
     translation,
     onPlay,
     onMoreInfo,
-    onRegenerate
+    onRegenerate,
+    onSave
 }) => {
     const buttonClass = cn(
         "ml-1 p-1 rounded-full cursor-pointer shadow-sm border border-white/10",
@@ -69,6 +71,16 @@ export const ReaderTokenPopup: React.FC<ReaderTokenPopupProps> = ({
                     title="Regenerate Translation"
                 >
                     <RefreshCcw size={14} strokeWidth={3} />
+                </button>
+                <button
+                    className={buttonClass}
+                    onClick={(e) => handleInteraction(e, onSave)}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onMouseUp={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    title="Save Word"
+                >
+                    <Save size={14} strokeWidth={3} />
                 </button>
             </div>
         </span>
