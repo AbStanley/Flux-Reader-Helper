@@ -9,6 +9,7 @@ import { useVisualSplits } from '../hooks/useVisualSplits';
 import { useTokenStyling } from '../hooks/useTokenStyling';
 import { useAudioStore } from '../store/useAudioStore';
 import { useReaderStore } from '../store/useReaderStore';
+import { useAudioPageSync } from '../hooks/useAudioPageSync';
 
 import { ReaderPagination } from './ReaderPagination';
 import { ReaderTextContent } from './ReaderTextContent';
@@ -60,10 +61,7 @@ export const ReaderMainPanel: React.FC = () => {
         }
     }, [sourceLang, availableVoices, setVoiceByLanguageName]);
 
-    const requiredAudioPage = useAudioStore(useCallback(s => {
-        if (!s.isPlaying || s.currentWordIndex === null) return null;
-        return Math.floor(s.currentWordIndex / PAGE_SIZE) + 1;
-    }, [PAGE_SIZE]));
+    const requiredAudioPage = useAudioPageSync(PAGE_SIZE);
 
     React.useEffect(() => {
         if (requiredAudioPage !== null && requiredAudioPage !== currentPage) {
