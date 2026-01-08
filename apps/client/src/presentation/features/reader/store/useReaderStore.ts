@@ -15,6 +15,7 @@ interface ReaderState {
     isGenerating: boolean;
     PAGE_SIZE: number;
     selectionMode: SelectionMode;
+    activePanel: 'DETAILS' | 'SAVED_WORDS';
 
     setConfig: (text: string, sourceLang: string, targetLang: string) => void;
     setText: (text: string) => void;
@@ -23,6 +24,7 @@ interface ReaderState {
     setIsReading: (isReading: boolean) => void;
     setIsGenerating: (isGenerating: boolean) => void;
     setSelectionMode: (mode: SelectionMode) => void;
+    setActivePanel: (panel: 'DETAILS' | 'SAVED_WORDS') => void;
     setPage: (page: number) => void;
     handleSelection: (globalIndex: number) => Promise<void>;
     clearSelection: () => void;
@@ -39,6 +41,7 @@ export const useReaderStore = create<ReaderState>((set, get) => ({
     isGenerating: false,
     PAGE_SIZE: 500,
     selectionMode: SelectionMode.Word,
+    activePanel: 'DETAILS',
 
     setConfig: (text, sourceLang, targetLang) => {
         if (text === get().text && sourceLang === get().sourceLang && targetLang === get().targetLang) {
@@ -80,6 +83,7 @@ export const useReaderStore = create<ReaderState>((set, get) => ({
     setIsReading: (isReading) => set({ isReading }),
     setIsGenerating: (isGenerating) => set({ isGenerating }),
     setSelectionMode: (selectionMode) => set({ selectionMode }),
+    setActivePanel: (activePanel) => set({ activePanel }),
 
     setPage: (currentPage) => {
         const { tokens, PAGE_SIZE } = get();

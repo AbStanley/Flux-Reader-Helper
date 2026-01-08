@@ -3,7 +3,7 @@ import { ServiceProvider } from './contexts/ServiceContext';
 import { ControlPanel } from './features/controls/ControlPanel';
 import { ReaderView } from './features/reader/ReaderView';
 import { useReaderStore } from './features/reader/store/useReaderStore';
-import { ModeToggle } from './components/ui/mode-toggle';
+
 import { FocusLayout } from './layouts/FocusLayout';
 import { useFocusMode } from './features/reader/hooks/useFocusMode';
 
@@ -62,17 +62,27 @@ function App() {
   );
 }
 
+import { NavBar } from './components/navigation/NavBar';
+import { useViewStore } from './features/navigation/store/useViewStore';
+import { WordManager } from './features/word-manager';
+
 function AppContent() {
   const { isReading, hasText, exitReaderMode } = useFocusMode();
+  const currentView = useViewStore(state => state.currentView);
+
+  // If in Word Manager view, show NavBar and Word Manager
+  if (currentView === 'WORD_MANAGER') {
+    return (
+      <>
+        <NavBar />
+        <WordManager />
+      </>
+    );
+  }
 
   return (
     <>
-      {!isReading && (
-        <header className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold tracking-tight text-primary">Flux</h1>
-          <ModeToggle />
-        </header>
-      )}
+      {!isReading && <NavBar />}
 
       <FocusLayout
         isReading={isReading}

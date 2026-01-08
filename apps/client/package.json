@@ -13,6 +13,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "docker:up": "docker compose up -d --build",
+    "docker:dev": "docker compose up --build",
     "docker:down": "docker compose down",
     "build:all": "npm run build && npm run docker:up"
   },
