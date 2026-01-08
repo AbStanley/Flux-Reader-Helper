@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useWords } from './hooks/useWords';
 import { WordList } from './components/WordList';
 import { EditWordDialog } from './components/EditWordDialog';
@@ -8,9 +8,13 @@ import { type CreateWordRequest, type Word } from '../../../infrastructure/api/w
 import { exportToCSV, exportToAnki } from './utils/exportUtils';
 
 export const WordManager: React.FC = () => {
-    const { words, isLoading, error, addWord, updateWord, deleteWord } = useWords();
+    const { words, isLoading, error, addWord, updateWord, deleteWord, fetchWords } = useWords();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingWord, setEditingWord] = useState<Word | undefined>(undefined);
+
+    useEffect(() => {
+        fetchWords();
+    }, [fetchWords]);
 
     const handleCreate = async (data: CreateWordRequest) => {
         await addWord(data);

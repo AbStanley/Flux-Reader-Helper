@@ -6,7 +6,8 @@
         "apps/*"
     ],
     "scripts": {
-        "dev": "npm run dev --workspace=@reader-helper/client",
+        "client:dev": "npm run dev --workspace=@reader-helper/client",
+        "server:dev": "npm run start:dev --workspace=@reader-helper/server",
         "build": "npm run build --workspaces",
         "test": "npm run test --workspaces",
         "lint": "npm run lint --workspaces",

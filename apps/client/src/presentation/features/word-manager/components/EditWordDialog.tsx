@@ -62,11 +62,18 @@ export const EditWordDialog: React.FC<EditWordDialogProps> = ({
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
+    const [showLimitWarning, setShowLimitWarning] = useState(false);
+
     const handleAddExample = () => {
+        if ((formData.examples?.length || 0) >= 3) {
+            setShowLimitWarning(true);
+            return;
+        }
         setFormData(prev => ({
             ...prev,
             examples: [...(prev.examples || []), { sentence: '', translation: '' }]
         }));
+        setShowLimitWarning(false);
     };
 
     const handleExampleChange = (index: number, field: 'sentence' | 'translation', value: string) => {
@@ -83,6 +90,7 @@ export const EditWordDialog: React.FC<EditWordDialogProps> = ({
             ...prev,
             examples: prev.examples?.filter((_, i) => i !== index)
         }));
+        setShowLimitWarning(false);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -169,10 +177,17 @@ export const EditWordDialog: React.FC<EditWordDialogProps> = ({
                         <div className="space-y-2">
                             <div className="flex justify-between items-center">
                                 <Label>Examples</Label>
-                                <Button type="button" variant="outline" size="sm" onClick={handleAddExample}>
-                                    <Plus className="h-4 w-4 mr-1" />
-                                    Add Example
-                                </Button>
+                                <div className="flex flex-col items-end">
+                                    <Button type="button" variant="outline" size="sm" onClick={handleAddExample}>
+                                        <Plus className="h-4 w-4 mr-1" />
+                                        Add Example
+                                    </Button>
+                                    {showLimitWarning && (
+                                        <span className="text-xs text-destructive mt-1">
+                                            Maximum 3 examples allowed
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                             <div className="space-y-3">
                                 {formData.examples?.map((ex, idx) => (

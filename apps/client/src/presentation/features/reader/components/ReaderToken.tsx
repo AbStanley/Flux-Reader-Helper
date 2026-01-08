@@ -7,6 +7,7 @@ import { ReaderTokenPopup } from './ReaderTokenPopup';
 import { TokenText } from './TokenText';
 import { useTokenLayout } from '../hooks/useTokenLayout';
 import { useWordsStore } from '../../word-manager/store/useWordsStore';
+import { useReaderStore } from '../store/useReaderStore';
 
 
 interface ReaderTokenProps {
@@ -107,13 +108,18 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
     // Local state for visual feedback
     const [isSaved, setIsSaved] = React.useState(false);
 
+    const sourceLang = useReaderStore(state => state.sourceLang);
+    const targetLang = useReaderStore(state => state.targetLang);
+
     const handleSave = (translationText: string) => {
         if (!token.trim()) return;
 
         addWord({
             text: token,
             definition: translationText,
-            context: ""
+            context: "",
+            sourceLanguage: sourceLang,
+            targetLanguage: targetLang
         }).then(() => {
             setIsSaved(true);
             setTimeout(() => setIsSaved(false), 2000); // Reset after 2s
