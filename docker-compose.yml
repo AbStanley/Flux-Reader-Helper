@@ -19,7 +19,8 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/readerhelper
       - OLLAMA_HOST=http://host.docker.internal:11434
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - app-network
     extra_hosts:
@@ -32,6 +33,11 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=readerhelper
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:

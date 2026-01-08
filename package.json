@@ -10,7 +10,8 @@
         "build": "npm run build --workspaces",
         "test": "npm run test --workspaces",
         "lint": "npm run lint --workspaces",
-        "prisma-studio": "npx prisma studio --schema=apps/server/prisma/schema.prisma"
+        "prisma-studio": "npx prisma studio --schema=apps/server/prisma/schema.prisma",
+        "docker:dev": "docker compose up --build"
     },
     "devDependencies": {
         "concurrently": "^8.2.2"

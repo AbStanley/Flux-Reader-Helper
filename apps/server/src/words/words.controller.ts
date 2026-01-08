@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { WordsService } from './words.service';
 import { CreateWordDto } from './dto/create-word.dto';
 import { UpdateWordDto } from './dto/update-word.dto';
@@ -13,8 +13,8 @@ export class WordsController {
   }
 
   @Get()
-  findAll() {
-    return this.wordsService.findAll();
+  findAll(@Query() query: { sourceLanguage?: string; targetLanguage?: string; sort?: 'date_desc' | 'date_asc' | 'text_asc' }) {
+    return this.wordsService.findAll(query);
   }
 
   @Get(':id')

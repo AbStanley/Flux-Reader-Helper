@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -25,6 +26,11 @@ model Word {
   text      String
   definition String?
   context   String?
+  sourceLanguage String?
+  targetLanguage String?
+  sourceTitle String?
+  imageUrl String?
+  pronunciation String?
   createdAt DateTime @default(now())
   
   userId    String
@@ -32,6 +38,18 @@ model Word {
   
   deckId    String?
   deck      Deck?    @relation(fields: [deckId], references: [id])
+  
+  examples  Example[]
+}
+
+model Example {
+  id        String   @id @default(uuid())
+  sentence  String
+  translation String?
+  createdAt DateTime @default(now())
+  
+  wordId    String
+  word      Word     @relation(fields: [wordId], references: [id], onDelete: Cascade)
 }
 
 model Deck {

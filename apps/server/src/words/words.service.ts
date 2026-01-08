@@ -26,27 +26,67 @@ export class WordsService {
         text: sanitizedText,
         definition: createWordDto.definition,
         context: createWordDto.context,
+        sourceLanguage: createWordDto.sourceLanguage,
+        targetLanguage: createWordDto.targetLanguage,
+        sourceTitle: createWordDto.sourceTitle,
+        imageUrl: createWordDto.imageUrl,
+        pronunciation: createWordDto.pronunciation,
         userId: user.id,
+        examples: createWordDto.examples ? {
+          create: createWordDto.examples
+        } : undefined
       },
+      include: {
+        examples: true
+      }
     });
   }
 
-  findAll() {
+  findAll(query?: {
+    sourceLanguage?: string;
+    targetLanguage?: string;
+    sort?: 'date_desc' | 'date_asc' | 'text_asc';
+  }) {
+    const { sourceLanguage, targetLanguage, sort } = query || {};
+
     return this.prisma.word.findMany({
-      orderBy: { createdAt: 'desc' }
+      where: {
+        sourceLanguage,
+        targetLanguage,
+      },
+      orderBy: sort === 'date_asc' ? { createdAt: 'asc' } :
+        sort === 'text_asc' ? { text: 'asc' } :
+          { createdAt: 'desc' },
+      include: {
+        examples: true
+      }
     });
   }
 
   findOne(id: string) {
     return this.prisma.word.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        examples: true
+      }
     });
   }
 
   update(id: string, updateWordDto: UpdateWordDto) {
+    // Separate examples from the rest of the data
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { examples, ...wordData } = updateWordDto as any;
+
+    // We don't support updating examples via this endpoint comfortably yet without more complex logic (upsert/delete)
+    // For now, we just update the word fields. 
+    // TODO: Implement thorough example updates (add/remove/update)
+
     return this.prisma.word.update({
       where: { id },
-      data: updateWordDto,
+      data: wordData,
+      include: {
+        examples: true
+      }
     });
   }
 
