@@ -11,7 +11,7 @@ interface WordsState {
     updateWord: (id: string, data: Partial<CreateWordRequest>) => Promise<Word>;
 }
 
-export const useWordsStore = create<WordsState>((set) => ({
+export const useWordsStore = create<WordsState>((set, get) => ({
     words: [],
     isLoading: false,
     error: null,
@@ -29,6 +29,19 @@ export const useWordsStore = create<WordsState>((set) => ({
     },
 
     addWord: async (data) => {
+        // Duplicate Check
+        const { words } = get();
+        const existingWord = words.find(w =>
+            w.text === data.text &&
+            w.sourceLanguage === data.sourceLanguage &&
+            w.targetLanguage === data.targetLanguage
+        );
+
+        if (existingWord) {
+            console.log("Word already saved (duplicate check passed).");
+            return existingWord;
+        }
+
         set({ isLoading: true, error: null });
         try {
             const newWord = await wordsApi.create(data);

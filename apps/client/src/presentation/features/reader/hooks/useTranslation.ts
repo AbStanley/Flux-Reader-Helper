@@ -30,6 +30,8 @@ export const useTranslation = (enableAutoFetch = false) => {
     const isRichInfoOpen = useTranslationStore(state => state.isRichInfoOpen);
     const showTranslations = useTranslationStore(state => state.showTranslations);
 
+    const clearSelection = useReaderStore(state => state.clearSelection);
+
     // Translation Store Actions
     const translateSelection = useTranslationStore(state => state.translateSelection);
     const handleHoverAction = useTranslationStore(state => state.handleHover);
@@ -51,12 +53,15 @@ export const useTranslation = (enableAutoFetch = false) => {
     useEffect(() => {
         if (!enableAutoFetch) return;
 
-        const timeoutId = setTimeout(() => {
-            translateSelection(selectedIndices, tokens, sourceLang, targetLang, aiService);
+        const timeoutId = setTimeout(async () => {
+            if (selectedIndices.size > 0) {
+                await translateSelection(selectedIndices, tokens, sourceLang, targetLang, aiService);
+                clearSelection();
+            }
         }, 500); // 500ms debounce for selection to allow grouping
 
         return () => clearTimeout(timeoutId);
-    }, [enableAutoFetch, selectedIndices, tokens, sourceLang, targetLang, aiService, translateSelection]);
+    }, [enableAutoFetch, selectedIndices, tokens, sourceLang, targetLang, aiService, translateSelection, clearSelection]);
 
     // Track last hovered index locally to prevent redundant dispatches without adding state dependency
     const lastHoveredIndexRef = useRef<number | null>(null);

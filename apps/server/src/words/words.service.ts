@@ -21,6 +21,23 @@ export class WordsService {
       .replace(/\s+/g, ' ')
       .trim();
 
+    // Duplicate Check
+    const existingWord = await this.prisma.word.findFirst({
+      where: {
+        text: sanitizedText,
+        sourceLanguage: createWordDto.sourceLanguage,
+        targetLanguage: createWordDto.targetLanguage,
+        userId: user.id
+      },
+      include: {
+        examples: true
+      }
+    });
+
+    if (existingWord) {
+      return existingWord;
+    }
+
     return this.prisma.word.create({
       data: {
         text: sanitizedText,

@@ -156,11 +156,8 @@ export const createTranslationSlice: StateCreator<TranslationSlice> = (set, get)
             const result = await fetchTranslationHelper(token, context, sourceLang, targetLang, aiService);
             if (get().hoveredIndex === globalIndex && result) {
                 set({ hoverTranslation: result });
-            }
-            if (result) {
-                const newCache = new Map(get().selectionTranslations);
-                newCache.set(key, result);
-                set({ selectionTranslations: newCache });
+                // Note: We do NOT add this to selectionTranslations map.
+                // Hover is transient. Persistence is for selection only.
             }
         } finally {
             pendingRequests.delete(key);
