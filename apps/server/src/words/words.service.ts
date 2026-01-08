@@ -16,9 +16,14 @@ export class WordsService {
       });
     }
 
+    const sanitizedText = createWordDto.text
+      .replace(/[.,"'()<>/\\;{}[\]=+&]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
     return this.prisma.word.create({
       data: {
-        text: createWordDto.text,
+        text: sanitizedText,
         definition: createWordDto.definition,
         context: createWordDto.context,
         userId: user.id,
