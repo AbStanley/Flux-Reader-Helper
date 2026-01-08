@@ -6,7 +6,7 @@ import { HoverPosition } from '../../../../core/types';
 import { ReaderTokenPopup } from './ReaderTokenPopup';
 import { TokenText } from './TokenText';
 import { useTokenLayout } from '../hooks/useTokenLayout';
-import { WordsClient } from '../../../../infrastructure/data/WordsClient';
+import { useWordsStore } from '../../word-manager/store/useWordsStore';
 
 
 interface ReaderTokenProps {
@@ -103,20 +103,20 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
         groupEndId
     });
 
-    const wordsClient = React.useMemo(() => new WordsClient(), []);
+    const addWord = useWordsStore(state => state.addWord);
+    // Local state for visual feedback
+    const [isSaved, setIsSaved] = React.useState(false);
 
     const handleSave = (translationText: string) => {
         if (!token.trim()) return;
 
-        // Simple feedback for now
-        // In a real app we'd use a toast reference passed from context
-        wordsClient.saveWord({
+        addWord({
             text: token,
             definition: translationText,
             context: ""
         }).then(() => {
-            // Visual feedback could be added here
-            console.log('Saved');
+            setIsSaved(true);
+            setTimeout(() => setIsSaved(false), 2000); // Reset after 2s
         }).catch(err => console.error(err));
     };
 
@@ -181,6 +181,7 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
                         onMoreInfo={() => onMoreInfo(index, false)}
                         onRegenerate={() => onRegenerate(index)}
                         onSave={() => handleSave(groupTranslation)}
+                        isSaved={isSaved}
                     />
                 </span>
             )}
@@ -204,6 +205,7 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
                         onMoreInfo={() => onMoreInfo(index, true)}
                         onRegenerate={() => onRegenerate(index)}
                         onSave={() => handleSave(hoverTranslation)}
+                        isSaved={isSaved}
                     />
                 </span>
             )}

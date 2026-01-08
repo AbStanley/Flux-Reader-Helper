@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Search, Volume2, RefreshCcw, Save } from 'lucide-react';
+import { Search, Volume2, RefreshCcw, Save, Check } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 
 interface ReaderTokenPopupProps {
@@ -9,6 +9,7 @@ interface ReaderTokenPopupProps {
     onMoreInfo: () => void;
     onRegenerate: () => void;
     onSave: () => void;
+    isSaved?: boolean;
 }
 
 export const ReaderTokenPopup: React.FC<ReaderTokenPopupProps> = ({
@@ -16,7 +17,8 @@ export const ReaderTokenPopup: React.FC<ReaderTokenPopupProps> = ({
     onPlay,
     onMoreInfo,
     onRegenerate,
-    onSave
+    onSave,
+    isSaved
 }) => {
     const buttonClass = cn(
         "ml-1 p-1 rounded-full cursor-pointer shadow-sm border border-white/10",
@@ -79,8 +81,9 @@ export const ReaderTokenPopup: React.FC<ReaderTokenPopupProps> = ({
                     onMouseUp={(e) => e.stopPropagation()}
                     onTouchStart={(e) => e.stopPropagation()}
                     title="Save Word"
+                    disabled={isSaved}
                 >
-                    <Save size={14} strokeWidth={3} />
+                    {isSaved ? <Check size={14} strokeWidth={3} className="text-green-400" /> : <Save size={14} strokeWidth={3} />}
                 </button>
             </div>
         </span>

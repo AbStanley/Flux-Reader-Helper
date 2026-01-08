@@ -34,7 +34,7 @@ export interface CreateWordRequest {
     examples?: { sentence: string; translation?: string }[];
 }
 
-const BASE_URL = 'http://localhost:3000/api/words';
+const BASE_URL = '/api/words';
 
 export const wordsApi = {
     getAll: async (params?: { sort?: string; sourceLanguage?: string }) => {
