@@ -1,12 +1,14 @@
+import type { GrammaticalGender, GrammaticalTense, PartOfSpeech, TranslationType } from '../types/Linguistics';
+
 export interface RichTranslationResult {
-    type?: 'word' | 'sentence'; // Discriminator
+    type?: TranslationType; // Discriminator
     translation: string;
     segment: string;
     // Word-specific
     grammar?: {
-        partOfSpeech: string;
-        tense?: string;
-        gender?: string;
+        partOfSpeech: PartOfSpeech;
+        tense?: GrammaticalTense | string; // Keep string fallback for tenses as they can be complex/varied from AI
+        gender?: GrammaticalGender;
         number?: string;
         infinitive?: string;
         explanation: string;

@@ -1,3 +1,5 @@
+import { normalizePartOfSpeech, type GrammaticalGender, type TranslationType } from "../../../core/types/Linguistics";
+
 export const cleanResponse = (response: string): string => {
     // Remove <think> blocks
     return response.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
@@ -30,10 +32,11 @@ export const extractJson = (response: string): any => {
 
         if (translationMatch) {
             return {
+                type: 'word', // Default fallback
                 translation: translationMatch[1],
                 segment: segmentMatch ? segmentMatch[1] : "",
                 // Return empty structures for the rest so UI doesn't crash
-                grammar: { partOfSpeech: "Unknown" },
+                grammar: { partOfSpeech: "unknown" },
                 examples: [],
                 alternatives: []
             };
@@ -43,6 +46,19 @@ export const extractJson = (response: string): any => {
 };
 
 export const normalizeRichTranslation = (data: any): any => {
+    // Normalize type
+    if (data.type) {
+        const typeLower = data.type.toLowerCase();
+        if (typeLower === 'word' || typeLower === 'sentence') {
+            data.type = typeLower as TranslationType;
+        } else {
+            // Default or fallback logic if needed, but for now strict check or leave as is (which TS might complain about if we returned strict type, but we return 'any')
+            // Let's force it to be valid if possible, or undefined if invalid
+            data.type = undefined;
+        }
+    }
+
+    // Normalize examples
     if (data.examples && Array.isArray(data.examples)) {
         data.examples = data.examples.map((ex: any) => {
             if (typeof ex === 'string') {
@@ -54,5 +70,18 @@ export const normalizeRichTranslation = (data: any): any => {
             };
         }).filter((ex: any) => ex.sentence);
     }
+
+    // Normalize Grammar Fields
+    if (data.grammar) {
+        if (data.grammar.partOfSpeech) {
+            data.grammar.partOfSpeech = normalizePartOfSpeech(data.grammar.partOfSpeech);
+        }
+
+        // Normalize Gender to lowercase to match union
+        if (data.grammar.gender) {
+            data.grammar.gender = data.grammar.gender.toLowerCase() as GrammaticalGender;
+        }
+    }
+
     return data;
 };
