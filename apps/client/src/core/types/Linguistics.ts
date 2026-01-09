@@ -36,9 +36,6 @@ export type GrammaticalTense =
     | 'Future Perfect'
     | 'Past' // Generic fallback
     | string; // Allow loosely typed strings for now if AI returns something unexpected, but we prefer the unions above. 
-// Ideally we remove 'string' eventually, but for AI output it's safer to keep it or map it.
-// Actually, per user request, let's try to be strict and use a catch-all 'other' or keeping it strictly union and handling normalization in parser.
-// I'll stick to a strict list but add 'Other' or similar if needed. For now let's try to capture most.
 
 export type GrammaticalNumber =
     | 'singular'

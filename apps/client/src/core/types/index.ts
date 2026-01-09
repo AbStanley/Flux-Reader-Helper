@@ -29,3 +29,5 @@ export const Language = {
 } as const;
 
 export type Language = typeof Language[keyof typeof Language];
+
+export * from './Linguistics';
