@@ -37,11 +37,13 @@ describe('AIControls', () => {
 
     it('renders correctly with Reader Input label', async () => {
         render(<AIControls isGenerating={false} />);
+        await waitFor(() => expect(mockGetAvailableModels).toHaveBeenCalled());
         expect(screen.getByText('Reader Input')).toBeInTheDocument();
     });
 
     it('displays the current service type selector', async () => {
         render(<AIControls isGenerating={false} />);
+        await waitFor(() => expect(mockGetAvailableModels).toHaveBeenCalled());
         // Look for the trigger that displays "Ollama (Local)"
         // Note: Radix UI Select trigger usually displays the selected value text.
         // Since currentServiceType is 'ollama', the SelectValue should render "Ollama (Local)" inside the trigger.
@@ -50,6 +52,7 @@ describe('AIControls', () => {
 
     it('calls setServiceType when switching service', async () => {
         render(<AIControls isGenerating={false} />);
+        await waitFor(() => expect(mockGetAvailableModels).toHaveBeenCalled());
 
         const serviceTrigger = screen.getByText('Ollama (Local)');
         fireEvent.click(serviceTrigger); // Open dropdown
@@ -124,6 +127,11 @@ describe('AIControls', () => {
 
     it('disables controls when generating', async () => {
         render(<AIControls isGenerating={true} />);
+
+        // Wait for inputs to settle
+        await waitFor(() => {
+            expect(mockGetAvailableModels).toHaveBeenCalled();
+        });
 
         const trigger = screen.getByText('Ollama (Local)').closest('button');
         expect(trigger).toBeDisabled();
