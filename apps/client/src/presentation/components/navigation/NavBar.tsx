@@ -1,10 +1,9 @@
-import React from 'react';
 import { BookOpen, Library } from 'lucide-react';
 import { useViewStore } from '../../features/navigation/store/useViewStore';
 import { Button } from '../ui/button';
 import { ModeToggle } from '../ui/mode-toggle';
 
-export const NavBar: React.FC = () => {
+export function NavBar() {
     const { currentView, setView } = useViewStore();
 
     return (
@@ -37,4 +36,4 @@ export const NavBar: React.FC = () => {
             <ModeToggle />
         </nav>
     );
-};
+}
