@@ -4,7 +4,7 @@ import { WordList } from './components/WordList';
 import { EditWordDialog } from './components/EditWordDialog';
 import { Button } from '../../components/ui/button';
 import { Plus, Download, FileDown } from 'lucide-react';
-import { type CreateWordRequest, type Word } from '../../../infrastructure/api/words';
+import { type CreateWordRequest, type Word, wordsApi } from '../../../infrastructure/api/words';
 import { exportToCSV, exportToAnki } from './utils/exportUtils';
 
 export const WordManager: React.FC = () => {
@@ -44,6 +44,27 @@ export const WordManager: React.FC = () => {
         setIsDialogOpen(true);
     };
 
+    const handleExport = async (format: 'csv' | 'anki') => {
+        try {
+            // Fetch ALL items for both types
+            const [wordsResponse, phrasesResponse] = await Promise.all([
+                wordsApi.getAll({ type: 'word' }),
+                wordsApi.getAll({ type: 'phrase' })
+            ]);
+
+            const allItems = [...wordsResponse.items, ...phrasesResponse.items];
+
+            if (format === 'csv') {
+                exportToCSV(allItems);
+            } else {
+                exportToAnki(allItems);
+            }
+        } catch (error) {
+            console.error('Failed to export:', error);
+            // Optionally set error state here if you want UI feedback
+        }
+    };
+
     return (
         <div className="p-6 max-w-6xl mx-auto space-y-8">
             <div className="flex justify-between items-center">
@@ -54,11 +75,11 @@ export const WordManager: React.FC = () => {
                     <p className="text-muted-foreground mt-1">Manage your personal collection of words and phrases.</p>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => exportToCSV([...wordsState.items, ...phrasesState.items])} disabled={wordsState.total + phrasesState.total === 0}>
+                    <Button variant="outline" onClick={() => handleExport('csv')} disabled={wordsState.total + phrasesState.total === 0}>
                         <FileDown className="mr-2 h-4 w-4" />
                         CSV
                     </Button>
-                    <Button variant="outline" onClick={() => exportToAnki([...wordsState.items, ...phrasesState.items])} disabled={wordsState.total + phrasesState.total === 0}>
+                    <Button variant="outline" onClick={() => handleExport('anki')} disabled={wordsState.total + phrasesState.total === 0}>
                         <Download className="mr-2 h-4 w-4" />
                         Anki
                     </Button>
