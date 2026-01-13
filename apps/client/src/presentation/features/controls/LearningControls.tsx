@@ -1,9 +1,9 @@
-import React from 'react';
 import { Switch } from "../../components/ui/switch";
 import { Label } from "../../components/ui/label";
 import { Input } from "../../components/ui/input";
 import { LanguageSelect } from "../../components/LanguageSelect";
 import { PROFICIENCY_LEVELS } from "../../../core/constants/levels";
+import { cn } from "@/lib/utils";
 
 interface LearningControlsProps {
     isLearningMode: boolean;
@@ -14,27 +14,27 @@ interface LearningControlsProps {
     setTopic: (value: string) => void;
 }
 
-export const LearningControls: React.FC<LearningControlsProps> = ({
+export function LearningControls({
     isLearningMode,
     setIsLearningMode,
     proficiencyLevel,
     setProficiencyLevel,
     topic,
     setTopic
-}) => {
+}: LearningControlsProps) {
     return (
-        <div className="space-y-2 pt-2 border-t border-white/10">
-            <div className="flex items-center space-x-2">
+        <div className={cn("space-y-2 pt-2 border-t border-white/10")}>
+            <div className={cn("flex items-center space-x-2")}>
                 <Switch
                     id="learning-mode"
                     checked={isLearningMode}
                     onCheckedChange={setIsLearningMode}
                 />
-                <Label htmlFor="learning-mode" className="cursor-pointer text-sm">Enable Learning Mode</Label>
+                <Label htmlFor="learning-mode" className={cn("cursor-pointer text-sm")}>Enable Learning Mode</Label>
             </div>
 
             {isLearningMode && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className={cn("grid grid-cols-1 sm:grid-cols-2 gap-2 animate-in fade-in slide-in-from-top-2 duration-200")}>
                     <LanguageSelect
                         label="Proficiency Level"
                         value={proficiencyLevel}
@@ -42,17 +42,17 @@ export const LearningControls: React.FC<LearningControlsProps> = ({
                         options={PROFICIENCY_LEVELS}
                         placeholder="Select Level"
                     />
-                    <div className="flex flex-col gap-2">
-                        <Label className="uppercase text-xs text-muted-foreground tracking-wider">Topic (Optional)</Label>
+                    <div className={cn("flex flex-col gap-2")}>
+                        <Label className={cn("uppercase text-xs text-muted-foreground tracking-wider")}>Topic (Optional)</Label>
                         <Input
                             placeholder="e.g. Travel, Cooking, Sci-Fi"
                             value={topic}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTopic(e.target.value)}
-                            className="bg-background"
+                            onChange={(e) => setTopic(e.target.value)}
+                            className={cn("bg-background")}
                         />
                     </div>
                 </div>
             )}
         </div>
     );
-};
+}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useServices } from '../../contexts/ServiceContext';
 import { Card, CardContent, CardHeader, CardDescription } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
@@ -11,9 +11,9 @@ import { useStoryGeneration } from './hooks/useStoryGeneration';
 import { FileImporter } from '../importer/FileImporter';
 import { AIControls } from './AIControls';
 import { ReaderInput } from './ReaderInput';
+import { cn } from "@/lib/utils";
 
-
-export const ControlPanel: React.FC = () => {
+export function ControlPanel() {
     const { aiService } = useServices();
 
     // Store State & Actions
@@ -58,9 +58,9 @@ export const ControlPanel: React.FC = () => {
     };
 
     return (
-        <Card className="w-full mb-2 glass text-card-foreground">
-            <CardHeader className="space-y-2 p-4">
-                <div className="flex flex-col sm:flex-row gap-2 pb-2 border-b border-border/40 items-center sm:items-end justify-center">
+        <Card className={cn("w-full mb-2 glass text-card-foreground")}>
+            <CardHeader className={cn("space-y-2 p-4")}>
+                <div className={cn("flex flex-col sm:flex-row gap-2 pb-2 border-b border-border/40 items-center sm:items-end justify-center")}>
                     <LanguageSelect
                         label="Source Language"
                         value={sourceLang}
@@ -75,7 +75,7 @@ export const ControlPanel: React.FC = () => {
                         variant="ghost"
                         size="icon"
                         onClick={handleSwapLanguages}
-                        className="mb-[2px] hover:bg-secondary/80"
+                        className={cn("mb-[2px] hover:bg-secondary/80")}
                         title="Swap Languages"
                         disabled={isGenerating}
                     >
@@ -93,7 +93,7 @@ export const ControlPanel: React.FC = () => {
                     />
                 </div>
 
-                <div className={isGenerating ? 'opacity-50 pointer-events-none' : ''}>
+                <div className={cn(isGenerating ? 'opacity-50 pointer-events-none' : '')}>
                     <LearningControls
                         isLearningMode={isLearningMode}
                         setIsLearningMode={setIsLearningMode}
@@ -106,12 +106,12 @@ export const ControlPanel: React.FC = () => {
 
                 <AIControls isGenerating={isGenerating} />
 
-                <CardDescription className="text-xs hidden sm:block">
+                <CardDescription className={cn("text-xs hidden sm:block")}>
                     Enter text below or generate a story to practice reading.
                 </CardDescription>
             </CardHeader>
 
-            <CardContent className="space-y-2 p-4 pt-0">
+            <CardContent className={cn("space-y-2 p-4 pt-0")}>
                 <ReaderInput
                     text={text}
                     isGenerating={isGenerating}
@@ -119,12 +119,12 @@ export const ControlPanel: React.FC = () => {
                     onClear={() => setText('')}
                 />
 
-                <div className="flex gap-4 flex-wrap">
+                <div className={cn("flex gap-4 flex-wrap")}>
                     {isGenerating ? (
                         <Button
                             onClick={stopGeneration}
                             variant="destructive"
-                            className="w-full sm:w-auto"
+                            className={cn("w-full sm:w-auto")}
                         >
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             Stop Generating
@@ -132,7 +132,7 @@ export const ControlPanel: React.FC = () => {
                     ) : (
                         <Button
                             onClick={generateStory}
-                            className="w-full sm:w-auto"
+                            className={cn("w-full sm:w-auto")}
                         >
                             Generate Story
                         </Button>
@@ -140,7 +140,7 @@ export const ControlPanel: React.FC = () => {
 
                     <Button
                         variant="outline"
-                        className="w-full sm:w-auto cursor-pointer"
+                        className={cn("w-full sm:w-auto cursor-pointer")}
                         disabled={isGenerating}
                         onClick={() => setIsImporterOpen(true)}
                     >
@@ -150,7 +150,7 @@ export const ControlPanel: React.FC = () => {
                     <Button
                         onClick={handleStartReading}
                         disabled={!text.trim() || isGenerating}
-                        className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg transition-all"
+                        className={cn("w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg transition-all")}
                     >
                         Open Reading Mode
                     </Button>
@@ -159,4 +159,4 @@ export const ControlPanel: React.FC = () => {
             <FileImporter open={isImporterOpen} onOpenChange={setIsImporterOpen} />
         </Card>
     );
-};
+}
