@@ -1,5 +1,4 @@
 import '@testing-library/jest-dom'
-import { vi } from 'vitest';
 
 // Polyfill DOMMatrix for react-pdf
 if (typeof DOMMatrix === 'undefined') {

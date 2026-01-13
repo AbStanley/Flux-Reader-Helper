@@ -110,25 +110,6 @@ const ReaderTokenComponent: React.FC<ReaderTokenProps> = ({
     const targetLang = useReaderStore(state => state.targetLang);
 
     const handleSave = (translationText: string) => {
-        // Decide what text to save:
-        // If we are saving the 'groupTranslation' (which is passed as argument here optionally? No, let's check call sites)
-        // The call sites: 
-        // 1. Group Popup: onSave={() => handleSave(groupTranslation)}
-        // 2. Hover Popup: onSave={() => handleSave(hoverTranslation)}
-
-        // If translationText matches groupTranslation, we should use groupText if available.
-        // Otherwise (hover or fallback), use token or whatever is appropriate.
-        // Actually simpler: if groupText is provided and we are saving the group translation, usage is clear.
-
-        // Logic: 
-        // If `groupText` exists AND `translationText === groupTranslation`, assume we are saving the sentence.
-        // However, `groupTranslation` might be same as `hoverTranslation` in some weird case? Unlikely.
-
-        // Better: Pass a flag or source to handleSave? 
-        // Or just check if `groupText` is present. If it is, and we are invoking from the "Visual Group Translation" popup, we want the full text.
-        // The popup for group translation is the one rendered inside: `{groupTranslation && ( ... <ReaderTokenPopup ... onSave={() => handleSave(groupTranslation)} /> ... )}`
-
-        // Let's update the call site in the JSX to be explicit, but first let's update this function.
 
         const textToSave = (groupText && translationText === groupTranslation)
             ? groupText
