@@ -64,6 +64,7 @@ function App() {
 
 import { NavBar } from './components/navigation/NavBar';
 import { useViewStore } from './features/navigation/store/useViewStore';
+import { AppView } from './features/navigation/types';
 import { WordManager } from './features/word-manager';
 
 function AppContent() {
@@ -71,7 +72,7 @@ function AppContent() {
   const currentView = useViewStore(state => state.currentView);
 
   // If in Word Manager view, show NavBar and Word Manager
-  if (currentView === 'WORD_MANAGER') {
+  if (currentView === AppView.WordManager) {
     return (
       <>
         <NavBar />

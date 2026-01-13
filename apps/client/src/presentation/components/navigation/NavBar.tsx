@@ -1,5 +1,6 @@
 import { BookOpen, Library } from 'lucide-react';
 import { useViewStore } from '../../features/navigation/store/useViewStore';
+import { AppView } from '../../features/navigation/types';
 import { Button } from '../ui/button';
 import { ModeToggle } from '../ui/mode-toggle';
 
@@ -13,18 +14,18 @@ export function NavBar() {
 
                 <div className="flex items-center gap-2">
                     <Button
-                        variant={currentView === 'READING' ? 'secondary' : 'ghost'}
+                        variant={currentView === AppView.Reading ? 'secondary' : 'ghost'}
                         size="sm"
-                        onClick={() => setView('READING')}
+                        onClick={() => setView(AppView.Reading)}
                         className="gap-2"
                     >
                         <BookOpen className="w-4 h-4" />
                         Reading
                     </Button>
                     <Button
-                        variant={currentView === 'WORD_MANAGER' ? 'secondary' : 'ghost'}
+                        variant={currentView === AppView.WordManager ? 'secondary' : 'ghost'}
                         size="sm"
-                        onClick={() => setView('WORD_MANAGER')}
+                        onClick={() => setView(AppView.WordManager)}
                         className="gap-2"
                     >
                         <Library className="w-4 h-4" />
