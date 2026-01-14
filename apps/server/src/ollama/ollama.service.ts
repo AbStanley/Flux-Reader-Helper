@@ -64,4 +64,68 @@ export class OllamaService {
             throw error;
         }
     }
+
+    /**
+     * Generate example sentences for a word using the LLM.
+     * Returns an array of { sentence, translation } objects.
+     */
+    async generateExamples(params: {
+        word: string;
+        definition?: string;
+        sourceLanguage: string;
+        targetLanguage: string;
+        model?: string;
+        count?: number;
+    }): Promise<{ sentence: string; translation: string }[]> {
+        const { word, definition, sourceLanguage, targetLanguage, count = 3 } = params;
+        let { model } = params;
+
+        // If no model specified, try to get first available
+        if (!model) {
+            try {
+                const tags = await this.ollama.list();
+                if (tags.models && tags.models.length > 0) {
+                    model = tags.models[0].name;
+                    this.logger.log(`Using first available model: ${model}`);
+                } else {
+                    throw new Error('No Ollama models available. Please pull a model first (e.g., ollama pull llama3.2)');
+                }
+            } catch (error) {
+                this.logger.error('Failed to list Ollama models - is Ollama running?', error);
+                throw new Error('Ollama is not available. Please make sure Ollama is running.');
+            }
+        }
+
+        const prompt = `Generate ${count} example sentences using the word "${word}"${definition ? ` (meaning: ${definition})` : ''}.
+The sentences should be in ${sourceLanguage} with translations in ${targetLanguage}.
+Format your response as a JSON array with objects containing "sentence" and "translation" fields.
+Only output the JSON array, nothing else.
+
+Example format:
+[{"sentence": "Example in ${sourceLanguage}", "translation": "Translation in ${targetLanguage}"}]`;
+
+        try {
+            this.logger.log(`Generating ${count} examples for word: ${word} using model: ${model}`);
+            const response = await this.ollama.generate({
+                model,
+                prompt,
+                stream: false,
+            });
+
+            // Parse JSON from response
+            const text = response.response.trim();
+            // Extract JSON array from response (handle potential markdown wrapping)
+            const jsonMatch = text.match(/\[[\s\S]*\]/);
+            if (!jsonMatch) {
+                this.logger.warn('Could not parse JSON from LLM response:', text);
+                return [];
+            }
+
+            const examples = JSON.parse(jsonMatch[0]);
+            return examples.slice(0, count);
+        } catch (error) {
+            this.logger.error('Error generating examples', error);
+            throw error;
+        }
+    }
 }

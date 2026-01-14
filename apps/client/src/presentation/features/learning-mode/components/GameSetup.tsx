@@ -201,11 +201,13 @@ export const GameSetup: React.FC = () => {
                                 <SelectContent>
                                     <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
                                     <SelectItem value="build-word">Word Builder</SelectItem>
+                                    <SelectItem value="scramble">Sentence Scramble</SelectItem>
                                 </SelectContent>
                             </Select>
                             <p className="text-sm text-muted-foreground">
                                 {config.mode === 'multiple-choice' && "Identify the correct translation from 4 options."}
                                 {config.mode === 'build-word' && "Spell the answer using individual letters."}
+                                {config.mode === 'scramble' && "Rearrange scrambled words to form the correct sentence."}
                             </p>
                         </div>
 

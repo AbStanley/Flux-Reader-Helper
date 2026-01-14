@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Sparkles, Loader2 } from 'lucide-react';
 import { type CreateWordRequest } from '../../../../infrastructure/api/words';
 
 interface WordExamplesSectionProps {
@@ -10,6 +10,9 @@ interface WordExamplesSectionProps {
     onAdd: () => void;
     onChange: (index: number, field: 'sentence' | 'translation', value: string) => void;
     onRemove: (index: number) => void;
+    onGenerate: () => void;
+    isGenerating: boolean;
+    canGenerate: boolean;
     showLimitWarning: boolean;
 }
 
@@ -18,24 +21,42 @@ export const WordExamplesSection: React.FC<WordExamplesSectionProps> = ({
     onAdd,
     onChange,
     onRemove,
+    onGenerate,
+    isGenerating,
+    canGenerate,
     showLimitWarning
 }) => {
     return (
         <div className="space-y-2">
             <div className="flex justify-between items-center">
                 <Label>Examples</Label>
-                <div className="flex flex-col items-end">
+                <div className="flex gap-2 items-center">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={onGenerate}
+                        disabled={!canGenerate || isGenerating}
+                        title={!canGenerate ? "Fill in word and languages first" : "Generate examples with AI"}
+                    >
+                        {isGenerating ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        ) : (
+                            <Sparkles className="h-4 w-4 mr-1" />
+                        )}
+                        {isGenerating ? 'Generating...' : 'AI Generate'}
+                    </Button>
                     <Button type="button" variant="outline" size="sm" onClick={onAdd}>
                         <Plus className="h-4 w-4 mr-1" />
-                        Add Example
+                        Add
                     </Button>
-                    {showLimitWarning && (
-                        <span className="text-xs text-destructive mt-1">
-                            Maximum 3 examples allowed
-                        </span>
-                    )}
                 </div>
             </div>
+            {showLimitWarning && (
+                <span className="text-xs text-destructive">
+                    Maximum 3 examples allowed
+                </span>
+            )}
             <div className="space-y-3">
                 {examples?.map((ex, idx) => (
                     <div key={idx} className="flex gap-2 items-start border p-2 rounded-md bg-muted/20 relative">
@@ -63,9 +84,10 @@ export const WordExamplesSection: React.FC<WordExamplesSectionProps> = ({
                     </div>
                 ))}
                 {(!examples || examples.length === 0) && (
-                    <p className="text-sm text-muted-foreground italic">No examples added.</p>
+                    <p className="text-sm text-muted-foreground italic">No examples added. Use AI Generate or add manually.</p>
                 )}
             </div>
         </div>
     );
 };
+

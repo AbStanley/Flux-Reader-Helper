@@ -103,21 +103,30 @@ export class WordsService {
     });
   }
 
-  update(id: string, updateWordDto: UpdateWordDto) {
-    // Separate examples from the rest of the data
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async update(id: string, updateWordDto: UpdateWordDto) {
     const { examples, ...wordData } = updateWordDto as any;
 
-    // We don't support updating examples via this endpoint comfortably yet without more complex logic (upsert/delete)
-    // For now, we just update the word fields. 
-    // TODO: Implement thorough example updates (add/remove/update)
+    // Use transaction to atomically update word and replace examples
+    return this.prisma.$transaction(async (tx) => {
+      // Delete all existing examples for this word
+      await tx.example.deleteMany({ where: { wordId: id } });
 
-    return this.prisma.word.update({
-      where: { id },
-      data: wordData,
-      include: {
-        examples: true
-      }
+      // Update word and create new examples
+      return tx.word.update({
+        where: { id },
+        data: {
+          ...wordData,
+          examples: examples && examples.length > 0 ? {
+            create: examples.map((ex: { sentence: string; translation?: string }) => ({
+              sentence: ex.sentence,
+              translation: ex.translation
+            }))
+          } : undefined
+        },
+        include: {
+          examples: true
+        }
+      });
     });
   }
 

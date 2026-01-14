@@ -40,4 +40,16 @@ export class OllamaController {
     async listTags() {
         return await this.ollamaService.listTags();
     }
+
+    @Post('generate-examples')
+    async generateExamples(@Body() body: {
+        word: string;
+        definition?: string;
+        sourceLanguage: string;
+        targetLanguage: string;
+        model?: string;
+        count?: number;
+    }) {
+        return await this.ollamaService.generateExamples(body);
+    }
 }

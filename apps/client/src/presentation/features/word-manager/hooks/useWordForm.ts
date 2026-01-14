@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { type CreateWordRequest, type Word } from '../../../../infrastructure/api/words';
+import { ollamaApi } from '../../../../infrastructure/api/ollama';
 
 const DEFAULT_FORM_STATE: CreateWordRequest = {
     text: '',
@@ -21,6 +22,7 @@ interface UseWordFormProps {
 export const useWordForm = ({ initialData, onSubmit, onClose, isOpen }: UseWordFormProps) => {
     const [formData, setFormData] = useState<CreateWordRequest>(DEFAULT_FORM_STATE);
     const [isLoading, setIsLoading] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
     const [showLimitWarning, setShowLimitWarning] = useState(false);
 
     useEffect(() => {
@@ -80,6 +82,39 @@ export const useWordForm = ({ initialData, onSubmit, onClose, isOpen }: UseWordF
         setShowLimitWarning(false);
     };
 
+    const handleGenerateExamples = async () => {
+        if (!formData.text || !formData.sourceLanguage || !formData.targetLanguage) {
+            console.warn('Need word text and languages to generate examples');
+            return;
+        }
+
+        setIsGenerating(true);
+        try {
+            const generated = await ollamaApi.generateExamples({
+                word: formData.text,
+                definition: formData.definition,
+                sourceLanguage: formData.sourceLanguage,
+                targetLanguage: formData.targetLanguage,
+                count: 3
+            });
+
+            // Replace existing examples with generated ones
+            setFormData(prev => ({
+                ...prev,
+                examples: generated.map(ex => ({
+                    sentence: ex.sentence,
+                    translation: ex.translation
+                }))
+            }));
+            setShowLimitWarning(false);
+        } catch (error) {
+            console.error('Failed to generate examples:', error);
+            alert('Failed to generate examples. Make sure Ollama is running and has a model available (e.g., run: ollama pull llama3.2)');
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -96,11 +131,13 @@ export const useWordForm = ({ initialData, onSubmit, onClose, isOpen }: UseWordF
     return {
         formData,
         isLoading,
+        isGenerating,
         showLimitWarning,
         handleChange,
         handleAddExample,
         handleExampleChange,
         handleRemoveExample,
+        handleGenerateExamples,
         handleSubmit
     };
 };

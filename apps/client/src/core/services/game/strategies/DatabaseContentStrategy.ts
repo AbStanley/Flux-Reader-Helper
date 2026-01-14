@@ -1,5 +1,5 @@
 import type { GameContentParams, GameItem, IContentStrategy } from '../interfaces';
-import { wordsApi, type Word } from '../../../../infrastructure/api/words';
+import { wordsApi, type Word, type Example } from '../../../../infrastructure/api/words';
 
 export class DatabaseContentStrategy implements IContentStrategy {
     async validateAvailability(): Promise<boolean> {
@@ -8,30 +8,39 @@ export class DatabaseContentStrategy implements IContentStrategy {
     }
 
     async fetchItems(config: GameContentParams['config']): Promise<GameItem[]> {
+        // For scramble mode, use specialized fetching
+        if (config?.gameMode === 'scramble') {
+            return this.fetchScrambleItems(config);
+        }
+
         try {
             const limit = config?.limit || 20;
             const reqSource = config?.language?.source;
             const reqTarget = config?.language?.target;
 
+            // Determine content type based on game mode
+            let typeFilter: 'word' | 'phrase' | undefined;
+            if (config?.gameMode === 'build-word' || config?.gameMode === 'multiple-choice') {
+                typeFilter = 'word';
+            }
+
             // 1. Forward Fetch: Search exactly as requested
-            // If Source selected, we look for DB.source == selectedSource
             const fwdPromise = wordsApi.getAll({
                 take: limit,
                 sourceLanguage: reqSource,
-                targetLanguage: reqTarget
+                targetLanguage: reqTarget,
+                type: typeFilter
             });
 
             // 2. Reverse Fetch: Search for the opposite to support "Backwards" learning
-            // If User wants Question to be "Russian" (reqSource='ru'), we also look for DB.target == 'ru'
-            // and then swap them so the Definition (Russian) becomes the Question.
             let revPromise: Promise<{ items: Word[]; total: number }> | undefined;
 
-            // Only perform reverse fetch if we have at least one filter and they aren't the same
             if ((reqSource || reqTarget) && reqSource !== reqTarget) {
                 revPromise = wordsApi.getAll({
                     take: limit,
-                    sourceLanguage: reqTarget, // swap filters
-                    targetLanguage: reqSource
+                    sourceLanguage: reqTarget,
+                    targetLanguage: reqSource,
+                    type: typeFilter
                 });
             }
 
@@ -42,21 +51,16 @@ export class DatabaseContentStrategy implements IContentStrategy {
 
             const items: GameItem[] = [];
 
-            // Map Forward Items
             fwdRes.items.forEach(word => {
                 items.push(this.mapToGameItem(word, false));
             });
 
-            // Map Reverse Items (Swapping Q/A)
             revRes.items.forEach(word => {
-                // Ensure definition exists if we are going to use it as the Question
                 if (word.definition) {
                     items.push(this.mapToGameItem(word, true));
                 }
             });
 
-            // Shuffle combined results if needed, or just return.
-            // (Store will likely shuffle or we can simple sort random here slightly?)
             return items.sort(() => 0.5 - Math.random()).slice(0, limit);
 
         } catch (error) {
@@ -65,22 +69,91 @@ export class DatabaseContentStrategy implements IContentStrategy {
         }
     }
 
+    /**
+     * Fetch items specifically for Scramble mode.
+     * Combines: phrases (type='phrase') + word examples
+     */
+    private async fetchScrambleItems(config: GameContentParams['config']): Promise<GameItem[]> {
+        try {
+            const limit = config?.limit || 20;
+            const reqSource = config?.language?.source;
+            const reqTarget = config?.language?.target;
+
+            // Fetch phrases directly
+            const phrasesPromise = wordsApi.getAll({
+                take: limit,
+                type: 'phrase',
+                sourceLanguage: reqSource,
+                targetLanguage: reqTarget
+            });
+
+            // Fetch words (to get their examples)
+            const wordsPromise = wordsApi.getAll({
+                take: limit * 2, // Get more to have enough examples
+                type: 'word',
+                sourceLanguage: reqSource,
+                targetLanguage: reqTarget
+            });
+
+            const [phrasesRes, wordsRes] = await Promise.all([phrasesPromise, wordsPromise]);
+
+            const items: GameItem[] = [];
+
+            // Map phrases directly (text = sentence, definition = translation)
+            phrasesRes.items.forEach(phrase => {
+                items.push(this.mapToGameItem(phrase, false));
+            });
+
+            // Extract examples from words and convert to GameItems
+            wordsRes.items.forEach(word => {
+                if (word.examples && word.examples.length > 0) {
+                    word.examples.forEach(example => {
+                        items.push(this.mapExampleToGameItem(example, word));
+                    });
+                }
+            });
+
+            // Shuffle and limit
+            return items.sort(() => 0.5 - Math.random()).slice(0, limit);
+
+        } catch (error) {
+            console.error('Failed to fetch scramble items from DB:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Map a word's example sentence to a GameItem for Scramble mode.
+     */
+    private mapExampleToGameItem(example: Example, parentWord: Word): GameItem {
+        const sourceLang = parentWord.sourceLanguage || 'en';
+        const targetLang = parentWord.targetLanguage || 'en';
+
+        return {
+            id: example.id,
+            question: example.sentence,
+            answer: example.translation || example.sentence, // Fallback to sentence if no translation
+            context: `Related to: ${parentWord.text}`,
+            source: 'db',
+            type: 'phrase',
+            lang: {
+                source: this.normalizeLanguageCode(sourceLang),
+                target: this.normalizeLanguageCode(targetLang)
+            },
+            originalData: { example, parentWord }
+        };
+    }
+
     private mapToGameItem(word: Word, swap: boolean): GameItem {
         const sourceLang = word.sourceLanguage || 'en';
         const targetLang = word.targetLanguage || 'en';
 
         return {
             id: word.id,
-            // If swapped: Question is Definition (Target in DB), Answer is Text (Source in DB)
             question: swap ? (word.definition || '???') : word.text,
             answer: swap ? word.text : (word.definition || 'No definition'),
-
             context: word.context || (word.examples && word.examples.length > 0 ? word.examples[0].sentence : undefined),
-
-            // Audio URL in DB is usually for the "text" (Source). 
-            // If swapped, the Question (Definition) likely has no audio URL, so we leave undefined to force TTS.
             audioUrl: swap ? undefined : word.pronunciation,
-
             imageUrl: word.imageUrl,
             source: 'db',
             type: word.type === 'phrase' ? 'phrase' : 'word',
@@ -104,7 +177,6 @@ export class DatabaseContentStrategy implements IContentStrategy {
             'japanese': 'ja-JP',
             'chinese': 'zh-CN',
             'korean': 'ko-KR',
-            // Short codes fallback overrides
             'en': 'en-US',
             'ru': 'ru-RU',
             'es': 'es-ES',
@@ -113,6 +185,7 @@ export class DatabaseContentStrategy implements IContentStrategy {
         };
 
         const lower = lang.toLowerCase();
-        return map[lower] || (lower.length === 2 ? lower : 'en-US'); // Fallback to en-US if unknown/long string to prevent errors
+        return map[lower] || (lower.length === 2 ? lower : 'en-US');
     }
 }
+

@@ -25,11 +25,13 @@ export const EditWordDialog: React.FC<EditWordDialogProps> = ({
     const {
         formData,
         isLoading,
+        isGenerating,
         showLimitWarning,
         handleChange,
         handleAddExample,
         handleExampleChange,
         handleRemoveExample,
+        handleGenerateExamples,
         handleSubmit
     } = useWordForm({ initialData, onSubmit, onClose, isOpen });
 
@@ -106,6 +108,9 @@ export const EditWordDialog: React.FC<EditWordDialogProps> = ({
                             onAdd={handleAddExample}
                             onChange={handleExampleChange}
                             onRemove={handleRemoveExample}
+                            onGenerate={handleGenerateExamples}
+                            isGenerating={isGenerating}
+                            canGenerate={!!(formData.text && formData.sourceLanguage && formData.targetLanguage)}
                             showLimitWarning={showLimitWarning}
                         />
 
