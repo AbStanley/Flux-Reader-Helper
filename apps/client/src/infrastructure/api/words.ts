@@ -37,7 +37,7 @@ export interface CreateWordRequest {
 const ENDPOINT = '/api/words';
 
 export const wordsApi = {
-    getAll: async (params?: { sort?: string; sourceLanguage?: string; skip?: number; take?: number; type?: 'word' | 'phrase' }) => {
+    getAll: async (params?: { sort?: string; sourceLanguage?: string; targetLanguage?: string; skip?: number; take?: number; type?: 'word' | 'phrase' }) => {
         const queryParams: Record<string, string> = {};
         if (params) {
             Object.entries(params).forEach(([key, value]) => {

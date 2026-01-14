@@ -1,4 +1,4 @@
-import { BookOpen, Library } from 'lucide-react';
+import { BookOpen, Dices, Library } from 'lucide-react';
 import { useViewStore } from '../../features/navigation/store/useViewStore';
 import { AppView } from '../../features/navigation/types';
 import { Button } from '../ui/button';
@@ -30,6 +30,15 @@ export function NavBar() {
                     >
                         <Library className="w-4 h-4" />
                         Words
+                    </Button>
+                    <Button
+                        variant={currentView === AppView.LearningMode ? 'secondary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setView(AppView.LearningMode)}
+                        className="gap-2"
+                    >
+                        <Dices className="w-4 h-4" />
+                        Arena
                     </Button>
                 </div>
             </div>

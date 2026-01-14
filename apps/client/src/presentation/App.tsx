@@ -66,6 +66,7 @@ import { NavBar } from './components/navigation/NavBar';
 import { useViewStore } from './features/navigation/store/useViewStore';
 import { AppView } from './features/navigation/types';
 import { WordManager } from './features/word-manager';
+import { LearningModePage } from './features/learning-mode/LearningModePage';
 
 function AppContent() {
   const { isReading, hasText, exitReaderMode } = useFocusMode();
@@ -77,6 +78,15 @@ function AppContent() {
       <>
         <NavBar />
         <WordManager />
+      </>
+    );
+  }
+
+  if (currentView === AppView.LearningMode) {
+    return (
+      <>
+        <NavBar />
+        <LearningModePage />
       </>
     );
   }
