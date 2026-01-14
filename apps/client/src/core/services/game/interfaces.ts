@@ -35,7 +35,7 @@ export interface GameContentParams {
             target?: string;
         }
         /** Only fetch items capable of this game mode? */
-        gameMode?: 'multiple-choice' | 'dictation' | 'scramble';
+        gameMode?: 'multiple-choice' | 'build-word' | 'dictation' | 'scramble';
         timerEnabled?: boolean;
     };
 }

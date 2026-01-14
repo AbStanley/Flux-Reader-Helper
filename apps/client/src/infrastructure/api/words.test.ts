@@ -35,7 +35,7 @@ describe('wordsApi', () => {
 
             const result = await wordsApi.getAll();
 
-            expect(defaultClient.get).toHaveBeenCalledWith('/api/words', undefined);
+            expect(defaultClient.get).toHaveBeenCalledWith('/api/words', {});
             expect(result).toEqual(mockResponse);
         });
     });

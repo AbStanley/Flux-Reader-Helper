@@ -10,12 +10,13 @@ interface GameShellProps {
 }
 
 export const GameShell: React.FC<GameShellProps> = ({ children }) => {
-    const { score, streak, health, maxHealth, currentIndex, items, reset, status, timeLeft, tick, timerEnabled } = useGameStore();
+    const { score, streak, health, maxHealth, currentIndex, items, reset, restartGame, status, timeLeft, tick, config } = useGameStore();
+    const timerEnabled = config.timerEnabled;
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
-        if (status === 'playing' && timerEnabled) { // Only run interval if enabled
-            interval = setInterval(tick, 1000);
+        if (status === 'playing' && timerEnabled) {
+            interval = setInterval(tick, 100);
         }
         return () => clearInterval(interval);
     }, [status, tick, timerEnabled]);
@@ -35,14 +36,15 @@ export const GameShell: React.FC<GameShellProps> = ({ children }) => {
                     </div>
                 </div>
                 <div className="flex gap-4">
-                    <Button size="lg" onClick={reset}>Back to Menu</Button>
+                    <Button size="lg" variant="outline" onClick={reset}>Back to Menu</Button>
+                    <Button size="lg" onClick={restartGame}>Play Again</Button>
                 </div>
             </div>
         );
     }
 
     const progress = items.length > 0 ? ((currentIndex) / items.length) * 100 : 0;
-    const timeProgress = (timeLeft / 10) * 100; // Assuming 10s max
+    const timeProgress = timeLeft; // Max is 100
 
     return (
         <div className="flex flex-col h-full bg-background relative">
@@ -51,8 +53,9 @@ export const GameShell: React.FC<GameShellProps> = ({ children }) => {
                 <div className="absolute top-0 left-0 w-full h-1.5 bg-primary/10 z-50">
                     <div
                         className={cn(
-                            "h-full transition-all duration-1000 ease-linear",
-                            timeLeft > 5 ? "bg-primary" : timeLeft > 2 ? "bg-orange-500" : "bg-red-500"
+                            "h-full ease-linear",
+                            timeLeft === 100 ? "transition-none" : "transition-all duration-100",
+                            timeLeft > 50 ? "bg-primary" : timeLeft > 20 ? "bg-orange-500" : "bg-red-500"
                         )}
                         style={{ width: `${timeProgress}%` }}
                     />
@@ -78,10 +81,10 @@ export const GameShell: React.FC<GameShellProps> = ({ children }) => {
                         {/* Timer Numeric Display */}
                         {timerEnabled && (
                             <div className={cn("hidden md:flex items-center gap-1.5 font-bold tabular-nums text-xl transition-colors",
-                                timeLeft <= 3 ? "text-red-500 animate-pulse" : "text-muted-foreground"
+                                timeLeft <= 30 ? "text-red-500 animate-pulse" : "text-muted-foreground"
                             )}>
                                 <Timer className="w-5 h-5" />
-                                {timeLeft}s
+                                {Math.ceil(timeLeft / 10)}s
                             </div>
                         )}
 

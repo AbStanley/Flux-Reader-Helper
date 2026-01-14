@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent } from "@/presentation/components/ui/card";
 import { useGameStore } from '../store/useGameStore';
@@ -8,10 +8,12 @@ import { soundService } from '../../../../core/services/SoundService';
 import { useGameAudio } from './hooks/useGameAudio';
 
 export const MultipleChoiceGame: React.FC = () => {
-    const { items, currentIndex, submitAnswer, nextItem } = useGameStore();
+    const { items, currentIndex, submitAnswer, nextItem, timeLeft, config } = useGameStore();
+    const timerEnabled = config.timerEnabled;
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const { playAudio, stopAudio } = useGameAudio();
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const currentItem = items[currentIndex];
 
@@ -19,16 +21,20 @@ export const MultipleChoiceGame: React.FC = () => {
     const options = useMemo(() => {
         if (!currentItem || items.length < 4) return [];
 
-        // 1. Get current answer
         const correctAnswer = currentItem.answer;
-
-        // 2. Get distractors (filter out current item)
         const pool = items.filter(i => i.id !== currentItem.id);
         const distractors = pool.sort(() => 0.5 - Math.random()).slice(0, 3).map(i => i.answer);
 
-        // 3. Combine and shuffle
         return [...distractors, correctAnswer].sort(() => 0.5 - Math.random());
     }, [currentItem, items]);
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            stopAudio();
+        };
+    }, [stopAudio]);
 
     // Auto-play Question on load
     useEffect(() => {
@@ -40,15 +46,27 @@ export const MultipleChoiceGame: React.FC = () => {
             return () => {
                 mounted = false;
                 clearTimeout(timer);
-                stopAudio();
             };
         }
-    }, [currentItem, playAudio, stopAudio]);
+    }, [currentItem, playAudio]);
+
+    // Handle Timeout
+    useEffect(() => {
+        if (timerEnabled && timeLeft === 0 && !isProcessing) {
+            setIsProcessing(true);
+            soundService.playWrong();
+
+            playAudio(currentItem.answer, currentItem.lang?.target, undefined).then(() => {
+                timeoutRef.current = setTimeout(() => nextItem(), 1500);
+            });
+        }
+    }, [timeLeft, timerEnabled, isProcessing, playAudio, currentItem, nextItem]);
 
     // Reset local state when item changes
     useEffect(() => {
         setSelectedOption(null);
         setIsProcessing(false);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
     }, [currentIndex]);
 
     const handleOptionClick = async (option: string) => {
@@ -58,7 +76,6 @@ export const MultipleChoiceGame: React.FC = () => {
 
         const isCorrect = option === currentItem.answer;
 
-        // Visual/Game Feedback
         if (isCorrect) {
             soundService.playCorrect();
         } else {
@@ -67,12 +84,9 @@ export const MultipleChoiceGame: React.FC = () => {
 
         submitAnswer(isCorrect);
 
-        // Audio Feedback: Play the CORRECT Answer (Target Language)
-        // Await audio completion before moving next
         await playAudio(currentItem.answer, currentItem.lang?.target, undefined);
 
-        // Small buffer after audio before switching
-        setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
             nextItem();
         }, 500);
     };
@@ -94,7 +108,6 @@ export const MultipleChoiceGame: React.FC = () => {
             {/* Question Card */}
             <Card className="w-full max-w-2xl bg-gradient-to-br from-card to-secondary/20 border-2 shadow-lg hover:shadow-xl transition-all">
                 <CardContent className="flex flex-col items-center justify-center p-12 min-h-[200px] gap-6">
-
 
                     <h2 className="text-4xl md:text-5xl font-black text-center text-primary drop-shadow-sm tracking-tight leading-tight">
                         {currentItem.question}
@@ -125,13 +138,10 @@ export const MultipleChoiceGame: React.FC = () => {
 
                     if (isProcessing) {
                         if (isCorrect) {
-                            // Correct: Vibrant Solid Green
                             variantClass = "bg-green-600 border-green-600 text-white scale-[1.02] shadow-lg shadow-green-900/20";
                         } else if (isSelected) {
-                            // Wrong: Vibrant Solid Red + Shake
                             variantClass = "bg-red-600 border-red-600 text-white animate-shake shadow-lg shadow-red-900/20";
                         } else {
-                            // Others: Fade out
                             variantClass = "opacity-30 grayscale";
                         }
                     }
@@ -151,9 +161,11 @@ export const MultipleChoiceGame: React.FC = () => {
                         </Button>
                     );
                 })}
+
+
             </div>
 
-            {/* Context/Hint */}
+            {/* Hint */}
             {isProcessing && selectedOption !== currentItem.answer && currentItem.context && (
                 <div className="text-sm text-muted-foreground animate-in slide-in-from-top-2 bg-secondary/50 px-4 py-2 rounded-lg">
                     💡 Hint: {currentItem.context}
