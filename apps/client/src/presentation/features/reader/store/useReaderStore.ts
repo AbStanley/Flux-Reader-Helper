@@ -18,6 +18,9 @@ interface ReaderState {
     selectionMode: SelectionMode;
     activePanel: 'DETAILS' | 'SAVED_WORDS';
 
+    aiModel?: string;
+    aiHost?: string;
+
     setConfig: (text: string, sourceLang: string, targetLang: string) => void;
     setText: (text: string) => void;
     setSourceLang: (lang: string) => void;
@@ -26,6 +29,8 @@ interface ReaderState {
     setIsGenerating: (isGenerating: boolean) => void;
     setSelectionMode: (mode: SelectionMode) => void;
     setActivePanel: (panel: 'DETAILS' | 'SAVED_WORDS') => void;
+    setAiModel: (model: string) => void;
+    setAiHost: (host: string) => void;
     setPage: (page: number) => void;
     handleSelection: (globalIndex: number) => Promise<void>;
     clearSelection: () => void;
@@ -42,6 +47,8 @@ export const useReaderStore = create<ReaderState>()(
             targetLang: "English",
             isReading: false,
             isGenerating: false,
+            aiModel: 'llama2', // Default
+            aiHost: import.meta.env.VITE_OLLAMA_URL || 'http://localhost:11434',
             PAGE_SIZE: 500,
             selectionMode: SelectionMode.Word,
             activePanel: 'DETAILS',
@@ -148,6 +155,9 @@ export const useReaderStore = create<ReaderState>()(
                 set({ selectedIndices: newSelection });
             },
 
+            setAiModel: (aiModel) => set({ aiModel }),
+            setAiHost: (aiHost) => set({ aiHost }),
+
             clearSelection: () => set({ selectedIndices: new Set() }),
         }),
         {
@@ -158,6 +168,8 @@ export const useReaderStore = create<ReaderState>()(
                 targetLang: state.targetLang,
                 tokens: state.tokens,
                 currentPage: state.currentPage,
+                aiModel: state.aiModel,
+                aiHost: state.aiHost,
             }),
         }
     )

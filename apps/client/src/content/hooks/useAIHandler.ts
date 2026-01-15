@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { OllamaService } from '../../infrastructure/ai/OllamaService';
+import { useReaderStore } from '../../presentation/features/reader/store/useReaderStore';
 
-// Initialize Service
+// Initialize Service (Default, will be updated)
 const aiService = new OllamaService(import.meta.env.VITE_OLLAMA_URL);
 
 export type Mode = 'EXPLAIN' | 'TRANSLATE';
@@ -10,6 +11,7 @@ export const useAIHandler = () => {
     const [result, setResult] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { aiModel, aiHost, setAiModel } = useReaderStore();
 
     const handleAction = async (text: string, mode: Mode, lang: string) => {
         setLoading(true);
@@ -17,12 +19,25 @@ export const useAIHandler = () => {
         setResult('');
 
         try {
+            // Update Service Config from Store
+            if (aiHost) {
+                aiService.setBaseUrl(aiHost);
+            }
+            // If model is set in store, use it.
+            if (aiModel) {
+                aiService.setModel(aiModel);
+            }
+
             let response = '';
-            // Ensure model is initialized or set preferred
-            const models = await aiService.getAvailableModels();
-            if (models.length > 0) {
-                const preferred = models.find(m => m.includes('llama3') || m.includes('mistral') || m.includes('qwen')) || models[0];
-                aiService.setModel(preferred);
+
+            // If no model is set, try to auto-detect and save it
+            if (!aiModel) {
+                const models = await aiService.getAvailableModels();
+                if (models.length > 0) {
+                    const preferred = models.find(m => m.includes('llama3') || m.includes('mistral') || m.includes('qwen')) || models[0];
+                    aiService.setModel(preferred);
+                    setAiModel(preferred); // Persist it
+                }
             }
 
             if (mode === 'EXPLAIN') {
@@ -34,7 +49,7 @@ export const useAIHandler = () => {
         } catch (err: unknown) {
             console.error('AI Error:', err);
             const errorMessage = err instanceof Error ? err.message : 'Failed to connect';
-            setError(`Error: ${errorMessage}`);
+            setError(`Error: ${errorMessage}. Check Host URL.`);
         } finally {
             setLoading(false);
         }

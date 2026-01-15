@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { GameItem, GameContentParams } from '../../../../core/services/game/interfaces';
 import { gameContentService } from '../../../../core/services/game/GameContentService';
 import { useUserStats } from './useUserStats';
@@ -16,6 +17,7 @@ export interface GameConfig {
     // AI Specific
     aiTopic?: string;
     aiModel?: string;
+    aiHost?: string;
     aiLevel?: 'beginner' | 'intermediate' | 'advanced';
 }
 
@@ -50,7 +52,7 @@ interface GameState {
     syncProgress: () => Promise<void>;
 }
 
-export const useGameStore = create<GameState>((set, get) => ({
+export const useGameStore = create<GameState>()(persist((set, get) => ({
     status: 'idle',
     config: {
         mode: 'multiple-choice',
@@ -146,11 +148,14 @@ export const useGameStore = create<GameState>((set, get) => ({
         }
 
         if (isCorrect) {
+            const newScore = score + 10 + (streak * 2);
+            console.log(`[GameStore] Correct! Old Score: ${score}, Streak: ${streak}, New Score: ${newScore}`);
             set({
-                score: score + 10 + (streak * 2),
+                score: newScore,
                 streak: streak + 1
             });
         } else {
+            console.log(`[GameStore] Wrong! Streak reset.`);
             set({
                 streak: 0,
                 health: Math.max(0, health - 1)
@@ -211,4 +216,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         const { config, items, history } = get();
         await gameContentService.syncProgress(config.source, items, history);
     }
+}), {
+    name: 'game-storage',
+    partialize: (state) => ({ config: state.config }),
 }));

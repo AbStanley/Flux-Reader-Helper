@@ -206,7 +206,7 @@ export const useWordBuilder = ({ targetWords, onComplete, isTimerPaused = false 
             } else if (e.key === 'Tab') {
                 e.preventDefault();
                 setFocusedWordIndex(prev => (prev + 1) % slots.length);
-            } else if (e.key.length === 1 && /[a-zA-Z0-9]/.test(e.key)) {
+            } else if (e.key.length === 1 && /[\p{L}\p{N}]/u.test(e.key)) {
                 handleInput(e.key);
             }
         };

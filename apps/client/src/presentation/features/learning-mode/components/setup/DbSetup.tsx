@@ -67,6 +67,20 @@ export function DbSetup() {
         return languageGraph[config.sourceLang] || [];
     }, [config.sourceLang, allUniqueLangs, languageGraph]);
 
+    // Auto-select first source language if currently 'all'
+    useEffect(() => {
+        if (allUniqueLangs.length > 0 && config.sourceLang === 'all') {
+            updateConfig({ sourceLang: allUniqueLangs[0] });
+        }
+    }, [allUniqueLangs, config.sourceLang, updateConfig]);
+
+    // Auto-select first target language if currently 'all' or invalid
+    useEffect(() => {
+        if (availableTargetLangs.length > 0 && (config.targetLang === 'all' || !availableTargetLangs.includes(config.targetLang))) {
+            updateConfig({ targetLang: availableTargetLangs[0] });
+        }
+    }, [availableTargetLangs, config.targetLang, updateConfig]);
+
     const swapLanguages = () => {
         updateConfig({
             sourceLang: config.targetLang,

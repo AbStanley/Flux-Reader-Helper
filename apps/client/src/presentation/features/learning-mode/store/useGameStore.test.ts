@@ -20,13 +20,15 @@ describe('useGameStore', () => {
         expect(config.mode).toBe('multiple-choice');
         expect(config.source).toBe('db');
         expect(config.timerEnabled).toBe(true);
+        expect(config.aiHost).toBeUndefined();
     });
 
-    it('should update config', () => {
-        useGameStore.getState().updateConfig({ mode: 'build-word', timerEnabled: false });
+    it('should update config and aiHost', () => {
+        useGameStore.getState().updateConfig({ mode: 'build-word', timerEnabled: false, aiHost: 'http://test:1234' });
         const { config } = useGameStore.getState();
         expect(config.mode).toBe('build-word');
         expect(config.timerEnabled).toBe(false);
+        expect(config.aiHost).toBe('http://test:1234');
     });
 
     it('should not tick if status is not playing', () => {
@@ -90,6 +92,27 @@ describe('useGameStore', () => {
         useGameStore.setState({ currentIndex: 1 });
         useGameStore.getState().submitAnswer(false);
         expect(useGameStore.getState().history['102']).toBe(false); // Incorrect
+    });
+
+    it('should update score and streak correctly', () => {
+        useGameStore.setState({
+            score: 0,
+            streak: 0,
+            items: [createMockItem('1'), createMockItem('2')]
+        });
+
+        // Correct answer: +10 + (0 * 2) = 10
+        useGameStore.getState().submitAnswer(true);
+        expect(useGameStore.getState().score).toBe(10);
+        expect(useGameStore.getState().streak).toBe(1);
+
+        // Next item (manual update for test)
+        useGameStore.setState({ currentIndex: 1 });
+
+        // Correct answer: +10 + (1 * 2) = 12. Total = 22
+        useGameStore.getState().submitAnswer(true);
+        expect(useGameStore.getState().score).toBe(22);
+        expect(useGameStore.getState().streak).toBe(2);
     });
 
     it('should call syncProgress', async () => {

@@ -2,14 +2,17 @@ import { useEffect, useState, useCallback } from 'react';
 import { useGameStore } from '../../store/useGameStore';
 import { ollamaService } from '@/infrastructure/ai/OllamaService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Pencil } from 'lucide-react';
 import { Button } from '@/presentation/components/ui/button';
+import { Input } from '@/presentation/components/ui/input';
+import { cn } from '@/lib/utils';
 
 export const AiSetup = () => {
     const { config, updateConfig } = useGameStore();
     const [models, setModels] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isManualInput, setIsManualInput] = useState(false);
 
     const fetchModels = useCallback(async () => {
         setLoading(true);
@@ -23,14 +26,17 @@ export const AiSetup = () => {
             // Auto-select first if none selected
             if (unique.length > 0 && !config.aiModel) {
                 updateConfig({ aiModel: unique[0] });
-            } else if (unique.length > 0 && config.aiModel && !unique.includes(config.aiModel)) {
-                // If current model not found, maybe select first? 
-                // Let's keep it but maybe show warning? For now just select first valid.
-                updateConfig({ aiModel: unique[0] });
             }
+            // Keep current model even if not in the fetched list (might be manually entered)
         } catch (err) {
             console.error(err);
-            setError("Failed to fetch models. Is Ollama running?");
+            setError("Could not auto-fetch models. You can enter one manually.");
+            // Don't clear models if we fail, just show error
+            if (!config.aiModel) {
+                // If nothing selected, maybe default to llama2?
+                // updateConfig({ aiModel: 'llama2' });
+                setIsManualInput(true);
+            }
         } finally {
             setLoading(false);
         }
@@ -51,6 +57,20 @@ export const AiSetup = () => {
                 <div className="space-y-4">
                     {/* Model Selection */}
                     <div className="space-y-1.5">
+                        <div className="space-y-1.5 mb-3">
+                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">AI Host URL</label>
+                            <Input
+                                value={config.aiHost || 'http://localhost:11434'}
+                                onChange={(e) => {
+                                    updateConfig({ aiHost: e.target.value });
+                                    // Make sure immediate service update happens if needed, or rely on it being set before calls
+                                    ollamaService.setBaseUrl(e.target.value);
+                                }}
+                                placeholder="http://localhost:11434"
+                                className="bg-white dark:bg-slate-700 font-mono text-xs"
+                            />
+                        </div>
+
                         <div className="flex items-center justify-between">
                             <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Model</label>
                             <Button
@@ -59,21 +79,40 @@ export const AiSetup = () => {
                                 onClick={fetchModels}
                                 className="h-6 w-6 p-0 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full"
                                 disabled={loading}
+                                title="Refresh Models"
                             >
                                 <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
                             </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setIsManualInput(!isManualInput)}
+                                className={cn("h-6 w-6 p-0 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full", isManualInput ? "text-violet-500" : "")}
+                                title="Toggle Manual Input"
+                            >
+                                <Pencil className="w-3.5 h-3.5" />
+                            </Button>
                         </div>
 
-                        {error ? (
-                            <div className="text-xs text-red-500">{error}</div>
+                        {error && (
+                            <div className="text-xs text-orange-500">{error}</div>
+                        )}
+
+                        {isManualInput ? (
+                            <Input
+                                value={config.aiModel || ''}
+                                onChange={(e) => updateConfig({ aiModel: e.target.value })}
+                                placeholder="Enter model name (e.g., llama2, mistral)"
+                                className="bg-white dark:bg-slate-700"
+                            />
                         ) : (
                             <Select
                                 value={config.aiModel}
                                 onValueChange={(val) => updateConfig({ aiModel: val })}
-                                disabled={loading || models.length === 0}
+                                disabled={loading || (models.length === 0 && !config.aiModel)}
                             >
                                 <SelectTrigger className="bg-white dark:bg-slate-700">
-                                    <SelectValue placeholder={loading ? "Loading models..." : "Select AI Model"} />
+                                    <SelectValue placeholder={loading ? "Loading models..." : (models.length === 0 ? "No models found" : "Select AI Model")} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {models.map(model => (

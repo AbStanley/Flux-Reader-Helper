@@ -27,6 +27,20 @@ export class OllamaService implements IAIService {
         this.model = model;
     }
 
+    setBaseUrl(url: string) {
+        if (!url) return;
+
+        let newUrl = url;
+        if (!newUrl.startsWith('http')) {
+            newUrl = `http://${newUrl}`;
+        }
+        if (newUrl.endsWith('/')) {
+            newUrl = newUrl.slice(0, -1);
+        }
+
+        this.transport = new OllamaTransport(newUrl);
+    }
+
     setModel(model: string) {
         this.model = model;
     }
