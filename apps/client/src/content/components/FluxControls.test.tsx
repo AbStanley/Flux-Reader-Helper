@@ -33,12 +33,12 @@ describe('FluxControls', () => {
             runtime: {
                 sendMessage: vi.fn(),
             },
-        } as any;
+        } as unknown as typeof chrome;
     });
 
     afterEach(() => {
         vi.restoreAllMocks();
-        // @ts-ignore
+        // @ts-expect-error - Testing missing title
         delete global.window.chrome;
     });
 

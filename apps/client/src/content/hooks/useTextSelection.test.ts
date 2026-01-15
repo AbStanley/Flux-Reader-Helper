@@ -3,10 +3,10 @@ import { renderHook, act } from '@testing-library/react';
 import { useTextSelection } from './useTextSelection';
 
 describe('useTextSelection', () => {
-    let addEventListenerSpy: any;
-    let removeEventListenerSpy: any;
-    let getSelectionSpy: any;
-    let events: Record<string, Function> = {};
+    let addEventListenerSpy: ReturnType<typeof vi.spyOn>;
+    let removeEventListenerSpy: ReturnType<typeof vi.spyOn>;
+    let getSelectionSpy: ReturnType<typeof vi.spyOn>;
+    let events: Record<string, (event?: unknown) => void> = {};
 
     beforeEach(() => {
         vi.useFakeTimers();
@@ -14,7 +14,7 @@ describe('useTextSelection', () => {
 
         // Mock document methods
         addEventListenerSpy = vi.spyOn(document, 'addEventListener').mockImplementation((event, handler) => {
-            events[event] = handler as Function;
+            events[event] = handler as (event?: unknown) => void;
         });
         removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
 

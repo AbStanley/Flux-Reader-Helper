@@ -110,7 +110,7 @@ export const useVisualSplits = ({
             clearTimeout(resizeTimer);
         };
 
-    }, [groups, selectionTranslations, currentPage, PAGE_SIZE]); // Deps aligned with inputs
+    }, [groups, selectionTranslations, currentPage, PAGE_SIZE, textAreaRef]); // Deps aligned with inputs
 
     return visualGroupStarts;
 };

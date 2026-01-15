@@ -10,13 +10,13 @@ export const getSentenceRange = (index: number, tokens: string[]): number[] => {
         if (!t) return false;
 
         // Basic punctuation check
-        const hasPunctuation = /[.!?]['"”’\)]*$/.test(t);
+        const hasPunctuation = /[.!?]['"”’)]*$/.test(t);
         if (!hasPunctuation) return false;
 
         // Check if it's an abbreviation
         const lowerToken = t.toLowerCase();
         // Remove trailing quotes/brackets for abbreviation check
-        const cleaned = lowerToken.replace(/['"”’\)]+$/, '');
+        const cleaned = lowerToken.replace(/['"”’)]+$/, '');
 
         if (abbreviations.has(cleaned)) {
             return false;

@@ -48,9 +48,14 @@ export class AnkiContentStrategy implements IContentStrategy {
             // But we have info.fields[key].order
             const sortedFields = fieldNames.sort((a, b) => info.fields[a].order - info.fields[b].order);
 
-            const invalidConfig = config as any;
-            const sourceField = invalidConfig.ankiFieldSource || sortedFields[0];
-            const targetField = invalidConfig.ankiFieldTarget || sortedFields[1] || sortedFields[0];
+            // Type-safe access to optional Anki field configuration
+            type AnkiConfig = NonNullable<GameContentParams['config']> & {
+                ankiFieldSource?: string;
+                ankiFieldTarget?: string;
+            };
+            const ankiConfig = config as AnkiConfig;
+            const sourceField = ankiConfig.ankiFieldSource || sortedFields[0];
+            const targetField = ankiConfig.ankiFieldTarget || sortedFields[1] || sortedFields[0];
 
             const question = this.stripHtml(info.fields[sourceField]?.value || "???");
             const answer = this.stripHtml(info.fields[targetField]?.value || "???");

@@ -8,8 +8,7 @@ interface UseReaderInteractionsProps {
     selectionTranslations: Map<string, string>;
     handleTokenClickAction: (index: number) => void;
     removeTranslation: (key: string, text: string, targetLang: string) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tokens: any[]; // Using any[] to match usage if string[], but safe if string[]
+    tokens: string[];
     targetLang: string;
     translateIndices: (indices: Set<number>, force?: boolean) => void;
     regenerateHover: (index: number) => void;
@@ -24,7 +23,7 @@ interface UseReaderInteractionsProps {
 const resolveTarget = (
     globalIndex: number,
     groups: number[][],
-    tokens: any[],
+    tokens: string[],
     forceSingle: boolean
 ) => {
     const group = groups.find(g => g.includes(globalIndex));
@@ -50,7 +49,7 @@ const handleGroupInteraction = (params: {
     isMultiSelecting: boolean;
     selectionMode: SelectionMode;
     selectionTranslations: Map<string, string>;
-    tokens: any[];
+    tokens: string[];
     removeTranslation: (key: string, text: string, targetLang: string) => void;
     targetLang: string;
     translateIndices: (indices: Set<number>, force?: boolean) => void;
@@ -165,7 +164,6 @@ export const useReaderInteractions = ({
     targetLang,
     translateIndices,
     regenerateHover,
-    sourceLang,
     selectionMode,
     fetchRichTranslation,
     playSingle
@@ -208,7 +206,7 @@ export const useReaderInteractions = ({
         // 3. Default Action
         handleTokenClickAction(index);
 
-    }, [currentPage, PAGE_SIZE, groups, selectionTranslations, handleTokenClickAction, removeTranslation, tokens, targetLang, translateIndices, sourceLang, selectionMode]);
+    }, [currentPage, PAGE_SIZE, groups, selectionTranslations, handleTokenClickAction, removeTranslation, tokens, targetLang, translateIndices, selectionMode]);
 
     const onMoreInfoClick = useCallback((index: number, forceSingle: boolean = false) => {
         const globalIndex = (currentPage - 1) * PAGE_SIZE + index;
@@ -216,11 +214,11 @@ export const useReaderInteractions = ({
 
         if (textToTranslate) {
             let startIndex = globalIndex;
-            while (startIndex > 0 && !tokens[startIndex - 1].includes('\n') && !/[.!?]['"”’\)]*$/.test(tokens[startIndex - 1])) {
+            while (startIndex > 0 && !tokens[startIndex - 1].includes('\n') && !/[.!?]['"”’)]*$/.test(tokens[startIndex - 1])) {
                 startIndex--;
             }
             let endIndex = globalIndex;
-            while (endIndex < tokens.length - 1 && !tokens[endIndex + 1].includes('\n') && !/[.!?]['"”’\)]*$/.test(tokens[endIndex])) {
+            while (endIndex < tokens.length - 1 && !tokens[endIndex + 1].includes('\n') && !/[.!?]['"”’)]*$/.test(tokens[endIndex])) {
                 endIndex++;
             }
             const context = tokens.slice(startIndex, endIndex + 1).join('');

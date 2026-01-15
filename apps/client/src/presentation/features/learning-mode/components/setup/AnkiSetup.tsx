@@ -25,7 +25,7 @@ export function AnkiSetup() {
                 try {
                     const deckNames = await ankiService.getDeckNames();
                     setAnkiDecks(deckNames);
-                } catch (e) {
+                } catch {
                     setAnkiError("Could not connect to Anki. Please ensure Anki is running with AnkiConnect installed.");
                 } finally {
                     setIsLoadingAnki(false);
@@ -64,7 +64,7 @@ export function AnkiSetup() {
             }
         };
         fetchFields();
-    }, [config.ankiDeckName]);
+    }, [config.ankiDeckName, config.ankiFieldSource, config.ankiFieldTarget, updateConfig]);
 
     const swapAnkiConfig = () => {
         updateConfig({

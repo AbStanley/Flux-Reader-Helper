@@ -9,7 +9,24 @@
  * - Coordinator: Opens the Side Panel in response to user actions from the In-Page UI.
  */
 
-// @ts-ignore
+interface ChromeMessage {
+    type: string;
+    data?: unknown;
+}
+
+interface ChromeResponse {
+    success: boolean;
+    data?: unknown;
+    error?: string;
+}
+
+interface ProxyConfig {
+    url: string;
+    method?: string;
+    headers?: Record<string, string>;
+    body?: unknown;
+}
+
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
         id: "open_flux_panel",
@@ -18,7 +35,6 @@ chrome.runtime.onInstalled.addListener(() => {
     });
 });
 
-// @ts-ignore
 chrome.contextMenus.onClicked.addListener((info, tab) => {
     if (info.menuItemId === "open_flux_panel" && tab?.windowId) {
         // Open the side panel
@@ -26,12 +42,14 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     }
 });
 
-// @ts-ignore
-chrome.runtime.onMessage.addListener((message: any, sender: any, sendResponse: any) => {
+chrome.runtime.onMessage.addListener((message: ChromeMessage, sender: chrome.runtime.MessageSender, sendResponse: (response: ChromeResponse) => void) => {
     if (message.type === 'PROXY_REQUEST') {
-        handleProxyRequest(message.data)
+        handleProxyRequest(message.data as ProxyConfig)
             .then(data => sendResponse({ success: true, data }))
-            .catch(error => sendResponse({ success: false, error: error.message }));
+            .catch((error: unknown) => {
+                const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                sendResponse({ success: false, error: errorMessage });
+            });
         return true; // Will respond asynchronously
     }
 
@@ -39,7 +57,10 @@ chrome.runtime.onMessage.addListener((message: any, sender: any, sendResponse: a
         if (sender.tab?.windowId) {
             chrome.sidePanel.open({ windowId: sender.tab.windowId })
                 .then(() => sendResponse({ success: true }))
-                .catch((e: any) => sendResponse({ success: false, error: e.message }));
+                .catch((error: unknown) => {
+                    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                    sendResponse({ success: false, error: errorMessage });
+                });
             return true;
         }
     }
@@ -47,15 +68,15 @@ chrome.runtime.onMessage.addListener((message: any, sender: any, sendResponse: a
 
 chrome.runtime.onConnect.addListener((port: chrome.runtime.Port) => {
     if (port.name === 'PROXY_STREAM_CONNECTION') {
-        port.onMessage.addListener((message: any) => {
+        port.onMessage.addListener((message: ChromeMessage) => {
             if (message.type === 'START_STREAM') {
-                handleStreamRequest(message.data, port);
+                handleStreamRequest(message.data as ProxyConfig, port);
             }
         });
     }
 });
 
-async function handleProxyRequest(config: { url: string, method?: string, headers?: any, body?: any }) {
+async function handleProxyRequest(config: ProxyConfig): Promise<unknown> {
     const { url, method = 'GET', headers = {}, body } = config;
 
     console.log('[Background] Fetching:', url);
@@ -83,7 +104,7 @@ async function handleProxyRequest(config: { url: string, method?: string, header
     }
 }
 
-async function handleStreamRequest(config: { url: string, method?: string, headers?: any, body?: any }, port: chrome.runtime.Port) {
+async function handleStreamRequest(config: ProxyConfig, port: chrome.runtime.Port): Promise<void> {
     const { url, method = 'POST', headers = {}, body } = config;
 
     try {
@@ -121,8 +142,9 @@ async function handleStreamRequest(config: { url: string, method?: string, heade
 
         port.disconnect();
 
-    } catch (error: any) {
-        port.postMessage({ type: 'ERROR', error: error.message });
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        port.postMessage({ type: 'ERROR', error: errorMessage });
         port.disconnect();
     }
 }

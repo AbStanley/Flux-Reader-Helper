@@ -42,8 +42,10 @@ export const useStoryGeneration = ({
                     setText(fullText);
                 }
             });
-        } catch (error: any) {
-            if (error.name === 'AbortError' || error.message === 'Aborted') {
+        } catch (error: unknown) {
+            const errorName = error instanceof Error ? error.name : '';
+            const errorMessage = error instanceof Error ? error.message : '';
+            if (errorName === 'AbortError' || errorMessage === 'Aborted') {
                 console.log('Generation aborted by user');
             } else {
                 console.error(error);

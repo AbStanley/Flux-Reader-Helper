@@ -25,7 +25,7 @@ if (typeof DOMMatrix === 'undefined') {
         isIdentity = true;
         is2D = true;
         setMatrixValue() { return this; }
-    } as any;
+    } as unknown as typeof DOMMatrix;
 }
 
 // Polyfill File/Blob arrayBuffer if missing

@@ -31,9 +31,10 @@ export const useAIHandler = () => {
                 response = await aiService.translateText(text, lang);
             }
             setResult(response);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('AI Error:', err);
-            setError(`Error: ${err.message || 'Failed to connect'} `);
+            const errorMessage = err instanceof Error ? err.message : 'Failed to connect';
+            setError(`Error: ${errorMessage}`);
         } finally {
             setLoading(false);
         }

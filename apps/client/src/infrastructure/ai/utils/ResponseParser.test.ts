@@ -31,12 +31,12 @@ describe('ResponseParser', () => {
 
         it('falls back to regex extraction for malformed JSON', () => {
             const input = 'Some text "translation": "hola", "segment": "hello" end text';
-            const result = extractJson(input);
+            const result = extractJson(input) as Record<string, unknown>;
 
             expect(result.translation).toBe('hola');
             expect(result.segment).toBe('hello');
             // Check default valid values
-            expect(result.grammar.partOfSpeech).toBe('unknown');
+            expect((result.grammar as Record<string, unknown>).partOfSpeech).toBe('unknown');
         });
     });
 
@@ -54,9 +54,9 @@ describe('ResponseParser', () => {
 
             const result = normalizeRichTranslation(input);
 
-            expect(result.grammar.partOfSpeech).toBe('noun');
-            expect(result.grammar.gender).toBe('masculine');
-            expect(result.grammar.tense).toBe('Present');
+            expect(result.grammar?.partOfSpeech).toBe('noun');
+            expect(result.grammar?.gender).toBe('masculine');
+            expect(result.grammar?.tense).toBe('Present');
         });
 
         it('handles unknown partOfSpeech', () => {
@@ -66,7 +66,7 @@ describe('ResponseParser', () => {
                 }
             };
             const result = normalizeRichTranslation(input);
-            expect(result.grammar.partOfSpeech).toBe('unknown');
+            expect(result.grammar?.partOfSpeech).toBe('unknown');
         });
 
         it('handles idioms/expressions as expression', () => {
@@ -76,7 +76,7 @@ describe('ResponseParser', () => {
                 }
             };
             const result = normalizeRichTranslation(input);
-            expect(result.grammar.partOfSpeech).toBe('expression');
+            expect(result.grammar?.partOfSpeech).toBe('expression');
         });
 
         it('normalizes translation type', () => {

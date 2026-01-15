@@ -33,11 +33,11 @@ export function FluxContent({ loading, error, result }: FluxContentProps) {
                 }}>
                     <ReactMarkdown
                         components={{
-                            p: ({ node, ...props }) => <p style={{ marginBottom: '8px' }} {...props} />,
-                            ul: ({ node, ...props }) => <ul style={{ marginLeft: '16px', listStyleType: 'disc', marginBottom: '8px' }} {...props} />,
-                            ol: ({ node, ...props }) => <ol style={{ marginLeft: '16px', listStyleType: 'decimal', marginBottom: '8px' }} {...props} />,
-                            li: ({ node, ...props }) => <li style={{ marginBottom: '4px' }} {...props} />,
-                            strong: ({ node, ...props }) => <strong style={{ color: '#bae6fd', fontWeight: '600' }} {...props} />
+                            p: ({ ...props }) => <p style={{ marginBottom: '8px' }} {...props} />,
+                            ul: ({ ...props }) => <ul style={{ marginLeft: '16px', listStyleType: 'disc', marginBottom: '8px' }} {...props} />,
+                            ol: ({ ...props }) => <ol style={{ marginLeft: '16px', listStyleType: 'decimal', marginBottom: '8px' }} {...props} />,
+                            li: ({ ...props }) => <li style={{ marginBottom: '4px' }} {...props} />,
+                            strong: ({ ...props }) => <strong style={{ color: '#bae6fd', fontWeight: '600' }} {...props} />
                         }}
                     >
                         {result}

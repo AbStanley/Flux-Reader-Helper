@@ -54,10 +54,12 @@ export function useSentenceScrambleLogic() {
             isUsed: false
         }));
 
-        setSlots(newSlots);
-        setWordPool(newPool);
-        setIsRevealed(false);
-        setIsComplete(false);
+        setTimeout(() => {
+            setSlots(newSlots);
+            setWordPool(newPool);
+            setIsRevealed(false);
+            setIsComplete(false);
+        }, 0);
     }, [currentItem, tokenize, shuffle]);
 
     // Auto-play question audio
@@ -75,6 +77,7 @@ export function useSentenceScrambleLogic() {
         return () => stopAudio();
     }, [stopAudio]);
 
+    // Handle clicking a word in the pool
     // Handle clicking a word in the pool
     const handleWordClick = useCallback((brickId: string) => {
         if (isComplete || isRevealed) return;
@@ -104,19 +107,38 @@ export function useSentenceScrambleLogic() {
             b.id === brickId ? { ...b, isUsed: true } : b
         ));
 
-        // Update slot with immediate status feedback
-        setSlots(prev => prev.map((s, idx) =>
+        // Update slots
+        const newSlots = slots.map((s, idx) =>
             idx === emptySlotIdx
                 ? {
                     ...s,
                     word: brick.word,
                     isFilled: true,
                     sourceBrickId: brickId,
-                    status: isCorrect ? 'correct' : 'wrong'
+                    status: (isCorrect ? 'correct' : 'wrong') as 'correct' | 'wrong'
                 }
                 : s
-        ));
-    }, [isComplete, isRevealed, wordPool, slots, currentItem, tokenize]);
+        );
+
+        setSlots(newSlots);
+
+        // Check for completion immediately on the new state
+        const allFilled = newSlots.every(s => s.isFilled);
+        if (allFilled) {
+            const allCorrect = newSlots.every(s => s.status === 'correct');
+            if (allCorrect) {
+                soundService.playCorrect();
+                setIsComplete(true);
+                submitAnswer(true);
+
+                playAudio(currentItem.answer, currentItem.lang?.target, undefined).then(() => {
+                    setTimeout(() => nextItem(), 1000);
+                });
+            } else {
+                soundService.playWrong();
+            }
+        }
+    }, [isComplete, isRevealed, wordPool, slots, currentItem, tokenize, playAudio, submitAnswer, nextItem]);
 
     // Handle clicking a filled slot to return word
     const handleSlotClick = useCallback((slotIndex: number) => {
@@ -141,29 +163,8 @@ export function useSentenceScrambleLogic() {
     }, [isComplete, isRevealed, slots]);
 
     // Check completion when all slots filled
-    useEffect(() => {
-        if (isComplete || isRevealed) return;
-        if (!currentItem) return;
-
-        const allFilled = slots.length > 0 && slots.every(s => s.isFilled);
-        if (!allFilled) return;
-
-        // Check if all slots are correct (status was set during placement)
-        const allCorrect = slots.every(s => s.status === 'correct');
-
-        if (allCorrect) {
-            soundService.playCorrect();
-            setIsComplete(true);
-            submitAnswer(true);
-
-            playAudio(currentItem.answer, currentItem.lang?.target, undefined).then(() => {
-                setTimeout(() => nextItem(), 1000);
-            });
-        } else {
-            // Full but wrong: Play wrong sound
-            soundService.playWrong();
-        }
-    }, [slots, isComplete, isRevealed, currentItem, submitAnswer, nextItem, playAudio]);
+    // Completion check moved to handleWordClick to avoid set-state-in-effect
+    // Removed useEffect that was here
 
     // Handle give up
     const handleGiveUp = useCallback(() => {
@@ -188,7 +189,7 @@ export function useSentenceScrambleLogic() {
     // Watch for Timeout
     useEffect(() => {
         if (config.timerEnabled && timeLeft === 0 && !isRevealed && !isComplete) {
-            handleGiveUp();
+            setTimeout(() => handleGiveUp(), 0);
         }
     }, [timeLeft, config.timerEnabled, isRevealed, isComplete, handleGiveUp]);
 

@@ -6,7 +6,14 @@ import * as UseTextSelection from './hooks/useTextSelection';
 
 // Mock child components to simplify testing
 vi.mock('./components/FluxPopup', () => ({
-    FluxPopup: ({ selection, result, mode, onAction, onClose, onModeChange }: any) => (
+    FluxPopup: ({ selection, result, mode, onAction, onClose, onModeChange }: {
+        selection: { text: string } | null;
+        result: string;
+        mode: string;
+        onAction: () => void;
+        onClose: () => void;
+        onModeChange: (mode: string) => void;
+    }) => (
         <div data-testid="flux-popup">
             <span>Popup for: {selection?.text}</span>
             <span>Result: {result}</span>
@@ -31,7 +38,7 @@ describe('FluxContentApp', () => {
     };
 
     // We need to capture the callbacks passed to useTextSelection
-    let triggerSelection: (sel: any) => void;
+    let triggerSelection: (sel: { text: string; x: number; y: number }) => void;
     let triggerClear: () => void;
 
     afterEach(() => {

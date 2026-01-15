@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useAIHandler } from './useAIHandler';
 import { OllamaService } from '../../infrastructure/ai/OllamaService';
@@ -13,14 +13,20 @@ vi.mock('../../infrastructure/ai/OllamaService', () => {
     return { OllamaService: OllamaServiceMock };
 });
 
+interface MockOllamaService {
+    getAvailableModels: Mock<() => Promise<string[]>>;
+    setModel: Mock<(model: string) => void>;
+    explainText: Mock<(text: string, targetLanguage?: string, context?: string) => Promise<string>>;
+    translateText: Mock<(text: string, targetLanguage?: string, context?: string, sourceLanguage?: string) => Promise<string>>;
+}
+
 describe('useAIHandler', () => {
-    let mockService: any;
+    let mockService: MockOllamaService;
 
     beforeEach(() => {
         vi.clearAllMocks();
         // Get the mock instance
-        // @ts-ignore
-        mockService = OllamaService.prototype;
+        mockService = OllamaService.prototype as unknown as MockOllamaService;
         mockService.getAvailableModels.mockResolvedValue(['llama3']);
         mockService.setModel.mockReturnValue(undefined);
     });

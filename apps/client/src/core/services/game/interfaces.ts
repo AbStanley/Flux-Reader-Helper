@@ -13,7 +13,7 @@ export interface GameItem {
     /** Source of the item for tracking back (e.g. 'anki', 'db', 'ai') */
     source: 'anki' | 'db' | 'ai';
     /** Raw data for specific handling (e.g. Anki card ID for reviewing) */
-    originalData?: any;
+    originalData?: unknown;
     /** Type of content */
     type: 'word' | 'start' | 'phrase';
     /** Language direction metadata */

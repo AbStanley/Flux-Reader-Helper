@@ -1,8 +1,7 @@
 import { type ComponentProps } from "react"
 import { cn } from "../../../lib/utils"
 
-export interface InputProps
-    extends ComponentProps<"input"> { }
+export type InputProps = ComponentProps<"input">
 
 function Input({ className, type, ref, ...props }: InputProps) {
     return (

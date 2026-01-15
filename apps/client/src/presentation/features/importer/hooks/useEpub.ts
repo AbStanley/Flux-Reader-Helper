@@ -2,12 +2,13 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import ePub from 'epubjs';
 import type { Chapter } from '../utils/epubUtils';
 import { processToc, extractEpubText } from '../utils/epubUtils';
+import type { EpubBook } from '../../../../types/external-libs';
 
 export const useEpub = (file: File) => {
     const [chapters, setChapters] = useState<Chapter[]>([]);
     const [loading, setLoading] = useState(true);
     const [isExtracting, setIsExtracting] = useState(false);
-    const bookRef = useRef<any>(null);
+    const bookRef = useRef<EpubBook | null>(null);
 
     useEffect(() => {
         const loadEpub = async () => {
@@ -17,7 +18,7 @@ export const useEpub = (file: File) => {
 
             try {
                 const buffer = await file.arrayBuffer();
-                const book = ePub(buffer);
+                const book = ePub(buffer) as unknown as EpubBook;
                 bookRef.current = book;
                 await book.ready;
                 const navigation = await book.loaded.navigation;

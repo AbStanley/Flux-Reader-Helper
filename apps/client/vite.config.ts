@@ -8,7 +8,13 @@ export default defineConfig({
   base: './',
   plugins: [
     react(),
-    checker({ typescript: true }),
+    checker({
+      typescript: true,
+      eslint: {
+        useFlatConfig: true,
+        lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
+      },
+    }),
   ],
   server: {
     port: parseInt(process.env.VITE_PORT || '5173'),
@@ -21,8 +27,8 @@ export default defineConfig({
         target: 'http://127.0.0.1:8765',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/anki/, ''),
-        configure: (proxy, _options) => {
-          proxy.on('proxyReq', (proxyReq, _req, _res) => {
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq) => {
             proxyReq.setHeader('Origin', 'http://127.0.0.1:8765');
           });
         },

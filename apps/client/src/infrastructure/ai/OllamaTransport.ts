@@ -16,7 +16,7 @@ export class OllamaTransport {
         return this.isExtension() ? 'http://127.0.0.1:11434' : '';
     }
 
-    async getTags(): Promise<any> {
+    async getTags(): Promise<{ models?: Array<{ name: string }> } | null> {
         const url = `${this.apiBaseUrl}/api/tags`;
         try {
             if (this.isExtension()) {
@@ -37,7 +37,7 @@ export class OllamaTransport {
         }
     }
 
-    async generate(body: any, options?: {
+    async generate(body: Record<string, unknown>, options?: {
         onProgress?: (chunk: string, fullText: string) => void;
         signal?: AbortSignal;
     }): Promise<string> {
@@ -96,14 +96,14 @@ export class OllamaTransport {
         }
     }
 
-    private async generateExtension(body: any, isStreaming: boolean, onProgress?: (chunk: string, fullText: string) => void): Promise<string> {
+    private async generateExtension(body: Record<string, unknown>, isStreaming: boolean, onProgress?: (chunk: string, fullText: string) => void): Promise<string> {
         return new Promise((resolve, reject) => {
             const port = chrome.runtime.connect({ name: 'PROXY_STREAM_CONNECTION' });
             let fullText = '';
 
-            port.onMessage.addListener((msg: any) => {
+            port.onMessage.addListener((msg: { type: string; chunk?: string; error?: string }) => {
                 if (msg.type === 'CHUNK') {
-                    const lines = msg.chunk.split('\n');
+                    const lines = msg.chunk!.split('\n');
                     for (const line of lines) {
                         if (!line.trim()) continue;
                         try {

@@ -37,7 +37,7 @@ export interface IAIService {
     generateText(prompt: string, options?: {
         onProgress?: (chunk: string, fullText: string) => void;
         signal?: AbortSignal;
-        [key: string]: any
+        [key: string]: unknown
     }): Promise<string>;
 
     /**

@@ -81,7 +81,10 @@ export const useGameStore = create<GameState>((set, get) => ({
                 // Pass Anki config
                 collectionId: config.ankiDeckName,
 
-                ...({ ankiFieldSource: config.ankiFieldSource, ankiFieldTarget: config.ankiFieldTarget } as any)
+                ...(config.ankiFieldSource || config.ankiFieldTarget ? {
+                    ankiFieldSource: config.ankiFieldSource,
+                    ankiFieldTarget: config.ankiFieldTarget
+                } : {})
             }
         };
 
@@ -106,9 +109,10 @@ export const useGameStore = create<GameState>((set, get) => ({
                 return;
             }
             set({ items, status: 'playing' });
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Failed to start game:", error);
-            set({ status: 'idle', error: error.message || "Failed to start game" });
+            const errorMessage = error instanceof Error ? error.message : "Failed to start game";
+            set({ status: 'idle', error: errorMessage });
         }
     },
 

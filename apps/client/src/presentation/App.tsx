@@ -23,13 +23,28 @@ function App() {
   const setText = useReaderStore(state => state.setText);
   const setIsReading = useReaderStore(state => state.setIsReading);
 
+
   useEffect(() => {
     // Check if running in extension context
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const w = window as any;
-    if (w.chrome && w.chrome.runtime && w.chrome.runtime.onMessage) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const handleMessage = (message: any) => {
+    type ChromeWindow = Window & {
+      chrome?: {
+        runtime?: {
+          onMessage?: {
+            addListener: (handler: (message: { type: string; text?: string }) => void) => void;
+            removeListener: (handler: (message: { type: string; text?: string }) => void) => void;
+          };
+        };
+        storage?: {
+          local?: {
+            get: (keys: string[], callback: (result: { pendingText?: string }) => void) => void;
+            remove: (keys: string | string[]) => void;
+          };
+        };
+      };
+    };
+    const w = window as ChromeWindow;
+    if (w.chrome?.runtime?.onMessage) {
+      const handleMessage = (message: { type: string; text?: string }) => {
         if (message.type === 'TEXT_SELECTED' && message.text) {
           setText(message.text);
           setIsReading(true);
@@ -38,18 +53,18 @@ function App() {
       w.chrome.runtime.onMessage.addListener(handleMessage);
 
       // Check for pending text in storage (from "Read in Flux" action)
-      if (w.chrome.storage && w.chrome.storage.local) {
-        w.chrome.storage.local.get(['pendingText'], (result: any) => {
+      if (w.chrome.storage?.local) {
+        w.chrome.storage.local.get(['pendingText'], (result: { pendingText?: string }) => {
           if (result.pendingText) {
             setText(result.pendingText);
             setIsReading(true);
             // Clear it so it doesn't persist forever
-            w.chrome.storage.local.remove('pendingText');
+            w.chrome.storage.local?.remove('pendingText');
           }
         });
       }
 
-      return () => w.chrome.runtime.onMessage.removeListener(handleMessage);
+      return () => w.chrome?.runtime?.onMessage?.removeListener(handleMessage);
     }
   }, [setText, setIsReading]);
 

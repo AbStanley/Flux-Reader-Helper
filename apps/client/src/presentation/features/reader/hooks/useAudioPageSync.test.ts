@@ -69,7 +69,7 @@ describe('useAudioPageSync', () => {
         let mockState = { isPlaying: true, currentWordIndex: 499 };
         mockUseAudioStore.mockImplementation((selector: (state: any) => any) => selector(mockState));
 
-        let { result, rerender } = renderHook(() => useAudioPageSync(PAGE_SIZE));
+        const { result, rerender } = renderHook(() => useAudioPageSync(PAGE_SIZE));
         expect(result.current).toBe(1);
 
         // Update state to boundary

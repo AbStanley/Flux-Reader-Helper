@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { Card, CardContent } from "../../../components/ui/card";
 import { Loader2 } from 'lucide-react';
 import styles from '../ReaderView.module.css';
@@ -53,10 +53,6 @@ export function ReaderMainPanel() {
     } = useTranslation(true);
 
     const groups = useReaderGroups(selectedIndices, getSelectionGroups, selectionTranslations);
-
-    const activeTabData = useMemo(() => {
-        return richDetailsTabs.find(t => t.id === activeTabId)?.data || null;
-    }, [richDetailsTabs, activeTabId]);
 
     const playSingle = useAudioStore(s => s.playSingle);
     const availableVoices = useAudioStore(s => s.availableVoices);
@@ -127,7 +123,6 @@ export function ReaderMainPanel() {
                             tokens={tokens}
                             paginatedTokens={paginatedTokens}
                             groups={groups}
-                            richTranslation={activeTabData}
                             currentPage={currentPage}
                             PAGE_SIZE={PAGE_SIZE}
                             selectionMode={selectionMode}

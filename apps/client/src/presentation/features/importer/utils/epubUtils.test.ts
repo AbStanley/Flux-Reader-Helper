@@ -61,7 +61,10 @@ describe('epubUtils', () => {
                     get: vi.fn(),
                     items: []
                 },
-                load: vi.fn() // passed to spine item load
+                load: vi.fn(), // passed to spine item load
+                ready: Promise.resolve(),
+                loaded: { navigation: Promise.resolve({ toc: [] }) },
+                destroy: vi.fn()
             };
 
             // Mock spine.get to return our mock item
@@ -107,7 +110,11 @@ describe('epubUtils', () => {
                 spine: {
                     get: vi.fn().mockReturnValue(undefined), // nothing found
                     items: []
-                }
+                },
+                ready: Promise.resolve(),
+                loaded: { navigation: Promise.resolve({ toc: [] }) },
+                load: vi.fn(),
+                destroy: vi.fn()
             };
             const toc: Chapter[] = [{ id: '1', label: 'Ch1', href: 'ch1.xhtml' }];
             const selectedHrefs = new Set(['ch1.xhtml']);

@@ -1,11 +1,12 @@
 import { normalizePartOfSpeech, type GrammaticalGender, type TranslationType } from "../../../core/types/Linguistics";
+import type { RichTranslationResult } from "../../../core/interfaces/IAIService";
 
 export const cleanResponse = (response: string): string => {
     // Remove <think> blocks
     return response.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 };
 
-export const extractJson = (response: string): any => {
+export const extractJson = (response: string): unknown => {
     let clean = cleanResponse(response);
 
     // Extract JSON block if present (Markdown code fence)
@@ -45,10 +46,10 @@ export const extractJson = (response: string): any => {
     }
 };
 
-export const normalizeRichTranslation = (data: any): any => {
+export const normalizeRichTranslation = (data: Record<string, unknown>): RichTranslationResult => {
     // Normalize type
     if (data.type) {
-        const typeLower = data.type.toLowerCase();
+        const typeLower = (data.type as string).toLowerCase();
         if (typeLower === 'word' || typeLower === 'sentence') {
             data.type = typeLower as TranslationType;
         } else {
@@ -60,28 +61,30 @@ export const normalizeRichTranslation = (data: any): any => {
 
     // Normalize examples
     if (data.examples && Array.isArray(data.examples)) {
-        data.examples = data.examples.map((ex: any) => {
+        data.examples = data.examples.map((ex: unknown) => {
             if (typeof ex === 'string') {
                 return { sentence: ex, translation: "" };
             }
+            const exObj = ex as Record<string, unknown>;
             return {
-                sentence: ex.sentence || ex.example || ex.text || ex.source || "",
-                translation: ex.translation || ex.meaning || ""
+                sentence: exObj.sentence || exObj.example || exObj.text || exObj.source || "",
+                translation: exObj.translation || exObj.meaning || ""
             };
-        }).filter((ex: any) => ex.sentence);
+        }).filter((ex: unknown) => (ex as Record<string, unknown>).sentence);
     }
 
     // Normalize Grammar Fields
     if (data.grammar) {
-        if (data.grammar.partOfSpeech) {
-            data.grammar.partOfSpeech = normalizePartOfSpeech(data.grammar.partOfSpeech);
+        const grammar = data.grammar as Record<string, unknown>;
+        if (grammar.partOfSpeech) {
+            grammar.partOfSpeech = normalizePartOfSpeech(grammar.partOfSpeech as string);
         }
 
         // Normalize Gender to lowercase to match union
-        if (data.grammar.gender) {
-            data.grammar.gender = data.grammar.gender.toLowerCase() as GrammaticalGender;
+        if (grammar.gender) {
+            grammar.gender = (grammar.gender as string).toLowerCase() as GrammaticalGender;
         }
     }
 
-    return data;
+    return data as unknown as RichTranslationResult;
 };

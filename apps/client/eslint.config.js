@@ -1,25 +1,45 @@
+import { fileURLToPath } from 'url'
+import { dirname } from 'path'
 import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
-import { defineConfig, globalIgnores } from 'eslint/config'
 
-export default defineConfig([
-  globalIgnores(['dist']),
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
+export default tseslint.config(
+  { ignores: ['dist', '**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx'] },
+  // 1. Base JS rules
+  js.configs.recommended,
+  // 2. TypeScript Strict + Stylistic rules (spread as they are arrays)
+  // 2. TypeScript Recommended rules (Relaxed from strict to allow dev)
+  ...tseslint.configs.recommended,
+  // ...tseslint.configs.stylistic, // Commented out to reduce stylistic noise
+  // 3. React Hooks (Flat config compatible object)
+  {
+    plugins: {
+      'react-hooks': reactHooks,
+    },
+    rules: reactHooks.configs.recommended.rules,
+  },
+  // 4. Custom Configuration
   {
     files: ['**/*.{ts,tsx}'],
-    extends: [
-      js.configs.recommended,
-      tseslint.configs.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
-    ],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+      parserOptions: {
+        project: ['./tsconfig.app.json', './tsconfig.node.json'],
+        tsconfigRootDir: __dirname,
+      },
+    },
+    plugins: {
+      'react-refresh': reactRefresh,
     },
     rules: {
+      ...reactRefresh.configs.vite.rules,
       'no-restricted-imports': [
         'error',
         {
@@ -46,4 +66,4 @@ export default defineConfig([
       '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
-])
+)

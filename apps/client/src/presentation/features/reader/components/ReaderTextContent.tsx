@@ -14,7 +14,7 @@ interface ReaderTextContentProps {
     tokens: string[]; // Needed for highlighting logic
     paginatedTokens: string[];
     groups: number[][]; // Needed for highlighting
-    richTranslation: any; // Needed for highlighting
+
     currentPage: number;
     PAGE_SIZE: number;
     selectionMode: SelectionMode; // Updated: Needed for display logic
@@ -33,7 +33,6 @@ const ReaderTextContentComponent = ({
     tokens,
     paginatedTokens,
     groups,
-    richTranslation,
     currentPage,
     PAGE_SIZE,
     visualGroupStarts,
@@ -57,11 +56,50 @@ const ReaderTextContentComponent = ({
     const { handleHover, clearHover } = useTranslation();
 
     // Highlighting Logic (Local to this component now)
-    const highlightIndices = useHighlighting(tokens, groups, richTranslation);
+    const highlightIndices = useHighlighting(tokens, groups);
 
-    // Track title state across tokens (linear scan)
-    let inTitle = false;
-    let skipNextSpace = false;
+    // Pre-calculate title lines to avoid mutation during render
+    // We scan tokens once. If we encounter a header marker, we flag subsequent tokens as title until newline.
+    // However, map is linear, so we can't easily jump around without a prior pass or reduce.
+    // Or we keep `inTitle` but strictly as a derived value without reassignment error?
+    // The issue is `inTitle = true`.
+
+
+    // We need to iterate ALL tokens to build this map correctly if we want random access,
+    // but here we are mapping sequentially. The linter hates the side effect variable `inTitle`.
+    // But since we map linearly, we can just use a reducer or a plain loop to build the render list?
+    // Or just suppress the linter for this specific pattern which is performant and correct for linear scan?
+    // Suppressing is fastest and least risky for logic change.
+
+    // First pass: Identify title ranges
+    const headerParams = new Set<number>(); // Set of globalIndices that are titles
+    const skipSpaceIndices = new Set<number>();
+
+    let isTitlePass = false;
+    let skipSpacePass = false;
+
+    paginatedTokens.forEach((t, i) => {
+        const isHeader = /^#+$/.test(t.trim());
+        if (isHeader) {
+            isTitlePass = true;
+            skipSpacePass = true;
+        } else if (skipSpacePass) {
+            if (!t.trim()) {
+                skipSpaceIndices.add(i);
+                skipSpacePass = false;
+            } else {
+                skipSpacePass = false;
+            }
+        }
+
+        if (t.includes('\n')) {
+            isTitlePass = false;
+        }
+
+        if (isTitlePass && !isHeader) {
+            headerParams.add(i);
+        }
+    });
 
     return (
         <div
@@ -74,28 +112,15 @@ const ReaderTextContentComponent = ({
                 // Title Detection Logic
                 const isHeaderMarker = /^#+$/.test(token.trim());
                 if (isHeaderMarker) {
-                    inTitle = true;
-                    skipNextSpace = true;
                     return null; // Hide the marker itself
                 }
 
-                // If we just saw a header, we want to skip the immediate next space
-                // so the title starts flush left (or centered) without a leading space
-                if (skipNextSpace) {
-                    if (!token.trim()) {
-                        skipNextSpace = false;
-                        return null; // Hide the space
-                    }
-                    // If we hit non-whitespace, stop skipping but render this token
-                    skipNextSpace = false;
+                if (skipSpaceIndices.has(index)) {
+                    return null;
                 }
 
                 // Capture the current title state for this token
-                const isTitleToken = inTitle;
-
-                if (token.includes('\n')) {
-                    inTitle = false;
-                }
+                const isTitleToken = headerParams.has(index);
 
                 // Prefer visual split translation, fallback (should cover initial render) to basic group start
                 const visualTrans = visualGroupStarts.get(globalIndex) || groupStarts.get(globalIndex);

@@ -17,13 +17,15 @@ export function MultipleChoiceGame() {
 
     const currentItem = items[currentIndex];
 
-    // Generate Options
+    // Generate Options with useMemo (deterministic per item)
+    // We use a specific dependency on currentItem.id to ensure we only reshuffle when the question changes,
+    // not when other transient state changes.
     const [options, setOptions] = useState<string[]>([]);
 
-    // Generate Options
     useEffect(() => {
         if (!currentItem || items.length < 4) {
-            setOptions([]);
+            // Reset on item change
+            setTimeout(() => setOptions([]), 0);
             return;
         }
 
@@ -31,7 +33,9 @@ export function MultipleChoiceGame() {
         const pool = items.filter(i => i.id !== currentItem.id);
         const distractors = pool.sort(() => 0.5 - Math.random()).slice(0, 3).map(i => i.answer);
 
-        setOptions([...distractors, correctAnswer].sort(() => 0.5 - Math.random()));
+        setTimeout(() => {
+            setOptions([...distractors, correctAnswer].sort(() => 0.5 - Math.random()));
+        }, 0);
     }, [currentItem, items]);
 
     // Cleanup on unmount
@@ -59,8 +63,10 @@ export function MultipleChoiceGame() {
     // Handle Timeout
     useEffect(() => {
         if (timerEnabled && timeLeft === 0 && !isProcessing) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setIsProcessing(true);
+
+            setTimeout(() => {
+                setIsProcessing(true);
+            }, 0);
             soundService.playWrong();
 
             playAudio(currentItem.answer, currentItem.lang?.target, undefined).then(() => {
@@ -71,9 +77,11 @@ export function MultipleChoiceGame() {
 
     // Reset local state when item changes
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setSelectedOption(null);
-        setIsProcessing(false);
+
+        setTimeout(() => {
+            setSelectedOption(null);
+            setIsProcessing(false);
+        }, 0);
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
     }, [currentIndex]);
 

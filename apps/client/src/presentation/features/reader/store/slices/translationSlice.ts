@@ -107,7 +107,7 @@ const fetchTranslationHelper = async (
             const timeoutPromise = new Promise<null>((_, reject) => setTimeout(() => reject(new Error("Timeout")), 15000));
 
             return await Promise.race([fetchPromise, timeoutPromise]) as string;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.warn(`Translation attempt ${attempt + 1} failed:`, error);
             attempt++;
             if (attempt >= retries) return null;
@@ -134,8 +134,8 @@ export const createTranslationSlice: StateCreator<TranslationSlice> = (set, get)
         const currentCache = get().translationCache;
         const currentTranslations = get().selectionTranslations;
 
-        let nextTranslations = new Map(currentTranslations);
-        let nextCache = new Map(currentCache);
+        const nextTranslations = new Map(currentTranslations);
+        const nextCache = new Map(currentCache);
         let updatesPending = false;
 
         // Groups to recursively process (from overlaps)
@@ -215,8 +215,8 @@ export const createTranslationSlice: StateCreator<TranslationSlice> = (set, get)
 
         // 2. FETCH & RESOLVE
         // We re-read state in case it changed
-        let finalTranslations = new Map(get().selectionTranslations);
-        let finalCache = new Map(get().translationCache);
+        const finalTranslations = new Map(get().selectionTranslations);
+        const finalCache = new Map(get().translationCache);
 
 
         await Promise.all(groups.map(async (group) => {

@@ -1,4 +1,5 @@
 import { pdfjs } from 'react-pdf';
+import type { PdfTextItem } from '../../../../types/external-libs';
 
 // Ensure worker is set up in the main component or globally, but imports here form dependencies
 // referencing types if needed, though pdfjs types are often loose.
@@ -17,7 +18,8 @@ export const extractPdfText = async (file: File, selectedPages: Set<number>): Pr
             const page = await pdf.getPage(pageNum);
             const textContent = await page.getTextContent();
             const pageText = textContent.items
-                .map((item: any) => item.str)
+                .filter((item): item is PdfTextItem => 'str' in item)
+                .map((item) => item.str)
                 .join(' ');
 
             if (!pageText.trim()) {

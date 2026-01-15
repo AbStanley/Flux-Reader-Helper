@@ -1,5 +1,12 @@
 import type { IAudioService } from "../../core/interfaces/IAudioService";
 
+// Extend window interface for speech utterance reference
+declare global {
+    interface Window {
+        _speechUtterance?: SpeechSynthesisUtterance | null;
+    }
+}
+
 export class WebSpeechAudioService implements IAudioService {
     private synthesis: SpeechSynthesis;
     private utterance: SpeechSynthesisUtterance | null = null;
@@ -34,7 +41,7 @@ export class WebSpeechAudioService implements IAudioService {
         const safeText = text.replace(/\*/g, ' ');
         this.utterance = new SpeechSynthesisUtterance(safeText);
         // HACK: Assign to window to prevent garbage collection in Chrome/Safari
-        (window as any)._speechUtterance = this.utterance;
+        window._speechUtterance = this.utterance;
 
         if (voice) {
             this.utterance.voice = voice;
@@ -88,8 +95,8 @@ export class WebSpeechAudioService implements IAudioService {
 
         this.synthesis.cancel();
         this.utterance = null;
-        if ((window as any)._speechUtterance) {
-            (window as any)._speechUtterance = null;
+        if (window._speechUtterance) {
+            window._speechUtterance = null;
         }
     }
 }

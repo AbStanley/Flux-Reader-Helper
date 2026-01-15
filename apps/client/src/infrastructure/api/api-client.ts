@@ -36,14 +36,14 @@ export class ApiClient {
         return this.request<T>(url, { method: 'GET' });
     }
 
-    post<T>(endpoint: string, data: any): Promise<T> {
+    post<T>(endpoint: string, data: unknown): Promise<T> {
         return this.request<T>(endpoint, {
             method: 'POST',
             body: JSON.stringify(data),
         });
     }
 
-    patch<T>(endpoint: string, data: any): Promise<T> {
+    patch<T>(endpoint: string, data: unknown): Promise<T> {
         return this.request<T>(endpoint, {
             method: 'PATCH',
             body: JSON.stringify(data),

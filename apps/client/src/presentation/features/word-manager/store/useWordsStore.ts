@@ -57,9 +57,15 @@ export const useWordsStore = create<WordsState>((set, get) => ({
             let items: Word[] = [];
             let total = 0;
 
-            if ('items' in response && Array.isArray((response as any).items)) {
-                items = (response as any).items;
-                total = (response as any).total;
+            interface PaginatedResponse {
+                items: Word[];
+                total: number;
+            }
+
+            if ('items' in response && Array.isArray((response as PaginatedResponse).items)) {
+                const paginatedResponse = response as PaginatedResponse;
+                items = paginatedResponse.items;
+                total = paginatedResponse.total;
             } else if (Array.isArray(response)) {
                 items = response as Word[];
                 total = items.length;

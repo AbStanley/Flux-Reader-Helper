@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '../components/ui/button';
 
@@ -6,8 +6,8 @@ interface FocusLayoutProps {
     isReading: boolean;
     hasText: boolean;
     onBackToConfig: () => void;
-    controlPanelSlot: React.ReactNode;
-    readerViewSlot: React.ReactNode;
+    controlPanelSlot: ReactNode;
+    readerViewSlot: ReactNode;
 }
 
 export const FocusLayout: React.FC<FocusLayoutProps> = ({

@@ -1,4 +1,4 @@
-
+import type { EpubTocItem } from '../../../../types/external-libs';
 
 export interface Chapter {
     id: string;
@@ -7,7 +7,7 @@ export interface Chapter {
     subitems?: Chapter[];
 }
 
-export const processToc = (items: any[]): Chapter[] => {
+export const processToc = (items: EpubTocItem[]): Chapter[] => {
     return items.map(item => ({
         id: item.id,
         label: item.label.trim(),
@@ -24,7 +24,9 @@ export const flattenToc = (items: Chapter[]): Chapter[] => {
     }, []);
 };
 
-export const extractEpubText = async (book: any, selectedHrefs: Set<string>, toc: Chapter[]): Promise<string> => {
+import type { EpubBook, EpubSpineItem } from '../../../../types/external-libs';
+
+export const extractEpubText = async (book: EpubBook, selectedHrefs: Set<string>, toc: Chapter[]): Promise<string> => {
     if (!book || selectedHrefs.size === 0) return '';
     let fullText = '';
 
@@ -40,7 +42,7 @@ export const extractEpubText = async (book: any, selectedHrefs: Set<string>, toc
         let spineItem = book.spine.get(hrefWithoutHash);
 
         if (!spineItem) {
-            spineItem = book.spine.items.find((item: any) => item.href.endsWith(hrefWithoutHash) || hrefWithoutHash.endsWith(item.href));
+            spineItem = book.spine.items.find((item: EpubSpineItem) => item.href.endsWith(hrefWithoutHash) || hrefWithoutHash.endsWith(item.href));
         }
 
         if (spineItem) {
@@ -53,11 +55,11 @@ export const extractEpubText = async (book: any, selectedHrefs: Set<string>, toc
                     const parser = new DOMParser();
                     try {
                         docElement = parser.parseFromString(doc, "application/xhtml+xml");
-                    } catch (e) {
+                    } catch {
                         docElement = parser.parseFromString(doc, "text/html");
                     }
                 } else if (typeof doc === 'object' && doc !== null) {
-                    docElement = doc as any;
+                    docElement = doc as Document | HTMLElement;
                 }
 
                 if (docElement) {

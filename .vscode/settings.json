@@ -1,5 +1,27 @@
 {
     "css.validate": false,
     "scss.validate": false,
-    "less.validate": false
+    "less.validate": false,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    },
+    "eslint.validate": [
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact"
+    ],
+    "eslint.run": "onType",
+    "eslint.workingDirectories": [
+        {
+            "directory": "apps/client",
+            "changeProcessCWD": true
+        },
+        {
+            "directory": "apps/server",
+            "changeProcessCWD": true
+        }
+    ],
+    "eslint.experimental.useFlatConfig": true,
+    "eslint.useFlatConfig": true
 }

@@ -20,7 +20,7 @@ export class WordsClient {
         this.client = new ApiClient(baseUrl);
     }
 
-    async saveWord(word: SaveWordDTO): Promise<any> {
+    async saveWord(word: SaveWordDTO): Promise<unknown> {
         return this.client.post('/api/words', word);
     }
 }

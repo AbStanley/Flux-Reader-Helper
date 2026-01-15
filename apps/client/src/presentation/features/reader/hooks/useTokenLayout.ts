@@ -1,9 +1,9 @@
-import React, { useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 
 interface UseTokenLayoutProps {
-    tokenRef: React.RefObject<any>;
-    containerRef?: React.RefObject<any>;
-    popupContainerRef: React.RefObject<any>;
+    tokenRef: React.RefObject<HTMLElement | null>;
+    containerRef?: React.RefObject<HTMLElement | null>;
+    popupContainerRef: React.RefObject<HTMLElement | null>;
     groupTranslation: string | undefined;
     hoverTranslation: string | undefined;
     isHovered: boolean;

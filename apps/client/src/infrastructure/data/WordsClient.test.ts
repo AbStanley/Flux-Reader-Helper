@@ -15,7 +15,12 @@ vi.mock('../api/api-client', () => {
 
 describe('WordsClient', () => {
     let client: WordsClient;
-    let mockApiClient: any;
+    let mockApiClient: {
+        post: ReturnType<typeof vi.fn>;
+        get: ReturnType<typeof vi.fn>;
+        delete: ReturnType<typeof vi.fn>;
+        patch: ReturnType<typeof vi.fn>;
+    };
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -25,7 +30,7 @@ describe('WordsClient', () => {
 
     it('should call post on ApiClient when saveWord is called', async () => {
         client = new WordsClient();
-        mockApiClient = (client as any).client;
+        mockApiClient = (client as unknown as { client: typeof mockApiClient }).client;
         const mockResponse = { success: true };
         mockApiClient.post.mockResolvedValue(mockResponse);
 
@@ -38,7 +43,7 @@ describe('WordsClient', () => {
 
     it('should return error if ApiClient throws', async () => {
         client = new WordsClient();
-        mockApiClient = (client as any).client;
+        mockApiClient = (client as unknown as { client: typeof mockApiClient }).client;
         const error = new Error('Network error');
         mockApiClient.post.mockRejectedValue(error);
 

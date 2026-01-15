@@ -33,8 +33,8 @@ export function GameSetup() {
                     {/* Source Selection Tabs */}
                     <Tabs
                         value={config.source}
-                        onValueChange={(val: any) => updateConfig({
-                            source: val,
+                        onValueChange={(val) => updateConfig({
+                            source: val as 'db' | 'anki' | 'ai',
                             // Reset languages when switching sources to prevent invalid states
                             sourceLang: 'all',
                             targetLang: 'all'
@@ -67,7 +67,7 @@ export function GameSetup() {
                             <Label>Game Mode</Label>
                             <Select
                                 value={config.mode}
-                                onValueChange={(val: any) => updateConfig({ mode: val })}
+                                onValueChange={(val) => updateConfig({ mode: val as 'multiple-choice' | 'build-word' | 'dictation' | 'scramble' })}
                             >
                                 <SelectTrigger className="h-12 text-lg">
                                     <SelectValue placeholder="Select Game Mode" />

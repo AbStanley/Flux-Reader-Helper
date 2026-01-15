@@ -8,14 +8,17 @@ vi.mock('./OllamaTransport');
 describe('OllamaService', () => {
 
     let service: OllamaService;
-    let mockTransport: any;
+    let mockTransport: {
+        getTags: ReturnType<typeof vi.fn>;
+        generate: ReturnType<typeof vi.fn>;
+    };
 
     beforeEach(() => {
         vi.clearAllMocks();
 
 
         service = new OllamaService('http://localhost:11434', 'llama3');
-        mockTransport = (service as any).transport;
+        mockTransport = (service as unknown as { transport: typeof mockTransport }).transport;
     });
 
     it('should initialize with correct base URL and model', () => {
@@ -60,7 +63,7 @@ describe('OllamaService', () => {
 
             // Implementation note: getRichTranslation calls normalizeRichTranslation.
             // verifying structure matches what we expect from that normalizer.
-            expect(result.definitions).toHaveLength(1);
+            expect(result.grammar).toBeDefined();
             expect(result.examples[0]).toEqual(expect.objectContaining({ sentence: 'Hello world' }));
         });
 

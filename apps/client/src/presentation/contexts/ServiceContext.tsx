@@ -3,9 +3,14 @@ import type { IAIService } from '../../core/interfaces/IAIService';
 import { MockAIService } from '../../infrastructure/ai/MockAIService';
 import { OllamaService } from '../../infrastructure/ai/OllamaService';
 
+interface OllamaConfig {
+    url?: string;
+    model?: string;
+}
+
 interface ServiceContextType {
     aiService: IAIService;
-    setServiceType: (type: 'mock' | 'ollama', config?: any) => void;
+    setServiceType: (type: 'mock' | 'ollama', config?: OllamaConfig) => void;
     currentServiceType: 'mock' | 'ollama';
 }
 
@@ -20,7 +25,7 @@ export function ServiceProvider({ children }: { children: ReactNode }) {
     const [aiService, setAiService] = useState<IAIService>(new OllamaService(initialUrl));
     const [currentServiceType, setCurrentServiceType] = useState<'mock' | 'ollama'>('ollama');
 
-    const setServiceType = (type: 'mock' | 'ollama', config?: any) => {
+    const setServiceType = (type: 'mock' | 'ollama', config?: OllamaConfig) => {
         setCurrentServiceType(type);
         if (type === 'ollama') {
             // Use config.url if provided.
@@ -38,6 +43,7 @@ export function ServiceProvider({ children }: { children: ReactNode }) {
     );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useServices = () => {
     const context = useContext(ServiceContext);
     if (!context) {

@@ -3,8 +3,21 @@ import { WebSpeechAudioService } from './WebSpeechAudioService';
 
 describe('WebSpeechAudioService', () => {
     let service: WebSpeechAudioService;
-    let mockSynthesis: any;
-    let mockUtterance: any;
+    let mockSynthesis: {
+        getVoices: ReturnType<typeof vi.fn>;
+        speak: ReturnType<typeof vi.fn>;
+        cancel: ReturnType<typeof vi.fn>;
+        pause: ReturnType<typeof vi.fn>;
+        resume: ReturnType<typeof vi.fn>;
+    };
+    let mockUtterance: {
+        voice: SpeechSynthesisVoice | null;
+        rate: number;
+        onboundary: ((event: { name: string; charIndex: number }) => void) | null;
+        onend: (() => void) | null;
+        onerror: (() => void) | null;
+        text?: string;
+    };
 
     beforeEach(() => {
         mockSynthesis = {
@@ -37,7 +50,7 @@ describe('WebSpeechAudioService', () => {
 
         vi.stubGlobal('SpeechSynthesisUtterance', MockSpeechSynthesisUtterance);
 
-        service = new WebSpeechAudioService(mockSynthesis);
+        service = new WebSpeechAudioService(mockSynthesis as unknown as SpeechSynthesis);
     });
 
     afterEach(() => {

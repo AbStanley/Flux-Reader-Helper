@@ -21,7 +21,7 @@ describe('wordsApi', () => {
         it('should call get with correct endpoint and params', async () => {
             const params = { sort: 'asc', sourceLanguage: 'en' };
             const mockResponse = [{ id: '1', text: 'hello' }];
-            (defaultClient.get as any).mockResolvedValue(mockResponse);
+            (defaultClient.get as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponse);
 
             const result = await wordsApi.getAll(params);
 
@@ -31,7 +31,7 @@ describe('wordsApi', () => {
 
         it('should call get with correct endpoint when no params provided', async () => {
             const mockResponse = [{ id: '1', text: 'hello' }];
-            (defaultClient.get as any).mockResolvedValue(mockResponse);
+            (defaultClient.get as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponse);
 
             const result = await wordsApi.getAll();
 
@@ -44,7 +44,7 @@ describe('wordsApi', () => {
         it('should call post with correct endpoint and data', async () => {
             const data = { text: 'hello' };
             const mockResponse = { id: '1', text: 'hello' };
-            (defaultClient.post as any).mockResolvedValue(mockResponse);
+            (defaultClient.post as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponse);
 
             const result = await wordsApi.create(data);
 
@@ -56,7 +56,7 @@ describe('wordsApi', () => {
     describe('delete', () => {
         it('should call delete with correct endpoint', async () => {
             const id = '123';
-            (defaultClient.delete as any).mockResolvedValue(undefined);
+            (defaultClient.delete as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
 
             await wordsApi.delete(id);
 
@@ -69,7 +69,7 @@ describe('wordsApi', () => {
             const id = '123';
             const data = { definition: 'greeting' };
             const mockResponse = { id: '123', text: 'hello', definition: 'greeting' };
-            (defaultClient.patch as any).mockResolvedValue(mockResponse);
+            (defaultClient.patch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponse);
 
             const result = await wordsApi.update(id, data);
 

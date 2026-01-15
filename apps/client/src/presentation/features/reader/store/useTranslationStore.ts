@@ -48,7 +48,7 @@ export const useTranslationStore = create<TranslationState>()(
                 selectionTranslations: state.selectionTranslations,
                 translationCache: state.translationCache,
                 showTranslations: state.showTranslations
-            } as any),
+            } as Partial<TranslationState>),
         }
     )
 );

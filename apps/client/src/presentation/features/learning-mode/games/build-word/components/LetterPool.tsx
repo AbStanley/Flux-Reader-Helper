@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button } from "@/presentation/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Flag } from 'lucide-react';

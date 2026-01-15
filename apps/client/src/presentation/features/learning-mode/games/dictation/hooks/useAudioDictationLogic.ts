@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useGameStore } from '../../../store/useGameStore';
 import { useGameAudio } from '../../hooks/useGameAudio';
 import { useWordBuilder } from '../../hooks/useWordBuilder';
@@ -13,7 +13,17 @@ export const useAudioDictationLogic = () => {
 
     // Local State
     const [audioMode, setAudioMode] = useState<AudioMode>('target');
-    const [targetWords, setTargetWords] = useState<string[]>([]);
+    const targetWords = useMemo(() => {
+        if (!currentItem) return [];
+        const raw = currentItem.answer;
+        return raw.split(/[,;]+/)
+            .map(s => {
+                let clean = s.replace(/\s*\(.*?\)\s*/g, ' ').replace(/\s*\[.*?\]\s*/g, ' ').replace(/\s*\{.*?\}\s*/g, ' ').trim();
+                if (clean.includes('/')) clean = clean.split('/')[0].trim();
+                return clean;
+            })
+            .filter(s => s.length > 0);
+    }, [currentItem]);
 
     // Handler when word is completed successfully
     const onWordComplete = useCallback((isCorrect: boolean) => {
@@ -55,31 +65,15 @@ export const useAudioDictationLogic = () => {
     }, [currentItem, audioMode, playAudio]);
 
     // Initialization Logic
+    // Initialization Logic
     useEffect(() => {
-        if (!currentItem) return;
+        if (targetWords.length === 0) return;
 
-        // 1. Parse Answer (Same logic as BuildWord)
-        const raw = currentItem.answer;
-        const targets = raw.split(/[,;]+/)
-            .map(s => {
-                let clean = s.replace(/\s*\(.*?\)\s*/g, ' ').replace(/\s*\[.*?\]\s*/g, ' ').replace(/\s*\{.*?\}\s*/g, ' ').trim();
-                if (clean.includes('/')) clean = clean.split('/')[0].trim();
-                return clean;
-            })
-            .filter(s => s.length > 0);
+        // Initialize Builder
+        initializeSlots(targetWords);
+        initializePool(targetWords);
 
-        setTargetWords(targets);
-
-        // 2. Initialize Builder
-        initializeSlots(targets);
-        initializePool(targets);
-
-        // 3. Play Audio immediately
-        // We need to wait for state update? No, hooks run sequentially in effect.
-        // NOTE: playCurrentAudio depends on audioMode state, which might be stale if we just set it?
-        // Actually we want to persist audioMode across rounds, so we don't reset it here.
-
-        // We call play explicitly here
+        // Play Audio immediately
         if (audioMode === 'target') {
             playAudio(currentItem.answer, currentItem.lang?.target, undefined);
         } else {
@@ -89,7 +83,7 @@ export const useAudioDictationLogic = () => {
         return () => {
             stopAudio();
         };
-    }, [currentItem, initializeSlots, initializePool, playAudio, stopAudio]); // Intentionally exclude playCurrentAudio/audioMode to avoid re-triggering loop
+    }, [targetWords, initializeSlots, initializePool, playAudio, stopAudio, audioMode, currentItem]); // Added missing deps
 
     // Handle Mode Toggle
     const toggleAudioMode = useCallback(() => {

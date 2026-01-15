@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { useGameStore } from '../../../store/useGameStore';
 import { useGameAudio } from '../../hooks/useGameAudio';
 import { useWordBuilder } from '../../hooks/useWordBuilder';
@@ -10,7 +10,18 @@ export const useBuildWordLogic = () => {
     const currentItem = items[currentIndex];
 
     // Local state for target parsing
-    const [targetWords, setTargetWords] = useState<string[]>([]);
+    // Local state for target parsing
+    const targetWords = useMemo(() => {
+        if (!currentItem) return [];
+        const raw = currentItem.answer;
+        return raw.split(/[,;]+/)
+            .map(s => {
+                let clean = s.replace(/\s*\(.*?\)\s*/g, ' ').replace(/\s*\[.*?\]\s*/g, ' ').replace(/\s*\{.*?\}\s*/g, ' ').trim();
+                if (clean.includes('/')) clean = clean.split('/')[0].trim();
+                return clean;
+            })
+            .filter(s => s.length > 0);
+    }, [currentItem]);
 
     // Handler when word is completed successfully
     const onWordComplete = useCallback((isCorrect: boolean) => {
@@ -40,32 +51,25 @@ export const useBuildWordLogic = () => {
     });
 
     // Initialization Logic
+    // Initialization Logic
+    useEffect(() => {
+        if (targetWords.length === 0) return;
+
+        // Initialize Builder
+        initializeSlots(targetWords);
+        initializePool(targetWords);
+    }, [targetWords, initializeSlots, initializePool]);
+
+    // Audio Logic
     useEffect(() => {
         if (!currentItem) return;
 
-        // 1. Parse Answer
-        const raw = currentItem.answer;
-        const targets = raw.split(/[,;]+/)
-            .map(s => {
-                let clean = s.replace(/\s*\(.*?\)\s*/g, ' ').replace(/\s*\[.*?\]\s*/g, ' ').replace(/\s*\{.*?\}\s*/g, ' ').trim();
-                if (clean.includes('/')) clean = clean.split('/')[0].trim();
-                return clean;
-            })
-            .filter(s => s.length > 0);
-
-        setTargetWords(targets);
-
-        // 2. Initialize Builder
-        initializeSlots(targets);
-        initializePool(targets);
-
-        // 3. Play Audio
         playAudio(currentItem.question, currentItem.lang?.source, currentItem.audioUrl);
 
         return () => {
             stopAudio();
         };
-    }, [currentItem, playAudio, stopAudio, initializeSlots, initializePool]);
+    }, [currentItem, playAudio, stopAudio]);
 
     // Handle Give Up
     const handleGiveUp = useCallback(() => {

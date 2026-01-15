@@ -18,6 +18,6 @@ declare module 'epubjs' {
         destroy: () => void;
     }
 
-    function ePub(data: ArrayBuffer | string, options?: any): Book;
+    function ePub(data: ArrayBuffer | string, options?: unknown): Book;
     export default ePub;
 }

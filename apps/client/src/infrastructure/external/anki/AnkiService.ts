@@ -4,7 +4,7 @@
 export interface AnkiConnectRequest {
     action: string;
     version: number;
-    params?: any;
+    params?: Record<string, unknown>;
 }
 
 export interface AnkiConnectResponse<T> {
@@ -23,37 +23,30 @@ export class AnkiService {
     /**
      * Generic wrapper for AnkiConnect calls
      */
-    private async invoke<T>(action: string, params: any = {}): Promise<T> {
-        try {
-            const response = await fetch(this.baseUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json' // AnkiConnect might be picky, usually generic fetch works
-                },
-                body: JSON.stringify({
-                    action,
-                    version: this.version,
-                    params
-                })
-            });
+    private async invoke<T>(action: string, params: Record<string, unknown> = {}): Promise<T> {
+        const response = await fetch(this.baseUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json' // AnkiConnect might be picky, usually generic fetch works
+            },
+            body: JSON.stringify({
+                action,
+                version: this.version,
+                params
+            })
+        });
 
-            if (!response.ok) {
-                throw new Error(`AnkiConnect HTTP Error: ${response.status} ${response.statusText}`);
-            }
-
-            const data: AnkiConnectResponse<T> = await response.json();
-
-            if (data.error) {
-                throw new Error(`AnkiConnect Error: ${data.error}`);
-            }
-
-            return data.result;
-
-        } catch (error) {
-            // Rethrow or wrap
-            // For now, let's allow it to bubble up so the UI can handle "Connection Failed"
-            throw error;
+        if (!response.ok) {
+            throw new Error(`AnkiConnect HTTP Error: ${response.status} ${response.statusText}`);
         }
+
+        const data: AnkiConnectResponse<T> = await response.json();
+
+        if (data.error) {
+            throw new Error(`AnkiConnect Error: ${data.error}`);
+        }
+
+        return data.result;
     }
 
     /**
@@ -64,7 +57,7 @@ export class AnkiService {
             // "version" action is a good way to ping
             await this.invoke('version');
             return true;
-        } catch (e) {
+        } catch {
             return false;
         }
     }

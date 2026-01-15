@@ -108,7 +108,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
         });
     },
 
-    play: (_text) => {
+    play: () => {
         // Resume from current spot if available, else start (token 0)
         // If we are "paused" (stopped for single word), currentWordIndex should be valid.
         const { currentWordIndex, tokens } = get();

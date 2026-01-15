@@ -5,7 +5,7 @@ import { SelectionMode } from '../../../../core/types';
 import { getSentenceRange } from '../../../../core/utils/text-utils';
 
 
-export const useHighlighting = (tokens: string[], groups: number[][], richTranslation: any) => {
+export const useHighlighting = (tokens: string[], groups: number[][]) => {
     const hoveredIndex = useTranslationStore(s => s.hoveredIndex);
     const selectionMode = useReaderStore(s => s.selectionMode);
 
@@ -47,7 +47,7 @@ export const useHighlighting = (tokens: string[], groups: number[][], richTransl
             // Just the word in Word Mode
             return new Set([hoveredIndex]);
         }
-    }, [hoveredIndex, tokens, richTranslation, tokenToGroupMap, selectionMode]);
+    }, [hoveredIndex, tokens, tokenToGroupMap, selectionMode]);
 
     return highlightIndices;
 };

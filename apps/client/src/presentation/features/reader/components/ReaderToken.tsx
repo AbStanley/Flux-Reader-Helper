@@ -66,19 +66,12 @@ const ReaderTokenComponent = ({
     groupEndId,
     groupText,
 }: ReaderTokenProps) => {
-    // Hide visual header markers (##, ###) completely
+    // 1. Calculate derived state (synchronous)
     const isHeaderMarker = /^#+$/.test(token.trim());
-    if (isHeaderMarker) {
-        return null; // Don't render
-    }
-
     const isWhitespace = !token.trim();
     // Check if it contains newline
     const hasNewline = isWhitespace && token.includes('\n');
-
-    const isSelected = !!position; // If position is assigned, it's selected/grouped
-
-
+    const isSelected = !!position;
 
     const handleContextMenu = (e: React.MouseEvent) => {
         if (!isWhitespace) {
@@ -136,9 +129,9 @@ const ReaderTokenComponent = ({
         }).catch(err => console.error(err));
     };
 
-    if (hasNewline) {
-        return <br />;
-    }
+    // 3. Conditional Returns (After hooks)
+    if (isHeaderMarker) return null;
+    if (hasNewline) return <br />;
 
     return (
         <span

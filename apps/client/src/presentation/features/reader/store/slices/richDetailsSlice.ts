@@ -77,12 +77,13 @@ export const createRichDetailsSlice: StateCreator<RichDetailsSlice> = (set, get)
                         : tab
                 )
             }));
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(error);
+            const errorMessage = error instanceof Error ? error.message : 'Failed to load';
             set(state => ({
                 richDetailsTabs: state.richDetailsTabs.map(tab =>
                     tab.id === text
-                        ? { ...tab, isLoading: false, error: error.message || 'Failed to load' }
+                        ? { ...tab, isLoading: false, error: errorMessage }
                         : tab
                 )
             }));
@@ -137,10 +138,11 @@ export const createRichDetailsSlice: StateCreator<RichDetailsSlice> = (set, get)
                     t.id === id ? { ...t, data: result, isLoading: false } : t
                 )
             }));
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Regeneration failed';
             set(state => ({
                 richDetailsTabs: state.richDetailsTabs.map(t =>
-                    t.id === id ? { ...t, isLoading: false, error: error.message || 'Regeneration failed' } : t
+                    t.id === id ? { ...t, isLoading: false, error: errorMessage } : t
                 )
             }));
         }

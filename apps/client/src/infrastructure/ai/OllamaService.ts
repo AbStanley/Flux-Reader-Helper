@@ -1,5 +1,5 @@
 /// <reference types="chrome" />
-import type { IAIService } from '../../core/interfaces/IAIService';
+import type { IAIService, RichTranslationResult } from '../../core/interfaces/IAIService';
 import { getTranslatePrompt, getRichTranslationPrompt } from './prompts/TranslationPrompts';
 import { cleanResponse, extractJson, normalizeRichTranslation } from './utils/ResponseParser';
 import { OllamaTransport } from './OllamaTransport';
@@ -38,23 +38,19 @@ export class OllamaService implements IAIService {
     async generateText(prompt: string, options?: {
         onProgress?: (chunk: string, fullText: string) => void;
         signal?: AbortSignal;
-        [key: string]: any
+        [key: string]: unknown
     }): Promise<string> {
-        try {
-            const body = {
-                model: this.model,
-                prompt: prompt,
-                ...options
-            };
+        const body = {
+            model: this.model,
+            prompt: prompt,
+            ...options
+        };
 
-            // Transport handles 'stream' flag based on onProgress presence
-            return await this.transport.generate(body, {
-                onProgress: options?.onProgress,
-                signal: options?.signal
-            });
-        } catch (error: any) {
-            throw error;
-        }
+        // Transport handles 'stream' flag based on onProgress presence
+        return await this.transport.generate(body, {
+            onProgress: options?.onProgress,
+            signal: options?.signal
+        });
     }
 
     async translateText(text: string, targetLanguage: string = 'en', context?: string, sourceLanguage?: string): Promise<string> {
@@ -72,23 +68,23 @@ export class OllamaService implements IAIService {
         return cleanResponse(rawResponse);
     }
 
-    async getRichTranslation(text: string, targetLanguage: string = 'en', context?: string, sourceLanguage?: string): Promise<any> {
+    async getRichTranslation(text: string, targetLanguage: string = 'en', context?: string, sourceLanguage?: string): Promise<RichTranslationResult> {
 
         const prompt = getRichTranslationPrompt(text, targetLanguage, context, sourceLanguage);
         const rawResponse = await this.generateText(prompt, { num_predict: 4096 });
         try {
             const data = extractJson(rawResponse);
-            return normalizeRichTranslation(data);
+            return normalizeRichTranslation(data as unknown as Record<string, unknown>);
         } catch (e) {
-            throw new Error(`Failed to parse rich translation response: ${rawResponse}`);
+            throw new Error(`Failed to parse rich translation response: ${rawResponse}. Error: ${e}`);
         }
     }
 
     async getAvailableModels(): Promise<string[]> {
         try {
             const data = await this.transport.getTags();
-            return data?.models?.map((m: any) => m.name) || [];
-        } catch (error) {
+            return data?.models?.map((m: { name: string }) => m.name) || [];
+        } catch {
             return [];
         }
     }

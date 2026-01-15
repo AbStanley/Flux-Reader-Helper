@@ -45,7 +45,7 @@ export const useLongPress = ({
     return {
         onMouseDown: start,
         onMouseUp: clear,
-        onMouseLeave: (_e: any) => {
+        onMouseLeave: () => {
             // Cancel if mouse leaves
             if (timerRef.current) {
                 clearTimeout(timerRef.current);

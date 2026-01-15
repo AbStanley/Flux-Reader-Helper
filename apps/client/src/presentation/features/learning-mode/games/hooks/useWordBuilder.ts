@@ -217,8 +217,10 @@ export const useWordBuilder = ({ targetWords, onComplete, isTimerPaused = false 
     // Auto-initialize when targetWords changes
     useEffect(() => {
         if (targetWords && targetWords.length > 0) {
-            initializeSlots(targetWords);
-            initializePool(targetWords);
+            setTimeout(() => {
+                initializeSlots(targetWords);
+                initializePool(targetWords);
+            }, 0);
         }
     }, [targetWords, initializeSlots, initializePool]);
 
