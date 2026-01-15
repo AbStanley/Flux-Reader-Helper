@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/presentation/components/ui/button";
 import { Progress } from "@/presentation/components/ui/progress";
 import { X, Heart, Trophy, Flame, Timer } from 'lucide-react';
 import { useGameStore } from './store/useGameStore';
+import { LevelDisplay } from '../../components/gamification/LevelDisplay';
 import { cn } from "@/lib/utils";
 
 interface GameShellProps {
@@ -95,6 +97,7 @@ export function GameShell({ children }: GameShellProps) {
                         <Button variant="ghost" size="icon" onClick={reset} className="hover:bg-destructive/10 hover:text-destructive">
                             <X className="w-5 h-5" />
                         </Button>
+                        <LevelDisplay />
                         <Progress value={progress} className="h-2 flex-1" />
                     </div>
 
@@ -134,8 +137,19 @@ export function GameShell({ children }: GameShellProps) {
             </header>
 
             {/* Game Content */}
-            <main className="flex-1 flex flex-col max-w-4xl mx-auto w-full p-4 md:p-8 animate-in fade-in slide-in-from-bottom-4">
-                {children}
+            <main className="flex-1 flex flex-col max-w-4xl mx-auto w-full p-4 md:p-8">
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={currentIndex}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.2 }}
+                        className="w-full h-full"
+                    >
+                        {children}
+                    </motion.div>
+                </AnimatePresence>
             </main>
         </div>
     );

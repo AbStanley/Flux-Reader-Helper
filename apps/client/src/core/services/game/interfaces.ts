@@ -35,12 +35,17 @@ export interface GameContentParams {
             target?: string;
         }
         /** Only fetch items capable of this game mode? */
-        gameMode?: 'multiple-choice' | 'build-word' | 'dictation' | 'scramble';
+        gameMode?: 'multiple-choice' | 'build-word' | 'dictation' | 'scramble' | 'story';
         timerEnabled?: boolean;
 
         // Anki Specific
         ankiFieldSource?: string;
         ankiFieldTarget?: string;
+
+        // AI Specific
+        aiTopic?: string;
+        aiModel?: string;
+        aiLevel?: 'beginner' | 'intermediate' | 'advanced';
     };
 }
 

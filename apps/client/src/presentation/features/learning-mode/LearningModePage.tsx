@@ -5,6 +5,7 @@ import { MultipleChoiceGame } from './games/MultipleChoiceGame';
 import { BuildWordGame } from './games/build-word/BuildWordGame';
 import { AudioDictationGame } from './games/dictation/AudioDictationGame';
 import { SentenceScrambleGame } from './games/scramble/SentenceScrambleGame';
+import { StoryGame } from './games/story/StoryGame';
 import { GameSetup } from './components/GameSetup';
 
 export function LearningModePage() {
@@ -18,6 +19,8 @@ export function LearningModePage() {
                 return <AudioDictationGame />;
             case 'scramble':
                 return <SentenceScrambleGame />;
+            case 'story':
+                return <StoryGame />;
             default:
                 return <MultipleChoiceGame />;
         }

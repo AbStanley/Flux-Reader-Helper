@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import type { GameItem, GameContentParams } from '../../../../core/services/game/interfaces';
 import { gameContentService } from '../../../../core/services/game/GameContentService';
+import { useUserStats } from './useUserStats';
 
-interface GameConfig {
-    mode: 'multiple-choice' | 'build-word' | 'dictation' | 'scramble';
+export interface GameConfig {
+    mode: 'multiple-choice' | 'build-word' | 'dictation' | 'scramble' | 'story';
     source: 'db' | 'anki' | 'ai';
     timerEnabled: boolean;
     sourceLang: string;
@@ -12,6 +13,10 @@ interface GameConfig {
     ankiDeckName?: string;
     ankiFieldSource?: string;
     ankiFieldTarget?: string;
+    // AI Specific
+    aiTopic?: string;
+    aiModel?: string;
+    aiLevel?: 'beginner' | 'intermediate' | 'advanced';
 }
 
 interface GameState {
@@ -87,7 +92,12 @@ export const useGameStore = create<GameState>((set, get) => ({
                 ...(config.ankiFieldSource || config.ankiFieldTarget ? {
                     ankiFieldSource: config.ankiFieldSource,
                     ankiFieldTarget: config.ankiFieldTarget
-                } : {})
+                } : {}),
+
+                // Pass AI config
+                aiTopic: config.aiTopic,
+                aiModel: config.aiModel,
+                aiLevel: config.aiLevel
             }
         };
 
@@ -164,7 +174,12 @@ export const useGameStore = create<GameState>((set, get) => ({
         }
     },
 
-    endGame: () => set({ status: 'finished' }),
+    endGame: () => {
+        const { score } = get();
+        useUserStats.getState().addXp(score);
+        useUserStats.getState().incrementGamesPlayed();
+        set({ status: 'finished' });
+    },
 
     reset: () => set({
         status: 'idle',

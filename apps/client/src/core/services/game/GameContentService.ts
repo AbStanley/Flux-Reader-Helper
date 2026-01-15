@@ -1,6 +1,7 @@
 import type { GameContentParams, GameItem, IContentStrategy } from './interfaces';
 import { DatabaseContentStrategy } from './strategies/DatabaseContentStrategy';
 import { AnkiContentStrategy } from './strategies/AnkiContentStrategy';
+import { AiContentStrategy } from './strategies/AiContentStrategy';
 
 export class GameContentService {
     private strategies: Record<string, IContentStrategy>;
@@ -9,6 +10,7 @@ export class GameContentService {
         this.strategies = {
             'db': new DatabaseContentStrategy(),
             'anki': new AnkiContentStrategy(),
+            'ai': new AiContentStrategy(),
         };
     }
 

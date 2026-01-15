@@ -8,6 +8,7 @@ import { Settings2, Play, Database, BrainCircuit, Library } from 'lucide-react';
 import { useGameStore } from '../store/useGameStore';
 import { DbSetup } from './setup/DbSetup';
 import { AnkiSetup } from './setup/AnkiSetup';
+import { AiSetup } from './setup/AiSetup';
 
 export function GameSetup() {
     const { config, updateConfig, startGame, error } = useGameStore();
@@ -44,7 +45,7 @@ export function GameSetup() {
                         <TabsList className="grid w-full grid-cols-3 mb-4">
                             <TabsTrigger value="db" className="flex gap-2"><Database className="w-4 h-4" /> Saved Words</TabsTrigger>
                             <TabsTrigger value="anki" className="flex gap-2"><Library className="w-4 h-4" /> Anki Decks</TabsTrigger>
-                            <TabsTrigger value="ai" disabled className="flex gap-2"><BrainCircuit className="w-4 h-4" /> AI Gen <span className="text-xs ml-1 opacity-50">(Soon)</span></TabsTrigger>
+                            <TabsTrigger value="ai" className="flex gap-2"><BrainCircuit className="w-4 h-4" /> AI Generation</TabsTrigger>
                         </TabsList>
 
                         {error && (
@@ -59,6 +60,10 @@ export function GameSetup() {
 
                         <TabsContent value="anki" className="space-y-6">
                             <AnkiSetup />
+                        </TabsContent>
+
+                        <TabsContent value="ai" className="space-y-6">
+                            <AiSetup />
                         </TabsContent>
                     </Tabs>
 
@@ -77,6 +82,7 @@ export function GameSetup() {
                                     <SelectItem value="build-word">Word Builder</SelectItem>
                                     <SelectItem value="dictation">Audio Dictation</SelectItem>
                                     <SelectItem value="scramble">Sentence Scramble</SelectItem>
+                                    <SelectItem value="story" disabled={config.source !== 'ai'}>Story Mode {config.source !== 'ai' && '(AI Only)'}</SelectItem>
                                 </SelectContent>
                             </Select>
                             <p className="text-sm text-muted-foreground">
@@ -84,6 +90,7 @@ export function GameSetup() {
                                 {config.mode === 'build-word' && "Spell the answer using individual letters."}
                                 {config.mode === 'dictation' && "Listen to the word and spell it out."}
                                 {config.mode === 'scramble' && "Rearrange scrambled words to form the correct sentence."}
+                                {config.mode === 'story' && "Read a story and learn identifying key phrases."}
                             </p>
                         </div>
 

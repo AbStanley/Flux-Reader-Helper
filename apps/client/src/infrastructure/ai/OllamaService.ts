@@ -98,3 +98,6 @@ export class OllamaService implements IAIService {
         }
     }
 }
+
+// Single instance export
+export const ollamaService = new OllamaService('http://localhost:11434');
